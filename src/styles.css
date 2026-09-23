@@ -1,0 +1,319 @@
+:root {
+  --bg: #1e1e1e;
+  --panel: #2c2c2c;
+  --panel-border: #3a3a3a;
+  --text: #e6e6e6;
+  --text-muted: #9a9a9a;
+  --accent: #0d99ff;
+  --accent-soft: rgba(13, 153, 255, 0.35);
+  --canvas: #e5e5e5;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 12px/1.4 var(--font);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 260px;
+  grid-template-rows: 100%;
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 150px minmax(0, 1fr) 170px;
+  }
+}
+
+.panel {
+  background: var(--panel);
+  border-color: var(--panel-border);
+  border-style: solid;
+  border-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel.left {
+  border-right-width: 1px;
+}
+
+.panel.right {
+  border-left-width: 1px;
+}
+
+.panel-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--panel-border);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 6px 0;
+}
+
+.canvas-area {
+  position: relative;
+  min-width: 0;
+  display: grid;
+}
+
+.canvas {
+  position: relative;
+  overflow: hidden;
+  background: var(--canvas);
+  cursor: default;
+  outline: none;
+}
+
+.canvas.panning {
+  cursor: grabbing;
+}
+
+.world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+
+.artboard-label {
+  position: absolute;
+  color: #666;
+  font-size: 11px;
+  transform: translateY(-100%);
+  padding-bottom: 4px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: move;
+}
+
+.artboard {
+  position: absolute;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.outline {
+  position: absolute;
+  border: 1px solid var(--accent);
+}
+
+.outline.hover {
+  border-color: var(--accent-soft);
+}
+
+.outline.selected {
+  border-width: 2px;
+}
+
+.outline .size {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 4px);
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #888;
+  text-align: center;
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.hint kbd {
+  font-family: var(--mono);
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.toolbar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.url-input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  width: 280px;
+}
+
+.url-input:focus {
+  outline: 1px solid var(--accent);
+}
+
+.toolbar-error {
+  color: #ff6b6b;
+  align-self: center;
+  padding: 0 6px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.zoom-readout {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: var(--panel);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+button.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.layer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.layer:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.layer.selected {
+  background: var(--accent-soft);
+}
+
+.layer .tag {
+  color: var(--text);
+}
+
+.layer .meta {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer .text {
+  color: var(--text-muted);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+}
+
+.field label {
+  color: var(--text-muted);
+}
+
+.field input,
+.field textarea {
+  font: inherit;
+  font-family: var(--mono);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 1px solid var(--accent);
+}
+
+.section-title {
+  padding: 10px 12px 4px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: none;
+}
+
+.empty {
+  padding: 16px 12px;
+  color: var(--text-muted);
+}
