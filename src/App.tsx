@@ -1,26 +1,52 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Canvas } from "@/features/canvas/Canvas";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Canvas, isTyping } from "@/features/canvas/Canvas";
+import { getTranslate, setTranslate } from "@/features/canvas/elementStyle";
+import { fitCamera, unionBounds, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
-import type { Artboard, Camera, Selection } from "@/features/canvas/types";
-import { ImportBar } from "@/features/import/ImportBar";
+import { Toolbar } from "@/features/canvas/Toolbar";
+import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
+import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
+import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
+import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
+import { CssEditor } from "@/features/inspector/CssEditor";
+import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
 
-let nextId = 1;
-const newId = () => `ab${nextId++}`;
+const newId = () => `ab-${crypto.randomUUID().slice(0, 8)}`;
+
+const PANEL_INSET = 257;
+const TOOLBAR_INSET = 72;
+
+const sampleDocument = (): Artboard[] => [
+  { id: newId(), name: "Sample", x: 80, y: 80, width: 640, html: SAMPLE_HTML, css: scopeCss(SAMPLE_CSS) },
+];
 
 export function App() {
-  const [artboards, setArtboards] = useState<Artboard[]>(() => [
-    { id: newId(), name: "Sample", x: 80, y: 80, width: 640, html: SAMPLE_HTML, css: scopeCss(SAMPLE_CSS) },
-  ]);
-  const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, z: 1 });
-  const [selection, setSelection] = useState<Selection>({ kind: "none" });
-  const [version, setVersion] = useState(0);
   const hostsRef = useRef(new Map<string, HTMLDivElement>());
+  const doc = useDocument(hostsRef.current, sampleDocument);
+  const { artboards } = doc;
+
+  // Start offset so the first artboard clears the floating layers panel.
+  const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
+  const [tool, setTool] = useState<Tool>("move");
+  const [uiHidden, setUiHidden] = useState(false);
+  const [selection, setSelection] = useState<Selection>({ kind: "none" });
+  const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
+  const [cssPreview, setCssPreview] = useState<{ id: string; css: string } | null>(null);
+  const pendingFocus = useRef<string | null>(null);
+  const [layerHover, setLayerHover] = useState<Element | null>(null);
+  const [version, setVersion] = useState(0);
+  const pendingSelection = useRef<{ artboardId: string; path: number[] | null } | null>(null);
 
   const bump = useCallback(() => setVersion((v) => v + 1), []);
+
+  useEffect(() => {
+    const t = setTimeout(() => saveCamera(camera), 300);
+    return () => clearTimeout(t);
+  }, [camera]);
 
   const onHostMount = useCallback((id: string, host: HTMLDivElement | null) => {
     if (host) hostsRef.current.set(id, host);
@@ -28,19 +54,47 @@ export function App() {
     bump();
   }, [bump]);
 
+  const commit = useCallback((fn?: (list: Artboard[]) => Artboard[]) => {
+    doc.commit(fn);
+    bump();
+  }, [doc, bump]);
+
   const updateArtboard = useCallback((id: string, patch: Partial<Artboard>) => {
-    setArtboards((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)));
-  }, []);
+    doc.update((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)));
+  }, [doc]);
+
+  const commitArtboard = useCallback((id: string, patch: Partial<Artboard>) => {
+    commit((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)));
+  }, [commit]);
 
   const addArtboard = useCallback((content: Pick<Artboard, "html" | "css" | "fonts"> & Partial<Pick<Artboard, "name" | "width">>) => {
-    setArtboards((list) => {
+    const id = newId();
+    commit((list) => {
       const last = list[list.length - 1];
       const x = last ? last.x + last.width + 80 : 80;
-      const id = newId();
-      setSelection({ kind: "artboard", artboardId: id });
       return [...list, { id, name: `Artboard ${list.length + 1}`, x, y: 80, width: 640, ...content }];
     });
-  }, []);
+    pendingFocus.current = id;
+    setSelection({ kind: "artboard", artboardId: id });
+  }, [commit]);
+
+  const createArtboard = useCallback((bounds: Bounds) => {
+    const id = newId();
+    commit((list) => [
+      ...list,
+      {
+        id,
+        name: `Frame ${list.length + 1}`,
+        x: Math.round(bounds.x),
+        y: Math.round(bounds.y),
+        width: Math.max(1, Math.round(bounds.width)),
+        height: Math.max(1, Math.round(bounds.height)),
+        html: "",
+        css: "",
+      },
+    ]);
+    return id;
+  }, [commit]);
 
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -60,8 +114,7 @@ export function App() {
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
-      const target = e.target;
-      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+      if (isTyping(e)) return;
       const plain = e.clipboardData?.getData("text/plain") ?? "";
       const rich = e.clipboardData?.getData("text/html") ?? "";
       if (isUrl(plain)) {
@@ -76,76 +129,234 @@ export function App() {
         addArtboard({ html: pasted.html, css: pasted.css });
       } else if (selection.kind !== "none") {
         const ab = artboards.find((a) => a.id === selection.artboardId);
-        if (ab) updateArtboard(ab.id, { css: `${ab.css}\n${scopeCss(pasted.css)}` });
+        if (ab) commitArtboard(ab.id, { css: `${ab.css}\n${scopeCss(pasted.css)}` });
       }
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [addArtboard, artboards, importSite, selection, updateArtboard]);
+  }, [addArtboard, artboards, commitArtboard, importSite, selection]);
 
-  const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
+  // Snapshot restores replace the DOM, so the selected element is re-found
+  // by path once the artboards have re-rendered.
+  useLayoutEffect(() => {
+    const pending = pendingSelection.current;
+    if (!pending) return;
+    pendingSelection.current = null;
+    const root = hostsRef.current.get(pending.artboardId)?.shadowRoot;
+    if (!root) return setSelection({ kind: "none" });
+    const element = pending.path ? resolvePath(root, pending.path) : null;
+    setSelection(element ? { kind: "element", artboardId: pending.artboardId, element } : { kind: "artboard", artboardId: pending.artboardId });
+  }, [artboards]);
+
+  const travel = useCallback((direction: "undo" | "redo") => {
+    pendingSelection.current =
+      selection.kind === "element"
+        ? { artboardId: selection.artboardId, path: pathOf(selection.element) }
+        : selection.kind === "artboard"
+          ? { artboardId: selection.artboardId, path: null }
+          : null;
+    const moved = direction === "undo" ? doc.undo() : doc.redo();
+    if (!moved) pendingSelection.current = null;
+    bump();
+  }, [doc, selection, bump]);
+
+  const viewport = useCallback(() => {
+    const inset = uiHidden ? 16 : PANEL_INSET;
+    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 376 : PANEL_INSET;
+    return { left: inset, top: 16, width: Math.max(80, window.innerWidth - inset - rightInset), height: Math.max(80, window.innerHeight - 16 - (uiHidden ? 16 : TOOLBAR_INSET)) };
+  }, [uiHidden, inspectorTab]);
+
+  useLayoutEffect(() => {
+    const id = pendingFocus.current;
+    if (!id) return;
+    const ab = artboards.find((item) => item.id === id);
+    const host = hostsRef.current.get(id);
+    if (!ab || !host) return;
+    pendingFocus.current = null;
+    setCamera(fitCamera({ x: ab.x, y: ab.y, width: ab.width, height: host.offsetHeight || 300 }, viewport()));
+  }, [artboards, version, viewport]);
+
+  const artboardBounds = useCallback((ab: Artboard): Bounds => ({
+    x: ab.x, y: ab.y, width: ab.width, height: hostsRef.current.get(ab.id)?.offsetHeight ?? ab.height ?? 0,
+  }), []);
+
+  const zoomToFit = useCallback(() => {
+    const bounds = unionBounds(artboards.map(artboardBounds));
+    if (bounds) setCamera(fitCamera(bounds, viewport()));
+  }, [artboards, artboardBounds, viewport]);
+
+  const zoomToSelection = useCallback(() => {
+    if (selection.kind === "none") return zoomToFit();
+    const target = selection.kind === "element" ? selection.element : hostsRef.current.get(selection.artboardId);
+    if (!target) return;
+    const r = target.getBoundingClientRect();
+    const bounds = { x: (r.left - camera.x) / camera.z, y: (r.top - camera.y) / camera.z, width: r.width / camera.z, height: r.height / camera.z };
+    setCamera(fitCamera(bounds, viewport()));
+  }, [selection, camera, viewport, zoomToFit]);
+
+  const deleteSelection = useCallback(() => {
+    if (selection.kind === "artboard") {
+      commit((list) => list.filter((ab) => ab.id !== selection.artboardId));
+      setSelection({ kind: "none" });
+    } else if (selection.kind === "element") {
+      const parent = selection.element.parentElement;
+      selection.element.remove();
+      setSelection(parent ? { kind: "element", artboardId: selection.artboardId, element: parent } : { kind: "artboard", artboardId: selection.artboardId });
+      commit();
+    }
+  }, [selection, commit]);
+
+  const duplicateSelection = useCallback(() => {
+    if (selection.kind === "artboard") {
+      const ab = artboards.find((a) => a.id === selection.artboardId);
+      const root = hostsRef.current.get(selection.artboardId)?.shadowRoot;
+      if (!ab) return;
+      const id = newId();
+      commit((list) => [...list, { ...ab, id, name: `${ab.name} copy`, x: ab.x + ab.width + 80, html: root ? serializeRoot(root) : ab.html }]);
+      setSelection({ kind: "artboard", artboardId: id });
+    } else if (selection.kind === "element") {
+      const clone = selection.element.cloneNode(true) as Element;
+      selection.element.after(clone);
+      setSelection({ kind: "element", artboardId: selection.artboardId, element: clone });
+      commit();
+    }
+  }, [selection, artboards, commit]);
+
+  const nudge = useCallback((dx: number, dy: number) => {
+    if (selection.kind === "artboard") {
+      const ab = artboards.find((a) => a.id === selection.artboardId);
+      if (ab) commitArtboard(ab.id, { x: ab.x + dx, y: ab.y + dy });
+    } else if (selection.kind === "element") {
+      const el = selection.element as HTMLElement | SVGElement;
+      const t = getTranslate(el);
+      setTranslate(el, t.x + dx, t.y + dy);
+      commit();
+    }
+  }, [selection, artboards, commit, commitArtboard]);
+
+  const selectParent = useCallback(() => {
+    if (selection.kind === "element") {
+      const parent = selection.element.parentElement;
+      setSelection(parent ? { kind: "element", artboardId: selection.artboardId, element: parent } : { kind: "artboard", artboardId: selection.artboardId });
+    } else {
+      setSelection({ kind: "none" });
+    }
+  }, [selection]);
 
   useEffect(() => {
+    const TOOL_KEYS: Record<string, Tool> = { v: "move", f: "frame", a: "frame", r: "rect", t: "text", h: "hand" };
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target;
-      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) return;
-      if (e.key !== "Backspace" && e.key !== "Delete") return;
-      if (selection.kind === "artboard") {
-        setArtboards((list) => list.filter((ab) => ab.id !== selection.artboardId));
-        setSelection({ kind: "none" });
-      } else if (selection.kind === "element") {
-        selection.element.remove();
-        setSelection({ kind: "none" });
-        bump();
+      if (isTyping(e)) return;
+      const mod = e.metaKey || e.ctrlKey;
+      const key = e.key.toLowerCase();
+
+      if (mod && key === "z") { e.preventDefault(); travel(e.shiftKey ? "redo" : "undo"); return; }
+      if (mod && key === "y") { e.preventDefault(); travel("redo"); return; }
+      if (mod && key === "d") { e.preventDefault(); duplicateSelection(); return; }
+      if (mod && e.key === "\\") { e.preventDefault(); setUiHidden((v) => !v); return; }
+      if (mod || e.altKey) return;
+
+      if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); deleteSelection(); return; }
+      if (e.key === "Escape") { selectParent(); setTool("move"); return; }
+      if (e.key.startsWith("Arrow")) {
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        const [dx, dy] = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key] ?? [0, 0];
+        nudge(dx, dy);
+        return;
       }
+      if (e.shiftKey && e.code === "Digit0") { setCamera((c) => ({ ...c, z: 1 })); return; }
+      if (e.shiftKey && e.code === "Digit1") { zoomToFit(); return; }
+      if (e.shiftKey && e.code === "Digit2") { zoomToSelection(); return; }
+      if (!e.shiftKey && TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selection, bump]);
+  }, [travel, duplicateSelection, deleteSelection, selectParent, nudge, zoomToFit, zoomToSelection]);
 
+  const [copied, setCopied] = useState(false);
   const copyCode = async () => {
     const id = selection.kind === "none" ? artboards[0]?.id : selection.artboardId;
     const ab = artboards.find((a) => a.id === id);
-    const host = id ? hostsRef.current.get(id) : undefined;
-    if (!ab || !host?.shadowRoot) return;
-    const markup = Array.from(host.shadowRoot.children)
-      .filter((el) => el.tagName !== "STYLE")
-      .map((el) => el.outerHTML)
-      .join("\n");
-    await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}\n</style>\n${markup}`);
+    const root = id ? hostsRef.current.get(id)?.shadowRoot : undefined;
+    if (!ab || !root) return;
+    await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}\n</style>\n${serializeRoot(root)}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
   };
 
-  return (
-    <div className="app">
-      <aside className="panel left">
-        <div className="panel-header">Layers</div>
-        <Layers artboards={artboards} hosts={hostsRef.current} selection={selection} onSelect={setSelection} version={version} />
-      </aside>
+  const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
+  const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
 
-      <main className="canvas-area">
-        {fonts && <style>{fonts}</style>}
-        <Canvas
+  return (
+    <div className={`app${uiHidden ? " ui-hidden" : ""}`}>
+      {fonts && <style>{fonts}</style>}
+      <Canvas
+        artboards={artboards}
+        cssPreview={cssPreview}
+        camera={camera}
+        onCameraChange={setCamera}
+        tool={tool}
+        onToolChange={setTool}
+        selection={selection}
+        onSelect={setSelection}
+        hosts={hostsRef.current}
+        onHostMount={onHostMount}
+        onUpdateArtboard={updateArtboard}
+        onCreateArtboard={createArtboard}
+        externalHover={layerHover}
+        version={version}
+        onChange={bump}
+        onCommit={commit}
+      />
+
+      <aside className="panel left">
+        <div className="panel-top">
+          <div className="file-name">
+            Untitled
+            <small>Drafts</small>
+          </div>
+        </div>
+        <div className="section-label">Layers</div>
+        <Layers
           artboards={artboards}
-          camera={camera}
-          onCameraChange={setCamera}
+          hosts={hostsRef.current}
           selection={selection}
           onSelect={setSelection}
-          hosts={hostsRef.current}
-          onHostMount={onHostMount}
-          onMoveArtboard={(id, x, y) => updateArtboard(id, { x, y })}
+          onHover={setLayerHover}
+          onRenameArtboard={(id, name) => commitArtboard(id, { name })}
+          onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}
           version={version}
-          onChange={bump}
         />
-        <ImportBar busy={importing} error={importError} onImport={importSite} />
-      </main>
-
-      <aside className="panel right">
-        <div className="panel-header">
-          Inspector
-          <button onClick={copyCode}>Copy code</button>
-        </div>
-        <Inspector selection={selection} artboards={artboards} onUpdateArtboard={updateArtboard} version={version} onChange={bump} />
       </aside>
+
+      <aside className={`panel right${inspectorTab === "css" ? " code-panel" : ""}`}>
+        <div className="panel-top">
+          <div className="file-name">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? "Element" : "Inspector"}</div>
+          <button className="zoom-button" title="Zoom to 100% (Shift+0)" onClick={() => setCamera((c) => ({ ...c, z: 1 }))}>
+            {Math.round(camera.z * 100)}%
+          </button>
+          <button className="btn-primary" onClick={copyCode} disabled={artboards.length === 0}>
+            {copied ? "Copied" : "Copy code"}
+          </button>
+        </div>
+        {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
+        <div className="inspector-tabs" role="tablist" aria-label="Inspector mode">
+          <button id="design-tab" role="tab" aria-selected={inspectorTab === "design"} aria-controls="inspector-content" onClick={() => setInspectorTab("design")}>Design</button>
+          <button id="css-tab" role="tab" aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS</button>
+        </div>
+        <div className="panel-scroll" id="inspector-content" role="tabpanel" aria-labelledby={`${inspectorTab}-tab`}>
+          {inspectorTab === "css" ? activeArtboard ? (
+            <CssEditor key={activeArtboard.id} artboard={activeArtboard} onPreview={setCssPreview} onApply={(css) => commitArtboard(activeArtboard.id, { css })} />
+          ) : <div className="empty">Select a frame or layer to edit its frame stylesheet.</div> : (
+            <Inspector selection={selection} artboards={artboards} onUpdateArtboard={commitArtboard} version={version} onChange={() => commit()} />
+          )}
+        </div>
+      </aside>
+
+      <Toolbar tool={tool} onToolChange={setTool}>
+        <ImportButton busy={importing} error={importError} onImport={importSite} />
+      </Toolbar>
     </div>
   );
 }

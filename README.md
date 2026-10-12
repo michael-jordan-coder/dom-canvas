@@ -15,11 +15,29 @@ Open http://localhost:5180.
 
 ## Use
 
-- Paste HTML (with or without `<style>`) with Cmd+V to create an artboard.
-- Paste a URL, or use the import field, to snapshot a real website.
-- Scroll to pan, Cmd+scroll or pinch to zoom, drag empty space or hold Space to pan.
-- Click an element to select it, drag to move, Backspace to delete.
-- Edit text and styles in the inspector. "Copy code" exports the artboard back to HTML and CSS.
+- Paste HTML (with or without `<style>`) with Cmd+V to create a frame. The camera fits the new frame automatically.
+- Paste a URL, or use the link button in the toolbar, to snapshot a real website.
+- Draw frames, rectangles and text with the toolbar tools. Double-click text to edit it.
+- Click to select, drag to move, drag the handles to resize. Double-click a layer to rename it.
+- Select a frame by its canvas label, the Layers list, or Cmd/Ctrl-click inside it. Frame outlines are purple; element outlines are blue. Alt-click or use the selection breadcrumb to move to a parent.
+- Choose Mobile (390px), Tablet (768px), or Desktop (1440px) frame widths, and fit height to content. These presets change the frame width; they do not emulate viewport media queries.
+- Edit Flex/Grid layout, position, overflow, size, fill and typography in the Design panel. "Copy code" exports the frame back to HTML and CSS.
+- Open the CSS tab to edit the selected frame stylesheet, including selectors, custom properties, nested rules and keyframes supported by the browser. Use `:host` to target the frame. Existing imported styles have already been scoped to it.
+- CSS drafts preview live without entering history. Apply CSS (Cmd/Ctrl+Enter) saves one undo step; Discard or Escape restores the saved stylesheet. Leaving the editor discards an unapplied draft. Inline styles from Design may override stylesheet rules; invalid CSS is ignored by the browser.
+- The document and camera are saved to localStorage automatically.
+
+| Shortcut | Action |
+| --- | --- |
+| V / F / R / T / H | Move, Frame, Rectangle, Text, Hand |
+| Cmd+Z / Cmd+Shift+Z | Undo / redo |
+| Cmd+D | Duplicate |
+| Backspace | Delete |
+| Arrows (Shift for 10px) | Nudge |
+| Esc | Select parent |
+| Shift+0 / Shift+1 / Shift+2 | Zoom to 100% / fit all / fit selection |
+| Space + drag, scroll | Pan |
+| Cmd+scroll, pinch | Zoom |
+| Cmd+\ | Hide UI |
 
 ## How it works
 
