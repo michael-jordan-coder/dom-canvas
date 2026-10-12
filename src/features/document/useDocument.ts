@@ -13,6 +13,7 @@ type Updater = (list: Artboard[]) => Artboard[];
 // persistence and re-rendering all read.
 export function useDocument(hosts: Map<string, HTMLDivElement>, initial: () => Artboard[]) {
   const [artboards, setArtboards] = useState<Artboard[]>(() => loadDocument() ?? initial());
+  const [saveStatus, setSaveStatus] = useState("Local document");
   const latest = useRef(artboards);
   const committed = useRef(artboards);
   const past = useRef<Artboard[][]>([]);
@@ -35,7 +36,7 @@ export function useDocument(hosts: Map<string, HTMLDivElement>, initial: () => A
     future.current = [];
     committed.current = snapshot;
     apply(snapshot);
-    saveDocument(snapshot);
+    setSaveStatus(saveDocument(snapshot) ? "Saved locally" : "Not saved — storage full or unavailable");
   }, [apply, hosts]);
 
   const undo = useCallback(() => {
@@ -45,7 +46,7 @@ export function useDocument(hosts: Map<string, HTMLDivElement>, initial: () => A
     future.current = [committed.current, ...future.current];
     committed.current = previous;
     apply(previous);
-    saveDocument(previous);
+    setSaveStatus(saveDocument(previous) ? "Saved locally" : "Not saved — storage full or unavailable");
     return true;
   }, [apply]);
 
@@ -56,11 +57,11 @@ export function useDocument(hosts: Map<string, HTMLDivElement>, initial: () => A
     past.current = [...past.current, committed.current];
     committed.current = next;
     apply(next);
-    saveDocument(next);
+    setSaveStatus(saveDocument(next) ? "Saved locally" : "Not saved — storage full or unavailable");
     return true;
   }, [apply]);
 
-  return { artboards, latest, update, commit, undo, redo };
+  return { artboards, latest, update, commit, undo, redo, saveStatus, canUndo: past.current.length > 0, canRedo: future.current.length > 0 };
 }
 
 function loadDocument(): Artboard[] | null {
@@ -76,8 +77,9 @@ function loadDocument(): Artboard[] | null {
 function saveDocument(artboards: Artboard[]) {
   try {
     localStorage.setItem(DOC_KEY, JSON.stringify(artboards));
+    return true;
   } catch {
-    // Quota exceeded (large imported sites): keep working in memory.
+    return false;
   }
 }
 

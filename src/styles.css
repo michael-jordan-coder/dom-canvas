@@ -685,3 +685,91 @@ button:disabled {
 .select-field { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .select-field select { min-width: 0; width: 132px; height: 28px; border: 1px solid var(--panel-border); border-radius: 5px; background: var(--field); color: var(--text); font: inherit; padding: 0 6px; }
 button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.canvas-navigation { position: absolute; top: 8px; left: 257px; right: 257px; z-index: 3; display: flex; justify-content: center; align-items: center; gap: 3px; min-height: 34px; }
+.canvas-navigation button { height: 30px; padding: 0 8px; background: var(--panel); border-radius: 6px; box-shadow: 0 0 0 1px var(--divider); white-space: nowrap; }
+.canvas-navigation button:hover { background: var(--field); }
+.canvas-navigation .zoom-value { min-width: 48px; font-variant-numeric: tabular-nums; }
+.navigation-divider { width: 5px; }
+.css-mode .canvas-navigation { right: 376px; }
+.ui-hidden .canvas-navigation { display: none; }
+.history-controls { display: flex; gap: 4px; }
+.history-controls button { color: var(--text-secondary); padding: 4px 6px; border-radius: 4px; font-size: 11px; }
+.history-controls button:hover { background: var(--hover); }
+.draft-dot { display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--accent); vertical-align: middle; }
+.draft-notice { padding: 10px 16px; font-size: 12px; line-height: 1.5; background: var(--row-selected); color: var(--text); }
+.file-name .save-error { color: var(--danger); white-space: normal; font-size: 10px; }
+.toast { position: absolute; z-index: 6; bottom: 80px; left: 50%; transform: translateX(-50%); max-width: min(480px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 8px; background: var(--text); color: var(--panel); box-shadow: var(--shadow-panel); font-size: 12px; line-height: 1.5; pointer-events: none; }
+.layer-tree:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.layer[role="treeitem"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* Property panel: compact controls, explicit hierarchy and CSS overrides. */
+.panel.right { width: 288px; bottom: var(--gutter); font-size: 12px; }
+.panel.right.code-panel { width: min(380px, calc(100vw - 32px)); }
+.canvas-navigation { right: 304px; }
+.css-mode .canvas-navigation { right: 396px; }
+.panel.right .panel-top { height: 48px; }
+.panel.right .btn-primary { height: 28px; }
+.panel.right .selection-path { flex-wrap: nowrap; overflow-x: auto; padding: 8px 12px; flex-shrink: 0; min-height: 40px; }
+.selection-path > button, .selection-path .path-item { flex-shrink: 0; }
+.selection-summary { padding: 16px 16px 4px; display: flex; gap: 8px; align-items: center; }
+.selection-summary strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.node-badge { font: 10px/18px var(--mono); padding: 0 5px; background: var(--field); color: var(--text-secondary); border-radius: 4px; }
+.frame-badge { color: #8b5cf6; }
+.selection-meta { padding: 4px 16px 12px; display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 10px; }
+.selection-meta > span { font: 10px var(--mono); }
+.property-section { border-bottom: 1px solid var(--divider); }
+.property-section-heading { display: flex; align-items: center; min-height: 42px; padding: 0 12px; gap: 8px; }
+.section-toggle { display: flex; align-items: center; gap: 8px; flex: 1; min-height: 34px; text-align: left; font-size: 12px; font-weight: 600; }
+.section-chevron { width: 5px; height: 5px; border-right: 1.5px solid var(--text-secondary); border-bottom: 1.5px solid var(--text-secondary); transform: rotate(-45deg); margin: 0 2px; }
+.section-chevron.open { transform: rotate(45deg); }
+.property-reset { color: var(--accent); font-size: 10px; padding: 5px; border-radius: 4px; }
+.property-reset:hover { background: var(--row-selected); }
+.property-section-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.property-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.property-row.single { grid-template-columns: minmax(0, 1fr); }
+.property-shell { display: flex; flex-wrap: wrap; align-items: center; position: relative; min-width: 0; }
+.property-shell > .field { flex: 1; height: 30px; }
+.property-shell .field .prefix { width: auto; min-width: 26px; padding: 0 6px; font-size: 10px; }
+.property-shell .field input { font-size: 11px; font-variant-numeric: tabular-nums; }
+.property-shell.overridden > .field { box-shadow: inset 2px 0 var(--accent); }
+.reset-value { width: 20px; flex-shrink: 0; align-self: stretch; color: var(--text-secondary); font-size: 14px; border-radius: 4px; }
+.reset-value:hover { color: var(--accent); background: var(--row-selected); }
+.field.invalid { border-color: var(--danger); }
+.invalid-value { width: 100%; color: var(--danger); font-size: 10px; margin-top: 3px; }
+.segmented { display: flex; padding: 3px; border-radius: 6px; background: var(--field); gap: 2px; min-height: 32px; }
+.segmented button { flex: 1; min-width: 0; padding: 4px; border-radius: 4px; font-size: 11px; color: var(--text-secondary); }
+.segmented button:hover { color: var(--text); }
+.segmented button[aria-pressed="true"] { color: var(--text); background: var(--panel); box-shadow: 0 1px 3px #00000012; }
+.property-section .select-field { margin: 0; min-width: 0; min-height: 30px; font-size: 11px; }
+.property-section .select-field select { width: 140px; height: 30px; border-color: transparent; }
+.property-row .select-field { gap: 4px; }
+.property-row .select-field select { flex: 1; width: 0; }
+.layout-alignment { display: flex; gap: 12px; align-items: center; }
+.alignment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 5px; width: 72px; height: 72px; flex-shrink: 0; border: 1px solid var(--divider); border-radius: 6px; }
+.alignment-grid button { display: grid; place-items: center; border-radius: 3px; }
+.alignment-grid button > span { width: 3px; height: 3px; border-radius: 50%; background: var(--text-secondary); }
+.alignment-grid button:hover { background: var(--hover); }
+.alignment-grid button[aria-pressed="true"] { background: var(--row-selected); }
+.alignment-grid button[aria-pressed="true"] > span { width: 7px; height: 7px; border-radius: 2px; background: var(--accent); }
+.alignment-options { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.alignment-options .select-field { display: block; }
+.alignment-options .select-field > span { display: block; font-size: 10px; margin-bottom: 3px; color: var(--text-secondary); }
+.alignment-options .select-field select { width: 100%; height: 26px; }
+.property-subheading { display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); font-size: 11px; min-height: 18px; }
+.small-toggle { font-size: 10px; color: var(--text-secondary); padding: 2px 4px; border-radius: 3px; }
+.small-toggle:hover, .small-toggle[aria-pressed="true"] { color: var(--accent); background: var(--row-selected); }
+.color-property { display: flex; gap: 8px; min-width: 0; align-items: center; }
+.color-property > .property-shell { flex: 1; }
+.color-picker { position: relative; width: 30px; height: 30px; flex-shrink: 0; border-radius: 5px; overflow: hidden; border: 1px solid var(--divider); background: conic-gradient(#ddd 25%, #fff 0 50%, #ddd 0 75%, #fff 0) 0 0 / 8px 8px; }
+.color-picker > span { position: absolute; inset: 0; }
+.color-picker input { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
+.color-picker:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.content-input { width: 100%; min-height: 54px; resize: vertical; background: var(--field); border: 1px solid transparent; border-radius: 5px; padding: 8px; color: var(--text); font: 12px/1.5 var(--font); }
+.content-input:focus { outline: 1px solid var(--accent); }
+.property-note, .inspector-footnote { color: var(--text-secondary); font-size: 11px; line-height: 1.5; margin: 0; }
+.inspector-footnote { padding: 16px; }
+.inspector-empty { padding: 24px 20px; }
+.inspector-empty strong { font-size: 13px; }
+.inspector-empty p { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.inspector-empty span { display: block; margin-top: 20px; color: var(--text-secondary); font-size: 11px; line-height: 1.7; }

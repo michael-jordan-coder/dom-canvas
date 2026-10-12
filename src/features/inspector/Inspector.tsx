@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState } from "react";
 import { getTranslate, setSize, setTranslate } from "@/features/canvas/elementStyle";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { layerName } from "@/features/layers/Layers";
+import { ColorField, Field, Row, Section, Segmented, SelectField, TextArea } from "./InspectorControls";
 
 type Props = {
   selection: Selection;
@@ -12,53 +13,26 @@ type Props = {
 };
 
 export function Inspector({ selection, artboards, onUpdateArtboard, onChange }: Props) {
-  if (selection.kind === "none") {
-    return <div className="empty">Select a layer to edit it.</div>;
-  }
-
+  if (selection.kind === "none") return <div className="inspector-empty"><strong>Nothing selected</strong><p>Select a frame or an element to edit its properties.</p><span>⌘/Ctrl-click selects the frame.<br />Alt-click selects a parent.</span></div>;
   if (selection.kind === "artboard") {
-    const ab = artboards.find((a) => a.id === selection.artboardId);
+    const ab = artboards.find((item) => item.id === selection.artboardId);
     if (!ab) return null;
-    const num = (v: string, fallback: number) => (Number.isFinite(parseFloat(v)) ? Math.round(parseFloat(v)) : fallback);
-    return (
-      <>
-        <div className="inspector-selection">
-          <span className="tag">Frame</span>
-        </div>
-        <Section title="Frame">
-          <Row single>
-            <Field title="Frame name" value={ab.name} onCommit={(v) => onUpdateArtboard(ab.id, { name: v || ab.name })} />
-          </Row>
-        </Section>
-        <Section title="Position">
-          <Row>
-            <Field prefix="X" value={String(ab.x)} onCommit={(v) => onUpdateArtboard(ab.id, { x: num(v, ab.x) })} />
-            <Field prefix="Y" value={String(ab.y)} onCommit={(v) => onUpdateArtboard(ab.id, { y: num(v, ab.y) })} />
-          </Row>
-        </Section>
-        <Section title="Frame size">
-          <div className="frame-presets">
-            {[{ name: "Mobile", width: 390 }, { name: "Tablet", width: 768 }, { name: "Desktop", width: 1440 }].map((preset) => (
-              <button key={preset.name} title={`${preset.name}: ${preset.width}px`} aria-pressed={ab.width === preset.width} onClick={() => onUpdateArtboard(ab.id, { width: preset.width })}>{preset.name}</button>
-            ))}
-          </div>
-          <Row>
-            <Field prefix="W" value={String(ab.width)} onCommit={(v) => onUpdateArtboard(ab.id, { width: Math.max(1, num(v, ab.width)) })} />
-            <Field
-              prefix="H"
-              title="Height (type hug to fit content)"
-              value={ab.height === undefined ? "Hug" : String(ab.height)}
-              onCommit={(v) =>
-                onUpdateArtboard(ab.id, { height: /^hug$/i.test(v) ? undefined : Math.max(1, num(v, ab.height ?? 100)) })
-              }
-            />
-          </Row>
-          <button className="btn-ghost hug-button" onClick={() => onUpdateArtboard(ab.id, { height: undefined })}>Fit height to content</button>
-        </Section>
-      </>
-    );
+    const update = (patch: Partial<Artboard>) => onUpdateArtboard(ab.id, patch);
+    const measuredHeight = document.querySelector<HTMLElement>(`[data-artboard="${ab.id}"]`)?.offsetHeight ?? 100;
+    return <>
+      <div className="selection-summary"><strong>{ab.name}</strong><span className="node-badge frame-badge">Frame</span></div>
+      <Section title="Frame">
+        <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
+        <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
+        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => update({ width: Math.max(1, number(v, ab.width)) })} /><Field prefix="H" label="Frame height" value={ab.height === undefined ? "Hug" : String(ab.height)} onCommit={(v) => update({ height: /^hug$/i.test(v) ? undefined : Math.max(1, number(v, measuredHeight)) })} /></Row>
+        <Segmented label="Frame height mode" value={ab.height === undefined ? "hug" : "fixed"} options={[{ value: "hug", label: "Hug content" }, { value: "fixed", label: "Fixed height" }]} onChange={(mode) => update({ height: mode === "hug" ? undefined : measuredHeight })} />
+      </Section>
+      <Section title="Position">
+        <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => update({ x: number(v, ab.x) })} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => update({ y: number(v, ab.y) })} /></Row>
+      </Section>
+      <div className="inspector-footnote">Frame size controls the canvas bounds. Select an element inside to edit its layout and appearance.</div>
+    </>;
   }
-
   const el = selection.element;
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
@@ -72,246 +46,135 @@ function elementKey(element: Element) {
 }
 
 function ElementInspector({ element, onChange }: { element: Element; onChange: () => void }) {
+  const [individualPadding, setIndividualPadding] = useState(false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
-  const hasOwnText = Array.from(element.childNodes).some((n) => n.nodeType === Node.TEXT_NODE && n.nodeValue?.trim());
-  const isLeaf = element.children.length === 0;
-
+  const hasText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.trim());
+  const read = (prop: string) => styled.style.getPropertyValue(prop) || computed.getPropertyValue(prop);
   const set = (prop: string, value: string) => {
+    if (!CSS.supports(prop, value)) return false;
     styled.style.setProperty(prop, value);
     onChange();
+    return true;
   };
-  const read = (prop: string) => styled.style.getPropertyValue(prop) || computed.getPropertyValue(prop);
-
-  const frame = frameGeometry(element);
+  const reset = (props: string[]) => {
+    props.forEach((prop) => styled.style.removeProperty(prop));
+    onChange();
+  };
+  const resetGroup = (props: string[]) => props.some((prop) => styled.style.getPropertyValue(prop)) ? () => reset(props) : undefined;
+  const resetProperty = (prop: string) => resetGroup([prop]);
+  const property = (label: string, prop: string, prefix?: string, length = true) => <Field label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={resetProperty(prop)} />;
+  const geometry = frameGeometry(element);
   const moveTo = (x: number, y: number) => {
-    const t = getTranslate(styled);
-    setTranslate(styled, t.x + x - frame.x, t.y + y - frame.y);
+    const current = getTranslate(styled);
+    setTranslate(styled, current.x + x - geometry.x, current.y + y - geometry.y);
     onChange();
   };
-  const resize = (size: { width?: number; height?: number }) => {
-    setSize(styled, size);
-    onChange();
-  };
+  const display = read("display");
+  const isFlex = display.includes("flex");
+  const isGrid = display.includes("grid");
+  const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "align-items", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
+  const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
+  const typographyProps = ["font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-align", "color"];
+  const overrides = styled.style.length;
 
-  return (
-    <>
-      <div className="inspector-selection">
-        <span className="name">{layerName(element)}</span>
-        <span className="tag">{element.tagName.toLowerCase()}</span>
-      </div>
+  return <>
+    <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
+    <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
 
-      {isLeaf && hasOwnText && (
-        <Section title="Content">
-          <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />
-        </Section>
-      )}
+    <Section title="Layout" onReset={resetGroup(layoutProps)}>
+      <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
+      {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
+      <Row>
+        <Field prefix="W" label="Width" value={trimNumber(styled.style.width) || String(geometry.width)} onReset={resetProperty("width")} onCommit={(v) => { if (/^-?\d*\.?\d+$/.test(v)) { setSize(styled, { width: number(v, geometry.width) }); onChange(); return true; } return set("width", v); }} />
+        <Field prefix="H" label="Height" value={trimNumber(styled.style.height) || String(geometry.height)} onReset={resetProperty("height")} onCommit={(v) => { if (/^-?\d*\.?\d+$/.test(v)) { setSize(styled, { height: number(v, geometry.height) }); onChange(); return true; } return set("height", v); }} />
+      </Row>
+      {isFlex && <>
+        <Segmented label="Direction" value={read("flex-direction")} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", v)} />
+        <SelectField label="Wrap" value={read("flex-wrap")} options={["nowrap", "wrap", "wrap-reverse"]} onCommit={(v) => set("flex-wrap", v)} />
+      </>}
+      {(isFlex || isGrid) && <>
+        <div className="layout-alignment">
+          <div className="alignment-grid" role="group" aria-label="Content alignment">
+            {["flex-start", "center", "flex-end"].flatMap((vertical, row) => ["flex-start", "center", "flex-end"].map((horizontal, column) => {
+              const columnDirection = isFlex && read("flex-direction").startsWith("column");
+              const reverse = read("flex-direction").endsWith("reverse");
+              const rtl = computed.direction === "rtl";
+              const flipX = columnDirection || !isFlex ? rtl : rtl !== reverse;
+              const flipY = isFlex && (columnDirection ? reverse : read("flex-wrap") === "wrap-reverse");
+              const flip = (v: string, reversed: boolean) => !reversed || v === "center" ? v : v === "flex-start" ? "flex-end" : "flex-start";
+              const x = flip(horizontal, flipX);
+              const y = flip(vertical, flipY);
+              const justify = columnDirection ? y : x;
+              const align = columnDirection ? x : y;
+              const active = read("justify-content") === justify && read("align-items") === align;
+              return <button key={`${row}-${column}`} aria-label={`Align ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][column]}`} aria-pressed={active} onClick={() => { styled.style.justifyContent = justify; styled.style.alignItems = align; onChange(); }}><span /></button>;
+            }))}
+          </div>
+          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={["flex-start", "center", "flex-end", "space-between", "space-around", "space-evenly"]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items")} options={["stretch", "flex-start", "center", "flex-end", "baseline"]} onCommit={(v) => set("align-items", v)} /></div>
+        </div>
+        <Row>{property("Column gap", "column-gap", "↔")}{property("Row gap", "row-gap", "↕")}</Row>
+      </>}
+      {isGrid && <><Field label="Grid columns" prefix="Cols" value={read("grid-template-columns")} onCommit={(v) => set("grid-template-columns", v)} onReset={resetProperty("grid-template-columns")} /><Field label="Grid rows" prefix="Rows" value={read("grid-template-rows")} onCommit={(v) => set("grid-template-rows", v)} onReset={resetProperty("grid-template-rows")} /></>}
+    </Section>
 
-      <Section title="Position">
-        <Row>
-          <Field prefix="X" value={String(frame.x)} onCommit={(v) => moveTo(toNumber(v, frame.x), frame.y)} />
-          <Field prefix="Y" value={String(frame.y)} onCommit={(v) => moveTo(frame.x, toNumber(v, frame.y))} />
-        </Row>
-        <Row>
-          <Field prefix="↻" suffix="°" title="Rotation" value={read("rotate") === "none" ? "0" : trimNumber(read("rotate"))} onCommit={(v) => set("rotate", `${toNumber(v, 0)}deg`)} />
-        </Row>
-      </Section>
+    <Section title="Spacing" defaultOpen={!hasText} onReset={resetGroup(paddingProps)}>
+      <div className="property-subheading"><span>Padding</span><button className="small-toggle" aria-pressed={individualPadding} onClick={() => setIndividualPadding(!individualPadding)}>{individualPadding ? "All sides" : "Individual sides"}</button></div>
+      {individualPadding ? <><Row>{property("Padding top", "padding-top", "T")}{property("Padding right", "padding-right", "R")}</Row><Row>{property("Padding bottom", "padding-bottom", "B")}{property("Padding left", "padding-left", "L")}</Row></> : property("Padding", "padding", "All")}
+      <div className="property-subheading"><span>Margin</span></div>
+      {property("Margin", "margin", "All")}
+    </Section>
 
-      <Section title="Layout">
-        <Row>
-          <Field prefix="W" value={String(frame.width)} onCommit={(v) => resize({ width: toNumber(v, frame.width) })} />
-          <Field prefix="H" value={String(frame.height)} onCommit={(v) => resize({ height: toNumber(v, frame.height) })} />
-        </Row>
-        <Row>
-          <Field prefix="⇥" value={trimNumber(read("padding"))} title="Padding" onCommit={(v) => set("padding", withPx(v))} />
-          <Field prefix="⇤" value={trimNumber(read("margin"))} title="Margin" onCommit={(v) => set("margin", withPx(v))} />
-        </Row>
-      </Section>
+    {hasText && <Section title="Typography" onReset={resetGroup(typographyProps)}>
+      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} />
+      <Row>{property("Font size", "font-size", "Size")}<Field label="Font weight" prefix="Wt" value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={resetProperty("font-weight")} /></Row>
+      <Row>{property("Line height", "line-height", "Line", false)}{property("Letter spacing", "letter-spacing", "Track")}</Row>
+      <Segmented label="Text alignment" value={read("text-align")} options={[{ value: "start", label: "Start" }, { value: "center", label: "Center" }, { value: "end", label: "End" }]} onChange={(v) => set("text-align", v)} />
+      <ColorField label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
+      {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
+    </Section>}
 
-      <Section title="CSS layout">
-        <SelectField label="Display" value={read("display")} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "none"]} onCommit={(v) => set("display", v)} />
-        <SelectField label="Position" value={read("position")} options={["static", "relative", "absolute", "fixed", "sticky"]} onCommit={(v) => set("position", v)} />
-        {read("display").includes("flex") && <>
-          <SelectField label="Direction" value={read("flex-direction")} options={["row", "column", "row-reverse", "column-reverse"]} onCommit={(v) => set("flex-direction", v)} />
-          <SelectField label="Wrap" value={read("flex-wrap")} options={["nowrap", "wrap", "wrap-reverse"]} onCommit={(v) => set("flex-wrap", v)} />
-        </>}
-        {(read("display").includes("flex") || read("display").includes("grid")) && <>
-          <SelectField label="Justify" value={read("justify-content")} options={["normal", "flex-start", "center", "flex-end", "space-between", "space-around", "space-evenly"]} onCommit={(v) => set("justify-content", v)} />
-          <SelectField label="Align" value={read("align-items")} options={["normal", "stretch", "flex-start", "center", "flex-end", "baseline"]} onCommit={(v) => set("align-items", v)} />
-          <Row single><Field prefix="Gap" title="Gap" value={trimNumber(read("gap"))} onCommit={(v) => set("gap", withPx(v))} /></Row>
-        </>}
-        {read("display").includes("grid") && <Row single><Field prefix="Cols" title="Grid template columns" value={read("grid-template-columns")} onCommit={(v) => set("grid-template-columns", v)} /></Row>}
-        <SelectField label="Overflow" value={read("overflow")} options={["visible", "hidden", "clip", "auto", "scroll"]} onCommit={(v) => set("overflow", v)} />
-      </Section>
+    <Section title="Appearance" onReset={resetGroup(["opacity", "border-radius", "background-color"])}>
+      <Row><Field label="Opacity" prefix="Opacity" suffix="%" value={String(Math.round(parseFloat(read("opacity") || "1") * 100))} onCommit={(v) => set("opacity", String(Math.min(100, Math.max(0, number(v, 100))) / 100))} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", "Radius")}</Row>
+      <div className="property-subheading"><span>Fill</span></div>
+      <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
+    </Section>
 
-      <Section title="Appearance">
-        <Row>
-          <Field
-            prefix="◐"
-            suffix="%"
-            title="Opacity"
-            value={String(Math.round(parseFloat(read("opacity") || "1") * 100))}
-            onCommit={(v) => set("opacity", String(Math.min(100, Math.max(0, toNumber(v, 100))) / 100))}
-          />
-          <Field prefix="◜" title="Corner radius" value={trimNumber(read("border-radius"))} onCommit={(v) => set("border-radius", withPx(v))} />
-        </Row>
-      </Section>
+    <Section title="Stroke" defaultOpen={false} onReset={resetGroup(["border", "border-width", "border-style", "border-color"])}>
+      <Row><Field label="Stroke width" prefix="Size" value={trimNumber(read("border-width"))} onReset={resetProperty("border-width")} onCommit={(v) => {
+        if (!CSS.supports("border-width", withPx(v))) return false;
+        styled.style.borderWidth = withPx(v);
+        if (read("border-style") === "none") styled.style.borderStyle = "solid";
+        onChange(); return true;
+      }} /><SelectField label="Style" value={read("border-style")} options={["none", "solid", "dashed", "dotted", "double"]} onCommit={(v) => set("border-style", v)} /></Row>
+      <ColorField label="Stroke color" value={computed.borderTopColor} onCommit={(v) => set("border-color", v)} onReset={resetProperty("border-color")} />
+    </Section>
 
-      <Section title="Fill">
-        <Row single>
-          <ColorField value={read("background-color")} onCommit={(v) => set("background-color", v)} />
-        </Row>
-      </Section>
+    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "translate", "rotate", "z-index"])}>
+      <SelectField label="Position" value={read("position")} options={["static", "relative", "absolute", "fixed", "sticky"]} onCommit={(v) => set("position", v)} />
+      <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => moveTo(number(v, geometry.x), geometry.y)} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => moveTo(geometry.x, number(v, geometry.y))} /></Row>
+      <Row><Field prefix="Angle" label="Rotation" suffix="°" value={read("rotate") === "none" ? "0" : read("rotate").replace(/deg$/, "")} onCommit={(v) => set("rotate", `${number(v, 0)}deg`)} />{property("Z index", "z-index", "Z", false)}</Row>
+      <p className="property-note">X and Y move the element visually; its place in the document flow stays the same.</p>
+    </Section>
 
-      {hasOwnText && (
-        <Section title="Typography">
-          <Row single>
-            <Field value={primaryFont(read("font-family"))} title="Font family" onCommit={(v) => set("font-family", v)} />
-          </Row>
-          <Row>
-            <Field prefix="Aa" title="Font size" value={trimNumber(read("font-size"))} onCommit={(v) => set("font-size", withPx(v))} />
-            <Field prefix="B" title="Font weight" value={read("font-weight")} onCommit={(v) => set("font-weight", v)} />
-          </Row>
-          <Row>
-            <Field prefix="↕" title="Line height" value={trimNumber(read("line-height"))} onCommit={(v) => set("line-height", withPx(v))} />
-            <Field prefix="↔" title="Letter spacing" value={trimNumber(read("letter-spacing"))} onCommit={(v) => set("letter-spacing", withPx(v))} />
-          </Row>
-          <Row single>
-            <ColorField value={read("color")} onCommit={(v) => set("color", v)} />
-          </Row>
-        </Section>
-      )}
-    </>
-  );
+    <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "overflow"])}>
+      <Field label="Box shadow" value={read("box-shadow")} onCommit={(v) => set("box-shadow", v)} onReset={resetProperty("box-shadow")} />
+      <SelectField label="Overflow" value={read("overflow")} options={["visible", "hidden", "clip", "auto", "scroll"]} onCommit={(v) => set("overflow", v)} />
+    </Section>
+    <div className="inspector-footnote">↑ ↓ to adjust values · Shift for 10 · Alt for 0.1<br />Blue markers show inline overrides. Reset returns to the stylesheet.</div>
+  </>;
 }
 
-function SelectField({ label, value, options, onCommit }: { label: string; value: string; options: string[]; onCommit: (value: string) => void }) {
-  const choices = options.includes(value) ? options : [value, ...options];
-  return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="inspector-section">
-      <h4>{title}</h4>
-      {children}
-    </section>
-  );
-}
-
-function Row({ single, children }: { single?: boolean; children: ReactNode }) {
-  return <div className={`field-row${single ? " single" : ""}`}>{children}</div>;
-}
-
-type FieldProps = {
-  value: string;
-  prefix?: string;
-  suffix?: string;
-  title?: string;
-  disabled?: boolean;
-  onCommit: (value: string) => void;
-};
-
-function Field({ value, prefix, suffix, title, disabled, onCommit }: FieldProps) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  const commit = () => { if (draft !== value) onCommit(draft.trim()); };
-
-  return (
-    <label className={`field${prefix ? "" : " no-prefix"}`} title={title}>
-      {prefix && <span className="prefix">{prefix}</span>}
-      <input
-        value={draft}
-        aria-label={title || prefix || "Value"}
-        disabled={disabled}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onFocus={(e) => e.target.select()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") e.currentTarget.blur();
-          if (e.key === "Escape") { setDraft(value); e.currentTarget.blur(); }
-        }}
-      />
-      {suffix && <span className="suffix">{suffix}</span>}
-    </label>
-  );
-}
-
-function TextArea({ value, onCommit }: { value: string; onCommit: (value: string) => void }) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  return (
-    <textarea
-      className="textarea-field"
-      rows={3}
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => { if (draft !== value) onCommit(draft); }}
-    />
-  );
-}
-
-function ColorField({ value, onCommit }: { value: string; onCommit: (value: string) => void }) {
-  const { hex, alpha } = parseColor(value);
-  const [draft, setDraft] = useState(hex);
-  useEffect(() => setDraft(hex), [hex]);
-  const commit = () => {
-    const clean = draft.replace(/^#/, "").trim();
-    if (/^[0-9a-f]{6}$/i.test(clean) && clean.toUpperCase() !== hex) onCommit(`#${clean}`);
-    else setDraft(hex);
-  };
-
-  return (
-    <label className="field color">
-      <span className="swatch">
-        <span style={{ background: value }} />
-        <input type="color" value={`#${hex}`} onChange={(e) => onCommit(e.target.value)} />
-      </span>
-      <input
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onFocus={(e) => e.target.select()}
-        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-      />
-      <span className="suffix">{Math.round(alpha * 100)}%</span>
-    </label>
-  );
-}
-
-// Position and size in the frame's coordinate space, derived from what is
-// rendered so that flow-positioned elements report where they actually are.
 function frameGeometry(element: Element) {
   const root = element.getRootNode();
   const host = root instanceof ShadowRoot ? (root.host as HTMLElement) : null;
-  const r = element.getBoundingClientRect();
-  if (!host) return { x: 0, y: 0, width: r.width, height: r.height };
-  const hr = host.getBoundingClientRect();
-  const z = hr.width / host.offsetWidth || 1;
+  const rect = element.getBoundingClientRect();
+  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height };
+  const parent = host.getBoundingClientRect();
+  const zoom = parent.width / host.offsetWidth || 1;
   const round = (n: number) => Math.round(n * 100) / 100;
-  return { x: round((r.left - hr.left) / z), y: round((r.top - hr.top) / z), width: round(r.width / z), height: round(r.height / z) };
+  return { x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
 }
-
-function parseColor(value: string) {
-  const m = value.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/);
-  if (!m) return { hex: "FFFFFF", alpha: value === "transparent" ? 0 : 1 };
-  const hex = [m[1], m[2], m[3]].map((n) => Math.round(Number(n)).toString(16).padStart(2, "0")).join("").toUpperCase();
-  return { hex, alpha: m[4] === undefined ? 1 : Number(m[4]) };
-}
-
-function primaryFont(family: string) {
-  return family.split(",")[0]?.replace(/["']/g, "").trim() ?? family;
-}
-
-function trimNumber(value: string) {
-  return value.replace(/(-?\d+\.\d+)/g, (n) => String(Math.round(parseFloat(n) * 100) / 100)).replace(/px/g, "").replace(/deg/g, "");
-}
-
-function toNumber(value: string, fallback: number) {
-  const n = parseFloat(value);
-  return Number.isFinite(n) ? Math.round(n * 100) / 100 : fallback;
-}
-
-function withPx(value: string) {
-  return value.split(/\s+/).map((part) => (/^-?\d*\.?\d+$/.test(part) ? `${part}px` : part)).join(" ");
-}
+function trimNumber(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+px$/.test(part) ? String(Math.round(parseFloat(part) * 100) / 100) : part).join(" "); }
+function number(value: string, fallback: number) { const n = parseFloat(value); return Number.isFinite(n) ? Math.round(n * 100) / 100 : fallback; }
+function withPx(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+$/.test(part) ? `${part}px` : part).join(" "); }

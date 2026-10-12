@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, isTyping } from "@/features/canvas/Canvas";
 import { getTranslate, setTranslate } from "@/features/canvas/elementStyle";
-import { fitCamera, unionBounds, type Bounds } from "@/features/canvas/geometry";
+import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
 import { Toolbar } from "@/features/canvas/Toolbar";
@@ -35,11 +35,29 @@ export function App() {
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
+  const [cssDrafts, setCssDrafts] = useState<Record<string, string>>({});
+  const [notice, setNotice] = useState<string | null>(null);
+  const [liveCssPreview, setLiveCssPreview] = useState(true);
   const [cssPreview, setCssPreview] = useState<{ id: string; css: string } | null>(null);
   const pendingFocus = useRef<string | null>(null);
   const [layerHover, setLayerHover] = useState<Element | null>(null);
   const [version, setVersion] = useState(0);
   const pendingSelection = useRef<{ artboardId: string; path: number[] | null } | null>(null);
+
+  const changeCssDraft = (id: string, value: string | null) => {
+    setCssDrafts((current) => {
+      const next = { ...current };
+      if (value === null) delete next[id];
+      else next[id] = value;
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   const bump = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -162,8 +180,8 @@ export function App() {
 
   const viewport = useCallback(() => {
     const inset = uiHidden ? 16 : PANEL_INSET;
-    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 376 : PANEL_INSET;
-    return { left: inset, top: 16, width: Math.max(80, window.innerWidth - inset - rightInset), height: Math.max(80, window.innerHeight - 16 - (uiHidden ? 16 : TOOLBAR_INSET)) };
+    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 396 : 304;
+    return { left: inset, top: uiHidden ? 16 : 60, width: Math.max(80, window.innerWidth - inset - rightInset), height: Math.max(80, window.innerHeight - (uiHidden ? 16 : 60) - (uiHidden ? 16 : TOOLBAR_INSET)) };
   }, [uiHidden, inspectorTab]);
 
   useLayoutEffect(() => {
@@ -193,6 +211,23 @@ export function App() {
     const bounds = { x: (r.left - camera.x) / camera.z, y: (r.top - camera.y) / camera.z, width: r.width / camera.z, height: r.height / camera.z };
     setCamera(fitCamera(bounds, viewport()));
   }, [selection, camera, viewport, zoomToFit]);
+
+  const setZoom = useCallback((zoom: number) => {
+    const area = viewport();
+    setCamera((current) => zoomAround(current, area.left + area.width / 2, area.top + area.height / 2, zoom / current.z));
+  }, [viewport]);
+
+  const revealSelection = useCallback((next: Selection) => {
+    setSelection(next);
+    const element = next.kind === "element" ? next.element : next.kind === "artboard" ? hostsRef.current.get(next.artboardId) : null;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const area = viewport();
+    if (rect.right < area.left || rect.left > area.left + area.width || rect.bottom < area.top || rect.top > area.top + area.height) {
+      pendingFocus.current = next.kind === "none" ? null : next.artboardId;
+      bump();
+    }
+  }, [viewport, bump]);
 
   const deleteSelection = useCallback(() => {
     if (selection.kind === "artboard") {
@@ -259,37 +294,43 @@ export function App() {
       if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); deleteSelection(); return; }
       if (e.key === "Escape") { selectParent(); setTool("move"); return; }
       if (e.key.startsWith("Arrow")) {
+        if ((e.target as HTMLElement).closest("button, [role=tab]")) return;
         e.preventDefault();
         const step = e.shiftKey ? 10 : 1;
         const [dx, dy] = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key] ?? [0, 0];
         nudge(dx, dy);
         return;
       }
-      if (e.shiftKey && e.code === "Digit0") { setCamera((c) => ({ ...c, z: 1 })); return; }
+      if (e.shiftKey && e.code === "Digit0") { setZoom(1); return; }
       if (e.shiftKey && e.code === "Digit1") { zoomToFit(); return; }
       if (e.shiftKey && e.code === "Digit2") { zoomToSelection(); return; }
       if (!e.shiftKey && TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [travel, duplicateSelection, deleteSelection, selectParent, nudge, zoomToFit, zoomToSelection]);
+  }, [travel, duplicateSelection, deleteSelection, selectParent, nudge, zoomToFit, zoomToSelection, setZoom]);
 
   const [copied, setCopied] = useState(false);
   const copyCode = async () => {
-    const id = selection.kind === "none" ? artboards[0]?.id : selection.artboardId;
+    const id = selection.kind === "none" ? undefined : selection.artboardId;
     const ab = artboards.find((a) => a.id === id);
     const root = id ? hostsRef.current.get(id)?.shadowRoot : undefined;
     if (!ab || !root) return;
-    await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}\n</style>\n${serializeRoot(root)}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    try {
+      await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}\n</style>\n${serializeRoot(root)}`);
+      setCopied(true);
+      setNotice(`Copied ${ab.name}${cssDrafts[ab.id] !== undefined ? " — applied CSS only" : ""}`);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setNotice("Could not copy. Check browser clipboard permissions and try again.");
+    }
   };
 
   const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
 
   return (
-    <div className={`app${uiHidden ? " ui-hidden" : ""}`}>
+    <div className={`app${uiHidden ? " ui-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
       {fonts && <style>{fonts}</style>}
       <Canvas
         artboards={artboards}
@@ -314,15 +355,15 @@ export function App() {
         <div className="panel-top">
           <div className="file-name">
             Untitled
-            <small>Drafts</small>
+            <small role="status" className={doc.saveStatus.startsWith("Not saved") ? "save-error" : ""}>{doc.saveStatus}</small>
           </div>
         </div>
-        <div className="section-label">Layers</div>
+        <div className="section-label">Layers<div className="history-controls"><button title="Undo (⌘/Ctrl+Z)" disabled={!doc.canUndo} onClick={() => travel("undo")}>Undo</button><button title="Redo (⌘/Ctrl+Shift+Z)" disabled={!doc.canRedo} onClick={() => travel("redo")}>Redo</button></div></div>
         <Layers
           artboards={artboards}
           hosts={hostsRef.current}
           selection={selection}
-          onSelect={setSelection}
+          onSelect={revealSelection}
           onHover={setLayerHover}
           onRenameArtboard={(id, name) => commitArtboard(id, { name })}
           onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}
@@ -333,27 +374,41 @@ export function App() {
       <aside className={`panel right${inspectorTab === "css" ? " code-panel" : ""}`}>
         <div className="panel-top">
           <div className="file-name">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? "Element" : "Inspector"}</div>
-          <button className="zoom-button" title="Zoom to 100% (Shift+0)" onClick={() => setCamera((c) => ({ ...c, z: 1 }))}>
-            {Math.round(camera.z * 100)}%
-          </button>
-          <button className="btn-primary" onClick={copyCode} disabled={artboards.length === 0}>
-            {copied ? "Copied" : "Copy code"}
+          <button className="btn-primary" onClick={copyCode} disabled={!activeArtboard} title="Copy this frame’s HTML and applied CSS">
+            {copied ? "Copied" : "Copy frame"}
           </button>
         </div>
         {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
-        <div className="inspector-tabs" role="tablist" aria-label="Inspector mode">
-          <button id="design-tab" role="tab" aria-selected={inspectorTab === "design"} aria-controls="inspector-content" onClick={() => setInspectorTab("design")}>Design</button>
-          <button id="css-tab" role="tab" aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS</button>
+        <div className="inspector-tabs" role="tablist" aria-label="Inspector mode" onKeyDown={(e) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+          e.preventDefault(); e.stopPropagation();
+          const tab = e.key === "Home" ? "design" : e.key === "End" ? "css" : inspectorTab === "design" ? "css" : "design";
+          if (tab === "css" && activeArtboard) pendingFocus.current = activeArtboard.id;
+          setInspectorTab(tab);
+          document.getElementById(`${tab}-tab`)?.focus();
+        }}>
+          <button id="design-tab" role="tab" tabIndex={inspectorTab === "design" ? 0 : -1} aria-selected={inspectorTab === "design"} aria-controls="inspector-content" onClick={() => setInspectorTab("design")}>Design</button>
+          <button id="css-tab" role="tab" tabIndex={inspectorTab === "css" ? 0 : -1} aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS{activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <span className="draft-dot" aria-label="Draft pending" />}</button>
         </div>
+        {inspectorTab === "design" && activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <div className="draft-notice">CSS draft kept. Open CSS to preview or apply it.</div>}
         <div className="panel-scroll" id="inspector-content" role="tabpanel" aria-labelledby={`${inspectorTab}-tab`}>
           {inspectorTab === "css" ? activeArtboard ? (
-            <CssEditor key={activeArtboard.id} artboard={activeArtboard} onPreview={setCssPreview} onApply={(css) => commitArtboard(activeArtboard.id, { css })} />
+            <CssEditor key={activeArtboard.id} artboard={activeArtboard} draft={cssDrafts[activeArtboard.id] ?? activeArtboard.css} live={liveCssPreview} onLiveChange={setLiveCssPreview} onDraftChange={(value) => changeCssDraft(activeArtboard.id, value)} onPreview={setCssPreview} onApply={(css) => { commitArtboard(activeArtboard.id, { css }); setNotice(`CSS applied to ${activeArtboard.name}`); }} />
           ) : <div className="empty">Select a frame or layer to edit its frame stylesheet.</div> : (
             <Inspector selection={selection} artboards={artboards} onUpdateArtboard={commitArtboard} version={version} onChange={() => commit()} />
           )}
         </div>
       </aside>
 
+      <div className="canvas-navigation" aria-label="Canvas navigation">
+        <button aria-label="Zoom out" onClick={() => setZoom(camera.z / 1.25)}>−</button>
+        <button className="zoom-value" title="Actual size (Shift+0)" onClick={() => setZoom(1)}>{Math.round(camera.z * 100)}%</button>
+        <button aria-label="Zoom in" onClick={() => setZoom(camera.z * 1.25)}>+</button>
+        <span className="navigation-divider" />
+        <button title="Fit all frames (Shift+1)" disabled={!artboards.length} onClick={zoomToFit}>Fit all</button>
+        <button title="Fit selection (Shift+2)" disabled={selection.kind === "none"} onClick={zoomToSelection}>Fit selection</button>
+      </div>
+      {notice && <div className="toast" role="status">{notice}</div>}
       <Toolbar tool={tool} onToolChange={setTool}>
         <ImportButton busy={importing} error={importError} onImport={importSite} />
       </Toolbar>

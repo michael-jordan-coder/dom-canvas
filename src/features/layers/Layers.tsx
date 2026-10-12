@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type KeyboardEvent } from "react";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { ChevronIcon, FrameIcon, ImageIcon, RectIcon, TextIcon, VectorIcon } from "@/design-system/icons";
 
@@ -61,6 +61,34 @@ export function Layers(props: Props) {
     });
   };
 
+  const navigateTree = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.target instanceof HTMLInputElement) return;
+    const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Enter", " "];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const rows = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="treeitem"]'));
+    if (!rows.length) return;
+    const target = (e.target as HTMLElement).closest<HTMLElement>('[role="treeitem"]');
+    const current = target ?? selectedRowRef.current ?? rows[0];
+    const index = rows.indexOf(current);
+    let next = current;
+    const level = Number(current.getAttribute("aria-level"));
+    if (e.key === "Home") next = rows[0];
+    else if (e.key === "End") next = rows[rows.length - 1];
+    else if (e.key === "ArrowDown") next = target ? rows[Math.min(index + 1, rows.length - 1)] : current;
+    else if (e.key === "ArrowUp") next = rows[Math.max(0, index - 1)];
+    else if (e.key === "ArrowRight") {
+      if (current.getAttribute("aria-expanded") === "false") current.querySelector<HTMLElement>(".chevron")?.click();
+      else if (rows[index + 1] && Number(rows[index + 1].getAttribute("aria-level")) > level) next = rows[index + 1];
+    } else if (e.key === "ArrowLeft") {
+      if (current.getAttribute("aria-expanded") === "true") current.querySelector<HTMLElement>(".chevron")?.click();
+      else next = rows.slice(0, index).reverse().find((row) => Number(row.getAttribute("aria-level")) < level) ?? current;
+    }
+    next.focus();
+    next.click();
+  };
+
   const selectedEl = selection.kind === "element" ? selection.element : null;
 
   const renderNode = (el: Element, depth: number, artboardId: string, within: boolean) => {
@@ -72,6 +100,13 @@ export function Layers(props: Props) {
       <div key={keyFor(el)}>
         <div
           ref={isSelected ? selectedRowRef : undefined}
+          role="treeitem"
+          tabIndex={-1}
+          aria-label={layerName(el)}
+          aria-selected={isSelected}
+          aria-expanded={children.length ? open : undefined}
+          aria-level={depth + 1}
+          onKeyDown={(e) => { if (e.key === "F2") { e.preventDefault(); e.stopPropagation(); setRenaming(el); } }}
           className={`layer${isSelected ? " selected" : within ? " within" : ""}`}
           style={{ paddingLeft: 8 + depth * INDENT }}
           onClick={() => onSelect({ kind: "element", artboardId, element: el })}
@@ -97,7 +132,7 @@ export function Layers(props: Props) {
   };
 
   return (
-    <div className="panel-scroll" data-version={version} onMouseLeave={() => onHover(null)}>
+    <div className="panel-scroll layer-tree" role="tree" aria-label="Layers" tabIndex={0} data-version={version} onKeyDown={navigateTree} onMouseLeave={() => onHover(null)}>
       {artboards.length === 0 && <div className="empty">Draw a frame, paste HTML or import a site to add layers.</div>}
       {artboards.map((ab) => {
         const root = hosts.get(ab.id)?.shadowRoot;
@@ -108,6 +143,13 @@ export function Layers(props: Props) {
           <div key={ab.id}>
             <div
               ref={isSelected ? selectedRowRef : undefined}
+              role="treeitem"
+              tabIndex={-1}
+              aria-label={ab.name}
+              aria-selected={isSelected}
+              aria-expanded={children.length ? open : undefined}
+              aria-level={1}
+              onKeyDown={(e) => { if (e.key === "F2") { e.preventDefault(); e.stopPropagation(); setRenaming(ab.id); } }}
               className={`layer artboard-row${isSelected ? " selected" : ""}`}
               style={{ paddingLeft: 8 }}
               onClick={() => onSelect({ kind: "artboard", artboardId: ab.id })}
@@ -140,6 +182,7 @@ function RenameInput({ value, onDone }: { value: string; onDone: (name: string) 
   return (
     <input
       className="rename"
+      aria-label="Layer name"
       autoFocus
       value={draft}
       onFocus={(e) => e.target.select()}
