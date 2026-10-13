@@ -45,3 +45,34 @@ styles and exact UI measurements remain open. The instance ends with its origina
 white raw Fill; the reusable local style Research/Panel white remains in the file.
 A browser connection changed during the experiment; it was reconnected to the
 same existing tab without reloading. This is not a Figma behavior observation.
+
+
+## BI04 — Color variable differs from style binding
+
+Open the creation dialog and select Variable: Name defaults to Color; Value is
+white with alpha100; Create variable is available. Create Research/Panel color.
+The selected instance's Fill retains a paint row with visibility and Remove, but
+the color fields become a named Color Variable button. In contrast, BI02's style
+binding replaced the section's paint rows with one style reference.
+
+Variables opens a full manager view with Variable collection, Research group,
+Name/Value table, New variable mode, Edit variable and Create variable. Modes were
+not created. Enter3366FF into Panel color's value, commit with Enter, and return
+via File: the bound panel now reports #36F ·100%. This verifies source-value
+propagation to the instance's binding display. The screenshot captures the result.
+
+A connection interruption left3366FF in the input while its swatch still reported
+FFFFFF. After reconnecting, Enter committed it before returning to the panel.
+The pre-interruption draft is not proof of a committed source value.
+
+Evidence: [create dialog](../evidence/bindings/08-variable-create-dialog.txt),
+[created](../evidence/bindings/09-variable-created.txt),
+[bound panel](../evidence/bindings/10-variable-panel.txt),
+[bound UI](../evidence/bindings/10-variable-panel.png),
+[manager](../evidence/bindings/11-variable-manager.txt),
+[updated panel](../evidence/bindings/13-variable-blue-panel.txt),
+[screenshot](../evidence/bindings/13-variable-blue.png).
+
+Retained local variable Research/Panel color=3366FF is bound to instance15:62.
+The previous raw-white fixture state is superseded. No library publication.
+Alias/mode switching, scope filtering, detach and Undo remain open.

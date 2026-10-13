@@ -59,3 +59,6 @@ Instance continuation: node15:62 is now verified, selected Variant2 of Frame2,
 Binding research: local color style Research/Panel white was created and retained.
 Instance15:62 was linked, its Fill removed, then Reset fill restored raw white.
 No library publication or push to main component was performed.
+
+Variable research: Research/Panel color in Variable collection is3366FF and
+bound to the Fill of instance15:62. Previous raw-white state is superseded.

@@ -1,0 +1,264 @@
+- application
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region "Comments on canvas":
+  - button "Create new comment"
+- region "Left sidebar":
+  - toolbar "Navigation Bar":
+    - button "Main menu":
+    - separator
+    - button "File":
+    - button "Agents":
+    - button "Assets" [expanded]:
+    - button "Tools":
+    - separator
+    - button "Variables":
+  - heading "Assets" [level=2]
+  - button "Libraries":
+  - textbox "Search all libraries":
+    - /placeholder: Search in this library
+  - button "Libraries and settings":
+  - button "Back":
+  - navigation:
+    - heading "All libraries" [level=3]: Created in this file
+  - button "Created in this file 1 component"
+  - heading [level=3]: Created in this file
+  - generic: 1 component
+  - generic "UI kits"
+  - button "iOS and iPadOS 26 175 components"
+  - heading [level=3]: iOS and iPadOS 26
+  - generic: 175 components
+  - button "iOS and iPadOS 27 190 components"
+  - heading [level=3]: iOS and iPadOS 27
+  - generic: 190 components
+  - button "macOS 26 71 components"
+  - heading [level=3]: macOS 26
+  - generic: 71 components
+  - button "macOS 27 118 components"
+  - heading [level=3]: macOS 27
+  - generic: 118 components
+  - button "Material 3 Design Kit 357 components"
+  - heading [level=3]: Material 3 Design Kit
+  - generic: 357 components
+  - button "Simple Design System 1844 components"
+  - heading [level=3]: Simple Design System
+  - generic: 1844 components
+  - button "visionOS 26 67 components"
+  - heading [level=3]: visionOS 26
+  - generic: 67 components
+  - button "watchOS 26 81 components"
+  - heading [level=3]: watchOS 26
+  - generic: 81 components
+  - button "Add more libraries":
+    - generic: Add more libraries
+  - grid:
+    - row
+    - row:
+      - gridcell:
+        - button:
+          - generic: "2"
+          - generic: Includes 2 variants
+          - generic: Frame 2
+        - generic: Press Enter or Space to insert. Press Command+Enter to view details.
+    - row
+  - slider "Resize handle"
+- region "Right sidebar":
+  - button "Multiplayer tools":
+  - group "Prototype view":
+    - button "Present":
+    - button "Prototype view":
+  - button "Share"
+  - tablist:
+    - tab "Design" [selected]:
+      - generic: Design
+      - generic: Design
+    - tab "Prototype":
+      - generic: Prototype
+      - generic: Prototype
+  - button "125%, zoom and view options":
+    - text: 125%
+  - button "Frame 2":
+    - generic: Frame 2
+  - button "More actions":
+  - button "From this file":
+    - generic: From this file
+  - generic: Property 1
+  - generic: Property 1
+  - combobox "Property 1":
+    - generic: Variant2
+  - button "Apply variable":
+  - heading "Position" [level=2]
+  - group "Alignment":
+    - generic: Alignment
+    - button "Align left" [disabled]:
+    - button "Align horizontal centers" [disabled]:
+    - button "Align right" [disabled]:
+    - button "Align top" [disabled]:
+    - button "Align vertical centers" [disabled]:
+    - button "Align bottom" [disabled]:
+  - group "Position":
+    - generic: Position
+    - generic: X
+    - spinbutton "X-position": "-163"
+    - generic: "Y"
+    - spinbutton "Y-position": "-67"
+  - group "Rotation":
+    - generic: Rotation
+    - spinbutton "Rotation": 0°
+    - button "Rotate 90˚ right":
+    - button "Flip horizontal":
+    - button "Flip vertical":
+  - heading "Layout" [level=2]
+  - group "Dimensions":
+    - generic: Dimensions
+    - generic "Width":
+      - generic: W
+      - textbox "Width": "200"
+    - generic "Height":
+      - generic: H
+      - textbox "Height": "125"
+    - checkbox "Lock aspect ratio"
+    - generic: Lock aspect ratio
+  - checkbox "Clip content" [checked]
+  - generic: Clip content
+  - heading "Appearance" [level=2]
+  - checkbox "Hide"
+  - generic: Hide
+  - button "Apply blend mode":
+  - generic "Opacity":
+    - textbox "Opacity": 100%
+  - generic "Corner radius":
+    - textbox "Corner radius": "0"
+  - button "Individual corners" [expanded]:
+  - generic "Top left corner radius":
+    - textbox "Top left corner radius": "0"
+  - generic "Top right corner radius":
+    - textbox "Top right corner radius": "0"
+  - generic "Bottom left corner radius":
+    - textbox "Bottom left corner radius": "0"
+  - generic "Bottom right corner radius":
+    - textbox "Bottom right corner radius": "0"
+  - button "Corner smoothing":
+  - heading "Fill" [level=2]
+  - button "Fill, Apply styles and variables" [expanded]:
+  - button "Add fill":
+  - grid:
+    - 'row "Solid color hex: FFFFFF Color FFFFFF Opacity Toggle visibility Remove"':
+      - 'gridcell "Solid color hex: FFFFFF Color FFFFFF Opacity"':
+        - 'button "Solid color hex: FFFFFF"'
+        - generic: Color
+        - generic: Autofill available. Type to see suggestions.
+        - combobox "Color": FFFFFF
+        - generic "Opacity":
+          - textbox "Opacity": "100"
+          - generic: "%"
+      - gridcell "Toggle visibility":
+        - checkbox "Toggle visibility" [checked]
+        - generic: Toggle visibility
+      - gridcell "Remove":
+        - button "Remove":
+  - button "Stroke":
+    - heading "Stroke" [level=2]
+  - button "Stroke, Apply styles and variables":
+  - button "Add stroke fill":
+  - button "Effects":
+    - heading "Effects" [level=2]
+  - button "Effects, Apply styles":
+  - button "Add effect":
+  - button "Layout guide":
+    - heading "Layout guide" [level=2]
+  - button "Layout guide, Apply styles":
+  - button "Add layout guide":
+  - button "Export":
+    - generic: Export
+  - button "Add export settings":
+  - slider "Resize handle"
+- region "Application toolbar":
+  - toolbar "Editor":
+    - group "Move":
+      - button "Move" [pressed]:
+      - button "Move tools":
+    - group "Frame":
+      - button "Frame":
+      - button "Region tools":
+    - group "Rectangle":
+      - button "Rectangle":
+      - button "Shape tools":
+    - group "Pen":
+      - button "Pen":
+      - button "Creation tools":
+    - group "Text":
+      - button "Text":
+      - button "Type tools":
+    - group "Comment":
+      - button "Comment":
+      - button "Comment tools":
+    - button "Actions":
+    - radiogroup "Toolbelt Mode":
+      - generic: Toolbelt Mode
+      - radio "Draw"
+      - generic: Draw
+      - radio "Design" [checked]
+      - generic: Design
+      - radio "Motion"
+      - generic: Motion
+      - radio "Dev Mode"
+      - generic: Dev Mode
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- dialog "Color picker":
+  - heading "Color picker" [level=2]
+  - tablist:
+    - tab "Custom":
+      - generic: Custom
+      - generic: Custom
+    - tab "Libraries" [selected]:
+      - generic: Libraries
+      - generic: Libraries
+  - button "New style or variable":
+  - tabpanel "Libraries":
+    - textbox "Search"
+    - generic: Variable set
+    - combobox "Variable set":
+      - generic: All libraries
+    - button "Show as list":
+    - generic "Research"
+    - button "Research/Panel white":
+      - img "Research/Panel white":
+    - generic: iOS and iPadOS 26
+    - generic "Accents"
+    - generic "Backgrounds"
+    - generic "Backgrounds (Grouped)"
+    - generic "Fills"
+    - generic "Fills - Vibrant"
+    - generic "Grays"
+    - generic "Labels"
+  - button "Close":
+- dialog "Variable and style creation":
+  - heading "Variable and style creation" [level=2]
+  - tablist:
+    - tab "Style":
+      - generic: Style
+      - generic: Style
+    - tab "Variable" [selected]:
+      - generic: Variable
+      - generic: Variable
+  - tabpanel "Variable":
+    - generic: Name
+    - group "Name":
+      - textbox [active]: Color
+    - generic: Value
+    - group "Value":
+      - 'button "Solid color hex: FFFFFF"'
+      - generic: Autofill available. Type to see suggestions.
+      - combobox: FFFFFF
+      - generic "Opacity":
+        - textbox "Opacity": "100"
+        - generic: "%"
+    - button "Create variable":
+      - generic: Create variable
+  - button "Close":
+- status
+- alert
+- alert
