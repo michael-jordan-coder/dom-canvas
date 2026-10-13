@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from "react";
 import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
+import { ImageControls } from "./ImageControls";
 import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
 import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
@@ -174,6 +175,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   return <>
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
+    {element instanceof HTMLImageElement && <ImageControls image={element} onChange={onChange} />}
 
     <Section preferenceKey="layout" title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />

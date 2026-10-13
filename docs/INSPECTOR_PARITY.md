@@ -170,3 +170,9 @@ Three Node tests pass for full data round-trip, invalid format/dimensions/view r
 Added project JSON clipboard recognition before ordinary HTML parsing. Malformed project text is routed to validation rather than imported as markup. File and clipboard routes share decode/open handling; file picker automation remains unverified.
 
 Browser QA now verifies shared open integration through paste: the actual downloaded file restored all four frames and its saved camera. Undo restored a prior renamed document, Redo restored the loaded document. Malformed JSON showed an error and preserved four frames. A benign sanitizer fixture retained text and CSS while removing script/iframe nodes, onclick, a javascript URL and a script nested in a template. Undo restored the four-frame document. Four project-file Node tests and build passed. History traversal also clears stale import notices.
+
+## Image fitting controls
+
+HTML image selections expose object-fit modes, nine-point object-position, a free CSS position field, alt text and intrinsic dimensions. Load/error listeners refresh source status. Section reset only removes fit/position overrides, and the existing inspector transaction/history system covers edits.
+
+Browser QA on port 5181: imported a 300x100 three-band SVG image in a 180x180 img box. Fill/right computed cover and 100% 50%, retained the 180x180 box and visibly cropped to the orange right band. Fit computed contain; alt editing updated the attribute. Two Undo operations restored cover and the original alt. Reset restored fill/50% 50%; Undo restored cover/right. Screenshot: /tmp/dom-canvas-image-controls.png. Build and diff check passed.
