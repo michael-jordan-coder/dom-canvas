@@ -19,7 +19,7 @@ import { ImportButton } from "@/features/import/ImportButton";
 import { HtmlImportDialog, emptyHtmlDraft } from "@/features/import/HtmlImportDialog";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
-import { useInspectorSectionActions } from "@/features/inspector/InspectorPreferences";
+import { useInspectorSectionActions, useInspectorSectionNavigation } from "@/features/inspector/InspectorPreferences";
 import { ElementCssEditor, type ElementCssDraft } from "@/features/inspector/ElementCssEditor";
 import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
@@ -39,6 +39,7 @@ const sampleDocument = (): Artboard[] => [
 
 export function App() {
   const setInspectorSections = useInspectorSectionActions();
+  const sectionNavigation = useInspectorSectionNavigation();
   const hostsRef = useRef(new Map<string, HTMLDivElement>());
   const doc = useDocument(hostsRef.current, sampleDocument);
   const { artboards } = doc;
@@ -469,6 +470,10 @@ export function App() {
     { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
     ...selectionActions,
     ...inspectorActions,
+    ...sectionNavigation.targets.filter(target => target.key.startsWith(`${inspectorScope}:section:`)).map(target => ({
+      label: `Go to ${target.title}`,
+      run: () => { setUiHidden(false); setInspectorVisible(true); sectionNavigation.reveal?.(target); },
+    })),
     { label: "Edit CSS", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
     { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("design"); } },
     { label: layersVisible ? "Hide layers panel" : "Show layers panel", run: () => { setUiHidden(false); setLayersVisible(value => !value); } },

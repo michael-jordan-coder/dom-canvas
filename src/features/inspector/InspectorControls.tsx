@@ -10,8 +10,8 @@ export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel
 type Commit = (value: string) => boolean | void;
 
 export function Section({ title, preferenceKey, children, defaultOpen = true, onReset, actions, help }: { title: string; preferenceKey?: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode; help?: ReactNode }) {
-  const [open, setOpen] = useInspectorDisclosure(`section:${preferenceKey ?? title}`, defaultOpen);
   const headingId = useId();
+  const [open, setOpen] = useInspectorDisclosure(`section:${preferenceKey ?? title}`, defaultOpen, { title, headingId });
   const helpId = useId();
   const [helpOpen, setHelpOpen] = useState(false);
   return <section className="property-section" aria-labelledby={headingId}>
