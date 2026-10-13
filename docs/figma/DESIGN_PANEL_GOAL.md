@@ -31,9 +31,9 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: empty/populated horizontal frame |
 | Parent-child dependencies | Hug/Fill/Fixed availability, parent effects, child position, min/max, constraints | Enabled/disabled controls, mode badges, contextual menus | Partial: populated parent/child, Fill reflow, min width, Ignore layout |
 | Text | Resize modes, content editing, font family/style/weight/size, line height, spacing, paragraphs, decoration, case, alignment, direction | Font menus, mixed typography, type settings, resizing states | Partial: resizing and Undo |
-| Appearance | Visibility, opacity, blend modes, radii and individual corners | Shared row geometry, toggles, expanded corner controls | Measured basic inputs only |
+| Appearance | Visibility, opacity, blend modes, radii and individual corners | Shared row geometry, toggles, expanded corner controls | Partial: input metrics, individual corners and Mixed/reset |
 | Fills | Solid, gradient/image options exposed by UI, alpha, multiple fills, order, visibility, remove | Swatches, fields, picker layouts, handles, menus, previews | Partial: Solid/Gradient context and committed close; color input measured |
-| Strokes | Width, alignment, sides, joins/caps/dashes where available, multiple strokes | Rows, menus, advanced settings, unavailable states | Open |
+| Strokes | Width, alignment, sides, joins/caps/dashes where available, multiple strokes | Rows, menus, advanced settings, unavailable states | Partial: frame stroke, dashed dependencies, custom-side editor |
 | Effects | Types exposed by UI, parameters, order, visibility, add/remove, preview/cancel | Effect rows, floating editors, icons, overflow behavior | Partial: Drop shadow add/edit/close/hide/remove |
 | Styles/variables | Binding, modes, source indicators, overrides, reset/detach where available | Menus, search, badges, linked/mixed states | Open |
 | Components/instances | Properties, variants, overrides, reset, instance-specific actions | Context header, property editors, unavailable actions | Open |
