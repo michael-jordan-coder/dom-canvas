@@ -113,3 +113,7 @@ Glass/Fill change; effect blend mode; Noise colors; exact X/Y coupling; numeric
 bounds and sliders via keyboard/drag; light-direction control; meaningful backdrop
 and clipping rendering comparisons; multiple effects/order; Mixed selections;
 preview cancellation; hover/focus/disabled states; Shader and Inner shadow.
+
+Follow-up: [Glass history](glass-history.md) verifies fresh-add Frost4, combined
+add/Fill Undo/Redo, preservation of Fill30%, two slider key steps and selected
+numeric bounds. Conversion history and other alpha contexts remain open.
