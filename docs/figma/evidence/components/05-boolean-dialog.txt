@@ -1,0 +1,216 @@
+- application [active]
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region:
+  - toolbar:
+    - button:
+    - separator
+    - button [expanded]:
+    - button:
+    - button:
+    - button:
+    - separator
+    - button:
+  - button: Untitled
+  - generic: File name
+  - button:
+  - button:
+  - link:
+    - /url: https://www.figma.com/files/team/1669091168837591051/project/649249618
+    - text: community
+  - heading [level=2]:
+    - button [expanded]:
+      - generic: Pages
+    - button:
+    - button:
+  - grid:
+    - row:
+      - gridcell:
+        - button:
+          - generic: Page 1
+    - row:
+      - gridcell:
+        - button:
+          - generic: Page 2
+  - slider
+  - heading [level=2]:
+    - button [expanded]:
+      - generic: Layers
+    - button:
+  - treegrid:
+    - row [selected]:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 2
+    - row:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 1
+    - row:
+      - gridcell:
+      - gridcell:
+        - generic: A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.
+    - row [expanded]:
+      - button:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 3
+    - row [level=1]:
+      - gridcell:
+      - gridcell:
+        - generic: Text tool comparison
+  - slider
+- button:
+- button:
+- button:
+- button: Share
+- tablist:
+  - tab [selected]:
+    - generic: Design
+    - generic: Design
+  - tab:
+    - generic: Prototype
+    - generic: Prototype
+- button:
+  - text: 125%
+- textbox: Frame 2
+- heading [level=1]: Frame 2
+- button:
+- button:
+- button:
+- generic: Properties
+- button [expanded]:
+- heading [level=2]: Position
+- generic: Alignment
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- generic: Position
+- generic: X
+- spinbutton: "126"
+- generic: "Y"
+- spinbutton: "-19"
+- generic: Rotation
+- spinbutton: 0°
+- button:
+- button:
+- button:
+- heading [level=2]: Layout
+- button:
+- checkbox
+- generic: Toggle auto layout
+- generic: Flow
+- radiogroup:
+  - generic: Layout
+  - radio [checked]
+  - generic: Freeform
+  - radio
+  - generic: Vertical
+  - radio
+  - generic: Horizontal
+  - radio
+  - generic: Grid
+- generic: Dimensions
+- generic: W
+- textbox: "200"
+- generic: H
+- textbox: "125"
+- checkbox
+- generic: Lock aspect ratio
+- checkbox [checked]
+- generic: Clip content
+- heading [level=2]: Appearance
+- checkbox
+- generic: Hide
+- button:
+- textbox: 100%
+- textbox: "0"
+- button [expanded]:
+- textbox: "0"
+- textbox: "0"
+- textbox: "0"
+- textbox: "0"
+- button:
+- heading [level=2]: Fill
+- button:
+- button:
+- grid:
+  - row:
+    - gridcell:
+      - button
+      - generic: Color
+      - generic: Autofill available. Type to see suggestions.
+      - combobox: FFFFFF
+      - textbox: "100"
+      - generic: "%"
+    - gridcell:
+      - checkbox [checked]
+      - generic: Toggle visibility
+    - gridcell:
+      - button:
+- button:
+  - heading [level=2]: Stroke
+- button:
+- button:
+- button:
+  - heading [level=2]: Effects
+- button:
+- button:
+- button:
+  - heading [level=2]: Layout guide
+- button:
+- button:
+- button:
+  - generic: Export
+- button:
+- slider
+- region "Application toolbar":
+  - toolbar "Editor":
+    - group "Move":
+      - button "Move" [pressed]:
+      - button "Move tools":
+    - group "Frame":
+      - button "Frame":
+      - button "Region tools":
+    - group "Rectangle":
+      - button "Rectangle":
+      - button "Shape tools":
+    - group "Pen":
+      - button "Pen":
+      - button "Creation tools":
+    - group "Text":
+      - button "Text":
+      - button "Type tools":
+    - group "Comment":
+      - button "Comment":
+      - button "Comment tools":
+    - button "Actions":
+    - radiogroup "Toolbelt Mode":
+      - generic: Toolbelt Mode
+      - radio "Draw"
+      - generic: Draw
+      - radio "Design" [checked]
+      - generic: Design
+      - radio "Motion"
+      - generic: Motion
+      - radio "Dev Mode"
+      - generic: Dev Mode
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- dialog "Create property":
+  - heading "Create property" [level=2]
+  - generic: Name
+  - textbox "Name": Boolean
+  - generic: Value
+  - checkbox "True" [checked]
+  - generic: "True"
+  - button "Create property":
+    - generic: Create property
+  - button "Close":
+- status
+- alert
+- alert

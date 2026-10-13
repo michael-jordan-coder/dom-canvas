@@ -44,3 +44,7 @@ Selecting the enclosing Layers `row` produced no change; clicking its named
 Latest continuation: Frame 3 is now 80 Fixed × 50 Hug. Child 8:3 is
 100 Fill (min width 100) × 30 Hug, Auto height, relative -10/10. This supersedes
 the 240-wide state above; see PC04–PC05 in the parent-child topic.
+
+Component research update: live Frame2 baseline was200 ×125 (not the older150
+width). It was converted to a main component without a width edit and retained
+for instance research. Its configuration dialog is open. See topics/components.md.

@@ -25,6 +25,7 @@
   editor and Mixed corner values within one object.
 - [Typography](topics/typography.md): contextual Type settings and font/line-height
   propagation into child and parent geometry.
+- [Components](topics/components.md): main-component context and property/configuration entry points.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
