@@ -121,3 +121,8 @@ height30 Hug/Auto height, X-10/Y10. See topics/size-limits.md.
 Font-controls pass: child8:3 tested withRoboto/Bold and20%,100%,2px tracking;
 restoredInter Regular12, line heightAuto, spacing0%,100 Fill/min100 ×30 Hug.
 Frame3 restored80 ×50, selected and zoomed to selection. See topics/font-controls.md.
+
+Layout-details pass: Frame3 clipping/padding/stroke tests restored.80 Fixed ×50
+Hug, all padding10, gap10, centered, Clip off, no Stroke. Advanced Inside stroke
+returned toIncluded, dialog closed, padding collapsed; Frame3 selected, zoom155%.
+See topics/layout-details.md; final pair-label repeat did not confirm any value edit.
