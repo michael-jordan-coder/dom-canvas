@@ -17,6 +17,7 @@ import { projectFilename, decodeProject, encodeProject, inertProjectHtml, isProj
 import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
+import { useInspectorSectionActions } from "@/features/inspector/InspectorPreferences";
 import { ElementCssEditor, type ElementCssDraft } from "@/features/inspector/ElementCssEditor";
 import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
@@ -35,6 +36,7 @@ const sampleDocument = (): Artboard[] => [
 ];
 
 export function App() {
+  const setInspectorSections = useInspectorSectionActions();
   const hostsRef = useRef(new Map<string, HTMLDivElement>());
   const doc = useDocument(hostsRef.current, sampleDocument);
   const { artboards } = doc;
@@ -424,6 +426,11 @@ export function App() {
   const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
   const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
+  const inspectorScope = selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
+  const inspectorActions: SelectionAction[] = [
+    { label: "Collapse Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
+    { label: "Expand Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, true) },
+  ];
 
   const selectionActions: SelectionAction[] = selection.kind === "none" ? [] : [
     { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
@@ -445,6 +452,7 @@ export function App() {
     { label: "Undo", shortcut: "⌘/Ctrl Z", disabled: !doc.canUndo, run: () => travel("undo") },
     { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
     ...selectionActions,
+    ...inspectorActions,
     { label: "Edit CSS", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
     { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorTab("design"); } },
     { label: "Fit all frames", shortcut: "⇧ 1", disabled: !artboards.length, run: zoomToFit },
@@ -538,7 +546,7 @@ export function App() {
         <button title="Fit selection (Shift+2)" disabled={selection.kind === "none"} onClick={zoomToSelection}>Fit selection</button>
       </div>
       {notice && <div className="toast" role="status">{notice}</div>}
-      {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={selectionActions} />}
+      {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[...selectionActions, ...inspectorActions]} />}
       {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}
       <Toolbar tool={tool} onToolChange={setTool}>
         <button className="tool" aria-label="Find an action" title="Find an action (⌘/Ctrl+K)" onClick={() => setActionSearchOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg></button>
