@@ -38,6 +38,7 @@
 - [Groups and sections](topics/groups-sections.md): contextual controls, child edits, coordinates and Resize to fit.
 - [Shapes and vector editing](topics/shapes-vector.md): contextual geometry fields, point selection and disabled corners.
 - [Mixed types](topics/mixed-types.md): supported subsets, Mixed inputs and selection-aware Undo/Redo.
+- [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.

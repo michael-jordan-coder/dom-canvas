@@ -108,3 +108,8 @@ Mixed-types pass: five Section1 children (Star, Polygon, Ellipse, Vector path,
 Frame5) selected. Count/Ratio and Clip tests undone with per-target restoration:
 Star7/50%, Polygon6, Frame5 clip checked. Other fixture geometry and paints unchanged.
 See topics/mixed-types.md for verified selection changes within Undo history.
+
+Mixed-paint pass: five-object Fill replacement and color edits fully undone;
+Frame5 white and four shapesD9D9D9 individually verified. Star second-fill test
+removed; Star has one visibleD9D9D9 Fill100%, object opacity100%, Count7/Ratio50%.
+Star selected. See topics/mixed-paint.md.
