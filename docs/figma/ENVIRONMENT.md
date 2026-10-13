@@ -152,3 +152,7 @@ Text-case pass: child8:3 selected,215% zoom, As typed/None/left-top restored,
 100 Fill/min100 ×30 Hug, Inter Regular12/Auto/0%, white Fill. Underline Solid/Auto
 thickness/offset verified on re-enable; final latent Skip ink across None remains
 inconclusive. No visible decoration. See topics/text-case.md.
+
+Text-trim pass: child8:3 Standard trim/No truncation restored,100 ×30 Hug; Frame3
+80 ×50 Hug verified, original padding/gap10, center, clip off, no Fill/Stroke.
+Parent selected,215% zoom, editor closed. See topics/text-trim.md.
