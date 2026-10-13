@@ -70,3 +70,25 @@ Evidence: [new variant](../evidence/components/07-add-variant.txt),
 Latest retained state: Frame2 is a component set15:57 containing Default and
 Variant2. Property-name inline editor is active, unchanged. Instances, swapping,
 renaming, override propagation, multi-edit variants and history remain untested.
+
+
+## CO04 — Instance insertion route, still unverified
+
+Right-click Default in Layers: captured context menu includes Copy but no direct
+Create instance entry. Copy followed by paste from the Move button did not produce
+an instance panel in the observed result; creation is not established.
+
+Assets → Created in this file exposes one local component card, Frame2, explicitly
+marked Includes2 variants. Its UI instructs Enter/Space to insert and Cmd+Enter to
+view details. Role-based press and double-click on the card timed out; clicking
+its text did not reveal instance controls. The live tab remained present and DOM
+snapshots remained readable. This is a control-path limitation, not a Figma product
+rule or a missing-account entitlement. Do not retry blind pastes or count an
+instance as created. Next attempt should inspect the rendered card with native
+Computer Use and verify insertion through the instance header/node.
+
+Evidence: [context menu](../evidence/components/11-main-context-menu.txt),
+[paste result](../evidence/components/12-copy-paste-result.txt),
+[Assets](../evidence/components/13-assets.txt),
+[current card state](../evidence/components/14-instance-attempt-current.txt),
+[text-click result](../evidence/components/15-asset-details.txt).
