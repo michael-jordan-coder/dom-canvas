@@ -208,3 +208,8 @@ Text-property pass: Variant2 child24:128 Panel label at20/30,62×15 Auto width,
 black InterRegular12 bound Research label. DefaultPanel label; instance15:62
 overrideUpdated label,BooleanTrue,blueFill/1xPNG. Instance selected69%,menusclosed.
 Browser reconnected to Chrome4, same tab858575047. See topics/text-property.md.
+
+Text-reset pass: Research label instance override cleared via named reset;
+Undo/Redo verified. Source two-line default followed by instance, then restored
+Panel label. Instance15:62 selected69%,BooleanTrue/blueFill/1xPNG unchanged.
+Source child24:128 measured67×30 with multiline; restored single-line content.

@@ -1,0 +1,12 @@
+{
+  "bg": "rgb(245, 245, 245)",
+  "border": "1px solid rgb(245, 245, 245)",
+  "borderRadius": "5px",
+  "fontSize": "11px",
+  "fontWeight": "450",
+  "height": 40,
+  "lineHeight": "16px",
+  "padding": "3px 7px",
+  "tag": "TEXTAREA",
+  "width": 136
+}

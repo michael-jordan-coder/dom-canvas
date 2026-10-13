@@ -90,3 +90,5 @@ bundles into evidence. Keep only the UI measurements and disposable fixture resu
 [Boolean default propagation and targeted reset](topics/boolean-default.md).
 
 [Text property creation, binding and instance edit](topics/text-property.md).
+
+[Text property reset, history and multiline inheritance](topics/text-reset.md).
