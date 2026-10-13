@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent, type KeyboardEvent } from "react";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { isLayerHidden } from "./visibility";
+import { lockedAncestor } from "./locking";
 import { ChevronIcon, FrameIcon, ImageIcon, RectIcon, TextIcon, VectorIcon } from "@/design-system/icons";
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
   onRenameArtboard: (id: string, name: string) => void;
   onRenameElement: (element: Element, name: string) => void;
   onToggleVisibility: (element: Element) => void;
+  onToggleLock: (element: Element) => void;
   version: number;
 };
 
@@ -121,6 +123,7 @@ export function Layers(props: Props) {
   const renderNode = (el: Element, depth: number, artboardId: string, within: boolean) => {
     const isSelected = el === selectedEl;
     const hidden = isLayerHidden(el);
+    const lockOwner = lockedAncestor(el);
     const children = Array.from(el.children).filter(child => !needle || visible.has(child));
     const open = needle ? !searchCollapsed.has(el) : expanded.has(el);
     const Icon = layerIcon(el);
@@ -155,6 +158,9 @@ export function Layers(props: Props) {
           ) : (
             <span className="name">{layerName(el)}</span>
           )}
+          <button className={`layer-lock${lockOwner ? " active" : ""}`} aria-label={lockOwner ? `Unlock ${layerName(lockOwner)}` : `Lock ${layerName(el)}`} title={lockOwner && lockOwner !== el ? "Unlock parent layer" : lockOwner ? "Unlock layer" : "Lock layer on canvas"} onClick={(e) => { e.stopPropagation(); props.onToggleLock(el); }} onDoubleClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"/><path d={lockOwner ? "M5 7V5a3 3 0 0 1 6 0v2" : "M5 7V5a3 3 0 0 1 6 0"}/><path d="M8 10v2"/></svg>
+          </button>
           <button className="layer-visibility" aria-label={`${hidden ? "Show" : "Hide"} ${layerName(el)}`} title={hidden ? "Show layer" : "Hide layer"} onClick={(e) => { e.stopPropagation(); props.onToggleVisibility(el); }} onDoubleClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M1.5 8s2-4 6.5-4 6.5 4 6.5 4-2 4-6.5 4-6.5-4-6.5-4Z"/><circle cx="8" cy="8" r="2"/>{hidden && <path d="m2 2 12 12"/>}</svg>
           </button>

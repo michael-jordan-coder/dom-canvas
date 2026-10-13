@@ -20,6 +20,7 @@ import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
 import { SelectionMenu, type MenuAnchor } from "@/features/layers/SelectionMenu";
 import { isLayerHidden, toggleLayerVisibility } from "@/features/layers/visibility";
+import { lockedAncestor, toggleLayerLock } from "@/features/layers/locking";
 
 const newId = () => `ab-${crypto.randomUUID().slice(0, 8)}`;
 
@@ -280,6 +281,7 @@ export function App() {
   }, [viewport, bump]);
 
   const deleteSelection = useCallback(() => {
+    if (selection.kind === "element" && lockedAncestor(selection.element)) return;
     if (selection.kind === "artboard") {
       commit((list) => list.filter((ab) => ab.id !== selection.artboardId));
       setSelection({ kind: "none" });
@@ -311,6 +313,7 @@ export function App() {
   const siblingIndex = selection.kind === "element" ? siblingElements.indexOf(selection.element) : -1;
   const reorderSelection = (destination: "earlier" | "later" | "first" | "last") => {
     if (selection.kind !== "element") return;
+    if (lockedAncestor(selection.element)) return;
     const el = selection.element;
     const index = destination === "first" ? 0 : destination === "last" ? siblingElements.length - 1 : siblingIndex + (destination === "earlier" ? -1 : 1);
     const target = siblingElements[index];
@@ -331,6 +334,7 @@ export function App() {
   }, []);
   const nudge = useCallback((dx: number, dy: number, repeat: boolean, key: string) => {
     if (selection.kind === "none") return;
+    if (selection.kind === "element" && lockedAncestor(selection.element)) return;
     const target = selection.kind === "element" ? selection.element : selection.artboardId;
     if (!repeat || nudgeGroup.current?.key !== key || nudgeGroup.current.target !== target) nudgeGroup.current = { key, target, token: Symbol("keyboard nudge") };
     const group = nudgeGroup.current.token;
@@ -450,6 +454,7 @@ export function App() {
           onRenameArtboard={(id, name) => commitArtboard(id, { name })}
           onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}
           onToggleVisibility={(el) => { toggleLayerVisibility(el); setLayerHover(null); commit(); }}
+          onToggleLock={(el) => { toggleLayerLock(el); setLayerHover(null); commit(); }}
           version={version}
         />
       </aside>
@@ -496,15 +501,16 @@ export function App() {
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
         { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
         ...(selection.kind === "element" ? [
+          { label: lockedAncestor(selection.element) ? lockedAncestor(selection.element) === selection.element ? "Unlock layer" : "Unlock parent layer" : "Lock layer", run: () => { toggleLayerLock(selection.element); setLayerHover(null); commit(); } },
           { label: isLayerHidden(selection.element) ? "Show layer" : "Hide layer", run: () => { toggleLayerVisibility(selection.element); setLayerHover(null); commit(); }, separator: true },
-          { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: siblingIndex <= 0, separator: true },
-          { label: "Move later", run: () => reorderSelection("later"), disabled: siblingIndex >= siblingElements.length - 1 },
-          { label: "Move to first", run: () => reorderSelection("first"), disabled: siblingIndex <= 0 },
-          { label: "Move to last", run: () => reorderSelection("last"), disabled: siblingIndex >= siblingElements.length - 1 },
+          { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0, separator: true },
+          { label: "Move later", run: () => reorderSelection("later"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
+          { label: "Move to first", run: () => reorderSelection("first"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0 },
+          { label: "Move to last", run: () => reorderSelection("last"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
         ] : []),
         { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection, separator: true },
         ...(selection.kind === "element" ? [{ label: "Select parent", shortcut: "Esc", run: selectParent }] : []),
-        { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true },
+        { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true, disabled: selection.kind === "element" && !!lockedAncestor(selection.element) },
       ]} />}
       <Toolbar tool={tool} onToolChange={setTool}>
         <ImportButton busy={importing} error={importError} onImport={importSite} />

@@ -1,6 +1,7 @@
 import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
 import { inspectorStyleValue } from "./styleValue";
+import { lockedAncestor } from "@/features/layers/locking";
 import { rotationField, rotationInput } from "@/features/canvas/rotation";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
@@ -204,6 +205,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
 
   return <>
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
+    {lockedAncestor(element) && <p className="inspector-footnote">Locked on canvas. Properties remain editable here.</p>}
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
     {element instanceof HTMLImageElement && <ImageControls image={element} onChange={onChange} />}
 

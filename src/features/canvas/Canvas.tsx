@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
+import { lockedAncestor } from "@/features/layers/locking";
 import { affineBorderBox, inverseLinearDelta, getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
 import { elementRectInCanvas, normalizeRect, zoomAround, type Bounds, type Point, type Rect } from "./geometry";
 import type { Artboard, Camera, Selection, Tool } from "./types";
@@ -39,6 +40,7 @@ type Drag =
 
 type Hit =
   | { kind: "empty" }
+  | { kind: "locked"; id: string }
   | { kind: "label"; id: string }
   | { kind: "artboard"; id: string }
   | { kind: "element"; id: string; element: Element };
@@ -134,6 +136,7 @@ export function Canvas(props: Props) {
       if (node.dataset.artboard) {
         const target = path[0];
         if (target === node || !(target instanceof Element)) return { kind: "artboard", id: node.dataset.artboard };
+        if (lockedAncestor(target)) return { kind: "locked", id: node.dataset.artboard };
         return { kind: "element", id: node.dataset.artboard, element: target };
       }
     }
@@ -242,6 +245,7 @@ export function Canvas(props: Props) {
       return;
     }
 
+    if (hit.kind === "locked") { e.preventDefault(); return; }
     if (hit.kind === "empty") {
       dragRef.current = { kind: "pan", startX: e.clientX, startY: e.clientY, camera };
       setPanning(true);
@@ -277,6 +281,7 @@ export function Canvas(props: Props) {
 
   const startResize = (handle: Handle) => (e: ReactPointerEvent) => {
     e.stopPropagation();
+    if (selection.kind === "element" && lockedAncestor(selection.element)) return;
     if (e.button !== 0 || dragRef.current) return;
     canvasRef.current!.focus();
     canvasRef.current!.setPointerCapture(e.pointerId);
@@ -457,7 +462,7 @@ export function Canvas(props: Props) {
   const { selected: selectedRect, hover: hoverRect } = rects;
 
   const selectedArtboardId = selection.kind === "artboard" ? selection.artboardId : null;
-  const canResize = !editing && (selection.kind === "artboard" || (selection.kind === "element" && isResizable(selection.element)));
+  const canResize = !editing && (selection.kind === "artboard" || (selection.kind === "element" && !lockedAncestor(selection.element) && isResizable(selection.element)));
   const toolCursor = handMode ? " hand" : tool === "text" ? " text-tool" : tool === "frame" || tool === "rect" ? " draw-tool" : "";
 
   return (

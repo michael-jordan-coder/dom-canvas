@@ -244,3 +244,9 @@ Added compact row eye buttons and Hide/Show layer menu actions. Hiding uses disp
 Canvas selection/hover measurement now suppresses outlines for elements with no layout boxes, including observer refreshes. Hidden HTML layers show CSS dimensions and a position explanation instead of misleading zero-size coordinates; ratio locking that needs measurement is disabled.
 
 Browser QA on port5181: flex!important hid with no client rectangles and showed with the original priority. Undo restored hidden then visible states. An imported display:none paragraph showed through the selection menu and Undo restored it. After reload, the hidden flex layer still restored correctly. Final hidden selection had no outline or X field. Screenshot: /tmp/dom-canvas-layer-visibility.png. Build and diff check passed.
+
+## Element canvas locks
+
+Added row lock toggles and selection-menu actions, persisted through data-canvas-locked and document history. Locks include descendant elements. Canvas hit handling ignores locked branches, resize handles are absent, and nudge/delete/reorder actions are guarded. Layer-list selection and explicit inspector edits remain available; the inspector explains this boundary. Child unlock actions identify the parent lock. Frames are not independently lockable, and an unlocked ancestor can still move/remove its whole subtree.
+
+Browser QA on port5181: locked heading ignored ArrowRight/Delete and had zero resize handles. Double-clicking its strong child kept the frame selected and did not enter editing. Delete menu action was disabled. Unlock enabled a1px nudge; two Undo actions restored the original locked/unmoved state. Child selection exposed Unlock parent layer and zero handles. Reload preserved the lock; a native drag left translate empty. Screenshot: /tmp/dom-canvas-layer-lock.png. Build and diff check passed.
