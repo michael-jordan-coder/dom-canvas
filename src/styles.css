@@ -924,3 +924,5 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .editor-guidance { color: var(--text-secondary); font-size: 11px; }
 .editor-guidance summary { cursor: pointer; min-height: 24px; line-height: 24px; }
 .editor-guidance .editor-help { font-size: 11px; margin-top: 6px; }
+
+.layout-details .disclosure-value { margin-left: auto; color: var(--text-secondary); text-transform: capitalize; font-variant-numeric: tabular-nums; }

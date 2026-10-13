@@ -284,3 +284,10 @@ Browser QA on5181: measured panel241px, sizing row217x24, width/height fields91.
 Fixed an observed boundary mismatch: ArrowUp at100% displayed101 while computed opacity remained1. Field setters can now return their accepted text; commit, suggestions, arrow steps and pointer scrubbing use it. HTML and SVG opacity setters return clamped0–100 values, including unchanged endpoints. SVG opacity fields now accept strict percentage input through the shared numeric parser. Hex color edits preserve an existing alpha of0 instead of treating it as absent.
 
 Browser QA on5181: HTML ArrowUp at100 stayed100; typing-20 and ArrowDown stayed0;100+20 normalized to100. Scrubbing toward the upper limit kept100; reversing reduced the value and Undo restored100. Changing purple at0 alpha to orange retained rgba(255,102,0,0); successive Undo restored transparent purple then opaque purple. SVG fill paint opacity accepted50%, rejected wrong without changing0.5, and Undo restored1. Build and diff check passed. Screenshot: /tmp/dom-canvas-opacity-values.png.
+
+
+## Position-first inspector hierarchy
+
+Compared the local canvas reference NodeProperties: Position precedes Layout with coordinates and rotation first. Reordered HTML controls accordingly and moved frame X/Y ahead of frame sizing. HTML position is open by default while preserving any explicit saved collapse preference. Coordinates, rotation and stacking remain directly available; flow mode, insets and transform origin sit in remembered CSS positioning disclosure, with a compact current-mode summary. This changes presentation, not the existing DOM transform/flow semantics.
+
+Browser QA on5181: X40->50 and Undo40; advanced left inset40->60 updated computed left60px, Undo restored40. Switching to the frame exposed section order Position, Frame, Fill. Returning to the element retained the open advanced disclosure; after closing it, Tab from Z index focused its summary. The final compact view shows Position, Layout, Appearance and Fill without scrolling. Build and diff check passed. Screenshot: /tmp/dom-canvas-position-first.png.

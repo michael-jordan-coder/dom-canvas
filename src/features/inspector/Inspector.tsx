@@ -71,15 +71,16 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
     const measuredHeight = frameHost?.offsetHeight ?? 100;
     return <>
       <div className="selection-summary"><strong>{ab.name}</strong><span className="node-badge frame-badge">Frame</span></div>
+      <Section title="Position">
+        <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
+      </Section>
       <Section title="Frame">
         <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
         <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
         <div className="sizing-row"><Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row><button className="inspector-icon" title="Lock frame aspect ratio" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}><InspectorIcon name="ratio" /></button></div>
       </Section>
       <FrameClipping artboard={ab} onUpdate={update} />
-      <Section title="Position">
-        <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
-      </Section>
+
       <FrameFill artboard={ab} onUpdate={update} />
       <div className="inspector-footnote">Frame size controls the canvas bounds. Select an element inside to edit its layout and appearance.</div>
     </>;
@@ -142,6 +143,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const [showConstraints, setShowConstraints] = useInspectorDisclosure("constraints", false);
   const [layoutOptions, setLayoutOptions] = useInspectorDisclosure("layout-options", false);
   const [typeOptions, setTypeOptions] = useInspectorDisclosure("type-options", false);
+  const [positionOptions, setPositionOptions] = useInspectorDisclosure("position-options", false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = containsHtmlText(element);
@@ -222,6 +224,23 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     {lockedAncestor(element) && <p className="inspector-footnote">Locked on canvas. Properties remain editable here.</p>}
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
+    <Section title="Position" help={<>
+      <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
+      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
+    </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
+      {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
+      <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
+      <details className="layout-details" open={positionOptions} onToggle={e => setPositionOptions(e.currentTarget.open)}>
+        <summary><span>CSS positioning</span><span className="disclosure-value">{read("position") === "static" ? "Flow" : read("position")}</span></summary>
+        <div className="layout-details-body">
+      <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
+      {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
+      <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
+      {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}
+        </div>
+      </details>
+    </Section>
+
     {element instanceof HTMLImageElement && <ImageControls image={element} onChange={onChange} />}
 
     <Section preferenceKey="layout" title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
@@ -345,18 +364,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <ColorField label="Stroke color" value={computed.borderTopColor} onCommit={(v) => set("border-color", v)} onReset={resetProperty("border-color")} />
     </Section>
 
-    <Section title="Position" defaultOpen={false} help={<>
-      <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
-      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
-    </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
-      <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
-      {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
-      <div className="property-subheading"><span>Visual position in frame</span></div>
-      {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
-      <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
-      <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
-      {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}
-    </Section>
+
 
     <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "overflow"])}>
       <ShadowEditor value={read("box-shadow")} computedValue={computed.boxShadow} onCommit={(v) => set("box-shadow", v)} />
