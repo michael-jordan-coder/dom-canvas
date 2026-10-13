@@ -24,7 +24,7 @@ export function Row({ single, children }: { single?: boolean; children: ReactNod
 }
 
 export function Field({ value, label, prefix, suffix, onCommit, onReset, trailing, suggestions }: {
-  value: string; label: string; prefix?: string; suffix?: string; onCommit: Commit; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
+  value: string; label: string; prefix?: ReactNode; suffix?: string; onCommit: Commit; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
 }) {
   const listId = useId();
   const edits = useContext(InspectorEdits);
@@ -138,8 +138,8 @@ export function SelectField({ label, value, options, onCommit }: { label: string
   return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
 }
 
-export function Segmented({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }) {
-  return <div className="segmented" role="group" aria-label={label}>{options.map((option) => <button key={option.value} title={`${label}: ${option.label}`} aria-label={`${label}: ${option.label}`} aria-pressed={value === option.value} onClick={() => onChange(option.value)}>{option.label}</button>)}</div>;
+export function Segmented({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string; icon?: ReactNode }[]; onChange: (value: string) => void }) {
+  return <div className="segmented" role="group" aria-label={label}>{options.map((option) => <button key={option.value} title={`${label}: ${option.label}`} aria-label={`${label}: ${option.label}`} aria-pressed={value === option.value} onClick={() => onChange(option.value)}>{option.icon ?? option.label}</button>)}</div>;
 }
 
 export function TextArea({ value, onCommit }: { value: string; onCommit: Commit }) {

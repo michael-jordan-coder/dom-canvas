@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { InspectorIcon } from "./InspectorIcon";
+import { useRef, useState, type ReactNode } from "react";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
 import { GradientEditor } from "./GradientEditor";
@@ -64,8 +65,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
       <Section title="Frame">
         <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
         <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
-        <div className="property-subheading"><span>Resizing</span><button className="small-toggle" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}>{ab.aspectRatio ? "Ratio locked" : "Lock ratio"}</button></div>
-        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} suffix="px" onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row>
+        <div className="sizing-row"><Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row><button className="inspector-icon" title="Lock frame aspect ratio" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}><InspectorIcon name="ratio" /></button></div>
       </Section>
       <Section title="Position">
         <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => update({ x: number(v, ab.x) })} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => update({ y: number(v, ab.y) })} /></Row>
@@ -107,7 +107,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   };
   const resetGroup = (props: string[]) => props.some((prop) => styled.style.getPropertyValue(prop)) ? () => reset(props) : undefined;
   const resetProperty = (prop: string) => resetGroup([prop]);
-  const property = (label: string, prop: string, prefix?: string, length = true) => <Field label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={resetProperty(prop)} />;
+  const property = (label: string, prop: string, prefix?: ReactNode, length = true) => <Field label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={resetProperty(prop)} />;
   const geometry = frameGeometry(element);
   const moveTo = (x: number, y: number) => {
     const current = getTranslate(styled);
@@ -145,9 +145,19 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         <option value="css">CSS</option><option value="fixed">Fixed</option><option value="hug">Hug</option><option value="fill">Fill</option>{mode === "custom" && <option value="custom">Custom</option>}
       </select>} />;
   };
+  const paddingPair = (axis: "horizontal" | "vertical") => {
+    const sides = axis === "horizontal" ? ["padding-left", "padding-right"] : ["padding-top", "padding-bottom"];
+    const values = sides.map(read);
+    return <Field label={`${axis === "horizontal" ? "Horizontal" : "Vertical"} padding`} prefix={<InspectorIcon name={axis} />} value={values[0] === values[1] ? trimNumber(values[0]) : "Mixed"} onReset={resetGroup(sides)} onCommit={(value) => {
+      const next = withPx(value);
+      if (!sides.every((side) => CSS.supports(side, next))) return false;
+      sides.forEach((side) => styled.style.setProperty(side, next));
+      onChange(); return true;
+    }} />;
+  };
   const paddingControls = <>
-    <div className="property-subheading"><span>Padding</span><button className="small-toggle" aria-label="Individual padding" aria-pressed={individualPadding} onClick={() => setIndividualPadding(!individualPadding)}>{individualPadding ? "All sides" : "Individual sides"}</button></div>
-    {individualPadding ? <><Row>{property("Padding top", "padding-top", "T")}{property("Padding right", "padding-right", "R")}</Row><Row>{property("Padding bottom", "padding-bottom", "B")}{property("Padding left", "padding-left", "L")}</Row></> : property("Padding", "padding", "All")}
+    <div className="property-subheading"><span>Padding</span><button className="inspector-icon" title="Individual padding" aria-label="Individual padding" aria-pressed={individualPadding} onClick={() => setIndividualPadding(!individualPadding)}><InspectorIcon name="padding" /></button></div>
+    {individualPadding ? <><Row>{property("Padding top", "padding-top", "T")}{property("Padding right", "padding-right", "R")}</Row><Row>{property("Padding bottom", "padding-bottom", "B")}{property("Padding left", "padding-left", "L")}</Row></> : <Row>{paddingPair("horizontal")}{paddingPair("vertical")}</Row>}
   </>;
   const overrides = styled.style.length;
 
@@ -212,15 +222,14 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     {hasText && <Section title="Typography" onReset={resetGroup(typographyProps)}>
       <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
       <Row><SelectField label="Weight" value={read("font-weight")} options={[{ value: "100", label: "Thin" }, { value: "200", label: "Extra light" }, { value: "300", label: "Light" }, { value: "400", label: "Regular" }, { value: "500", label: "Medium" }, { value: "600", label: "Semibold" }, { value: "700", label: "Bold" }, { value: "800", label: "Extra bold" }, { value: "900", label: "Black" }]} onCommit={(v) => set("font-weight", v)} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
-      <Row>{property("Line height", "line-height", "Line", false)}{property("Letter spacing", "letter-spacing", "Track")}</Row>
-      <Segmented label="Text alignment" value={read("text-align")} options={[{ value: "start", label: "Start" }, { value: "center", label: "Center" }, { value: "end", label: "End" }]} onChange={(v) => set("text-align", v)} />
+      <Row>{property("Line height", "line-height", <InspectorIcon name="lineHeight" />, false)}{property("Letter spacing", "letter-spacing", <InspectorIcon name="tracking" />)}</Row>
+      <Segmented label="Text alignment" value={read("text-align") === "left" ? (computed.direction === "rtl" ? "end" : "start") : read("text-align") === "right" ? (computed.direction === "rtl" ? "start" : "end") : read("text-align")} options={[{ value: "start", label: "Start", icon: <InspectorIcon name={computed.direction === "rtl" ? "end" : "start"} /> }, { value: "center", label: "Center", icon: <InspectorIcon name="center" /> }, { value: "end", label: "End", icon: <InspectorIcon name={computed.direction === "rtl" ? "start" : "end"} /> }, { value: "justify", label: "Justify", icon: <InspectorIcon name="justify" /> }]} onChange={(v) => set("text-align", v)} />
       <ColorField label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
       {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
     </Section>}
 
-    <Section title="Appearance" onReset={resetGroup(["opacity", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"])}>
-      <Row><Field label="Opacity" prefix="Opacity" suffix="%" value={String(Math.round(parseFloat(read("opacity") || "1") * 100))} onCommit={(v) => set("opacity", String(Math.min(100, Math.max(0, number(v, 100))) / 100))} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", "Radius")}</Row>
-      <div className="property-subheading"><span>Corners</span><button className="small-toggle" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}>Individual corners</button></div>
+    <Section title="Appearance" actions={<button className="inspector-icon" title="Individual corners" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}><InspectorIcon name="corners" /></button>} onReset={resetGroup(["opacity", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"])}>
+      <Row><Field label="Opacity" prefix={<InspectorIcon name="opacity" />} suffix="%" value={String(Math.round(parseFloat(read("opacity") || "1") * 100))} onCommit={(v) => set("opacity", String(Math.min(100, Math.max(0, number(v, 100))) / 100))} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", <InspectorIcon name="radius" />)}</Row>
       {individualCorners && <><Row>{property("Top left radius", "border-top-left-radius", "TL")}{property("Top right radius", "border-top-right-radius", "TR")}</Row><Row>{property("Bottom left radius", "border-bottom-left-radius", "BL")}{property("Bottom right radius", "border-bottom-right-radius", "BR")}</Row></>}
     </Section>
 

@@ -836,3 +836,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .property-shell .reset-value { position: absolute; right: 0; top: -10px; width: 16px; height: 16px; background: var(--panel); opacity: 0; pointer-events: none; }
 .property-shell:hover .reset-value, .property-shell:focus-within .reset-value { opacity: 1; pointer-events: auto; }
 .inspector-footnote { padding: 12px; font-size: 10px; }
+.property-icon { width: 16px; height: 16px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.field .prefix:has(.property-icon) { display: grid; place-items: center; min-width: 24px; padding: 0 4px; }
+.segmented button:has(.property-icon) { display: grid; place-items: center; padding: 2px; }
+.property-subheading > .inspector-icon { width: 20px; height: 20px; padding: 2px; }
