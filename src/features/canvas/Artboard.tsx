@@ -37,8 +37,19 @@ export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, on
       styleRef.current = document.createElement("style");
       root.prepend(styleRef.current);
     }
+    // Imported controls are design elements while on the editing canvas.
+    // Form events do not cross the shadow boundary, so intercept them here.
+    const preventActivation = (event: Event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+    const activationEvents = ["click", "auxclick", "submit", "reset"];
+    activationEvents.forEach(type => root.addEventListener(type, preventActivation, true));
     onMount(artboard.id, host);
-    return () => onMount(artboard.id, null);
+    return () => {
+      activationEvents.forEach(type => root.removeEventListener(type, preventActivation, true));
+      onMount(artboard.id, null);
+    };
   }, [artboard.id, onMount]);
 
   useLayoutEffect(() => {

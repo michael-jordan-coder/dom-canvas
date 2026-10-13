@@ -58,6 +58,7 @@ export function Canvas(props: Props) {
   const dragRef = useRef<Drag | null>(null);
   const restoreDrag = useRef<(() => void) | null>(null);
   const pointerId = useRef<number | null>(null);
+  const pointerHit = useRef<Hit>({ kind: "empty" });
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [panning, setPanning] = useState(false);
   const [hovered, setHovered] = useState<Element | null>(null);
@@ -218,8 +219,8 @@ export function Canvas(props: Props) {
   const onPointerDown = (e: ReactPointerEvent) => {
     if ((e.button !== 0 && e.button !== 1) || dragRef.current) return;
     const hit = hitTest(e);
+    pointerHit.current = hit;
     if (editing && hit.kind === "element" && editing.contains(hit.element)) return;
-
     const canvas = canvasRef.current!;
     canvas.focus();
     canvas.setPointerCapture(e.pointerId);
@@ -416,8 +417,12 @@ export function Canvas(props: Props) {
 
   const onDoubleClick = (e: ReactMouseEvent) => {
     if (tool !== "move" || handMode) return;
-    const hit = hitTest(e);
+    // Pointer capture can retarget the resulting double-click to the canvas.
+    const direct = hitTest(e);
+    const hit = direct.kind === "empty" ? pointerHit.current : direct;
     if (hit.kind === "element" && isTextEditable(hit.element)) {
+      const rect = hit.element.getBoundingClientRect();
+      if (!hit.element.isConnected || lockedAncestor(hit.element) || e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
       onSelect({ kind: "element", artboardId: hit.id, element: hit.element });
       startEditing(hit.element, false);
     }

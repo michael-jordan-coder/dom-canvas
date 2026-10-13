@@ -397,7 +397,7 @@ button:disabled {
 .layer-hidden > .name, .layer-hidden > .icon { opacity: .45; }
 .layer-lock, .layer-visibility { width: 20px; height: 20px; flex-shrink: 0; margin-left: auto; opacity: 0; display: grid; place-items: center; color: var(--text-secondary); border-radius: 3px; }
 .layer-lock svg, .layer-visibility svg { width: 14px; height: 14px; }
-.layer:hover > .layer-lock, .layer:focus-within > .layer-lock, .layer-lock.active, .layer:hover > .layer-visibility, .layer:focus-within > .layer-visibility, .layer-hidden > .layer-lock, .layer-visibility { opacity: 1; }
+.layer:hover > .layer-lock, .layer:focus-within > .layer-lock, .layer-lock.active, .layer:hover > .layer-visibility, .layer:focus-within > .layer-visibility, .layer-hidden > .layer-visibility { opacity: 1; }
 .layer-lock:hover, .layer-visibility:hover { background: var(--field); color: var(--text); }
 
 .layer .rename {
