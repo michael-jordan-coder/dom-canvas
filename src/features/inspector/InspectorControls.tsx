@@ -2,7 +2,7 @@ import { ColorPopover } from "./ColorPopover";
 import { useInspectorDisclosure } from "./InspectorPreferences";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
-import { colorWithAlpha, parseColor } from "./color";
+import { colorWithAlpha, parseColor, rememberRecentColor } from "./color";
 import { numericExpression } from "./arithmetic";
 
 export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel: boolean) => void } | null>(null);
@@ -176,9 +176,10 @@ export function ColorField({ value, label, onCommit, onReset }: { value: string;
   const parsed = parseColor(value);
   const edits = useContext(InspectorEdits);
   const swatch = useRef<HTMLButtonElement>(null);
+  const openingColor = useRef(value);
   const [open, setOpen] = useState(false);
   return <div className="color-property">
-    <button ref={swatch} className="color-picker" title={`Pick ${label}`} aria-label={`Pick ${label}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) { edits?.finish(false); setOpen(false); } else { edits?.begin(); setOpen(true); } }}>
+    <button ref={swatch} className="color-picker" title={`Pick ${label}`} aria-label={`Pick ${label}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) { if (value !== openingColor.current) rememberRecentColor(value); edits?.finish(false); setOpen(false); } else { openingColor.current = value; edits?.begin(); setOpen(true); } }}>
       <span style={{ background: value }} />
     </button>
     {open && swatch.current && <ColorPopover label={label} value={value} anchor={swatch.current} onPreview={onCommit} onClose={(cancel) => { edits?.finish(cancel); setOpen(false); }} />}

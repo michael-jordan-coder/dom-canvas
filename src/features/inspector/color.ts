@@ -19,3 +19,23 @@ export function colorWithAlpha(hex: string, alpha: number) {
   if (!color) return hex;
   return alpha >= 1 ? color.hex : `${color.hex}${Math.round(Math.max(0, alpha) * 255).toString(16).padStart(2, "0").toUpperCase()}`;
 }
+
+const RECENT_COLORS_KEY = "dom-canvas:recent-colors:v1";
+let recentFallback: string[] = [];
+
+export function recentColorList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((item): item is string => typeof item === "string" && /^#(?:[\da-f]{6}|[\da-f]{8})$/i.test(item)).map(item => item.toUpperCase()))].slice(0, 12);
+}
+
+export function loadRecentColors() {
+  try { recentFallback = recentColorList(JSON.parse(localStorage.getItem(RECENT_COLORS_KEY) ?? "[]")); } catch { /* Retain session colors if storage is unavailable. */ }
+  return recentFallback;
+}
+
+export function rememberRecentColor(value: string) {
+  const parsed = parseColor(value);
+  if (!parsed) return;
+  recentFallback = recentColorList([colorWithAlpha(parsed.hex, parsed.alpha), ...loadRecentColors()]);
+  try { localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(recentFallback)); } catch { /* Session-only history still works. */ }
+}

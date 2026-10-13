@@ -22,6 +22,7 @@ Open http://localhost:5180.
 - Click to select, drag to move, drag the handles to resize. Double-click a layer to rename it.
 - Select a frame by its canvas label, the Layers list, or Cmd/Ctrl-click inside it. Frame outlines are purple; element outlines are blue. Alt-click or use the selection breadcrumb to move to a parent.
 - Choose Mobile (390px), Tablet (768px), or Desktop (1440px) frame widths, and fit height to content. These presets change the frame width; they do not emulate viewport media queries.
+- Color pickers keep up to12 recent approved colors, including alpha, in local browser preferences. Reusing one previews it; Cancel does not add preview colors.
 - Color pickers support Hex and RGB entry. RGB edits preserve alpha, Cancel restores the opening color, and Done creates one document Undo step.
 - Selection actions → Copy appearance / Paste appearance transfers resolved typography, colors, backgrounds, borders and shadows between elements; SVG-to-SVG also transfers fill/stroke paint. The appearance buffer lasts for this app session and does not use the system clipboard. Content, layout declarations, transforms and shape geometry are retained; text/border changes can naturally affect layout. Paste is one Undo step.
 - Open a background layer to edit its own size, position and repeat mode. Custom image/gradient layers also expose their individual CSS source. The whole background list remains available under CSS value.

@@ -351,3 +351,10 @@ Browser QA on5181: Paste disabled before copy. Transferring clip-frame appearanc
 Added Hex/RGB format selection in the existing color popover. RGB channels use editable drafts, clamp whole-number commits to0–255, and reject empty/non-finite values. Format selection does not emit a color change. Channels retain current alpha and share the existing preview/cancel/one-commit transaction. Invalid RGB channels disable Done. Focus containment includes the format selector. Popover positioning now measures its rendered width/height before paint and limits height to the viewport.
 
 Browser QA on5181: a147/197/253 color at25% alpha was unchanged by switching toRGB; edits255/128/0 previewed rgba(255,128,0,.25), and Cancel restored the exact original. Red300 normalized255; an empty Green disabledDone. Correcting it and Done applied once; Undo restored originalblue/.25. Tab fromDone wrapped toClose color picker. RGB popover measured240x378 and remained within the viewport with8px bottom clearance. Build and diff check passed. Screenshot: /tmp/dom-canvas-rgb-picker.png.
+
+
+## Recent approved colors
+
+Color popovers show up to12 unique recent approved colors with alpha/checkerboard swatches. Confirmed changes through Done/outside close and the anchor close path are remembered; canceled/no-change popover sessions are excluded. Palette storage is separate from document history at dom-canvas:recent-colors:v1, validated as hex-only entries with a session fallback when storage is unavailable. Selecting a swatch remains a preview until confirmation. This records picker approvals, not every CSS/hex-field edit.
+
+Browser QA on5181: approving#FF660080 added one entry; previewing#00FF0080 thenCancel left the palette unchanged. Reusing orange on another element produced rgba(255,102,0,.5), and Undo restored its original blue. Reload retained the orange swatch. Approving#2563EBFF via the anchor close path closed the picker and added normalized#2563EB ahead of orange. Two tests cover alpha, order, deduplication, invalid stored values and the12-entry bound. Build and diff check passed. Screenshot: /tmp/dom-canvas-recent-colors.png.

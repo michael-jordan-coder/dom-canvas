@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { colorWithAlpha, parseColor } from "./color";
+import { colorWithAlpha, parseColor, loadRecentColors, rememberRecentColor } from "./color";
 
 function toHsv(hex: string) {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
@@ -35,6 +35,7 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
   const [color, setColor] = useState(() => ({ ...toHsv(initial.hex), a: initial.alpha }));
   const [hexDraft, setHexDraft] = useState(initial.hex);
   const [invalid, setInvalid] = useState(false);
+  const [recentColors] = useState(loadRecentColors);
   const [format, setFormat] = useState<"hex" | "rgb">("hex");
   const [rgbInvalid, setRgbInvalid] = useState<Record<string, boolean>>({});
   const dialog = useRef<HTMLDivElement>(null);
@@ -53,7 +54,9 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
   const finish = (cancel: boolean, focus = true) => {
     if (finished.current) return;
     finished.current = true;
-    latest.current.onClose(cancel || lastEmitted.current === original.current);
+    const discard = cancel || lastEmitted.current === original.current;
+    if (!discard) rememberRecentColor(lastEmitted.current);
+    latest.current.onClose(discard);
     if (focus && anchor.isConnected) anchor.focus();
   };
   useEffect(() => {
@@ -120,6 +123,10 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
         </div>}
       </div>
       {invalid && format === "hex" && <span className="invalid-value">Enter a valid hex color.</span>}
+      {recentColors.length > 0 && <div className="recent-colors">
+        <span>Recent colors</span>
+        <div role="group" aria-label="Recent colors">{recentColors.map(value => <button key={value} className="recent-color" aria-label={`Use color ${value}`} title={value} onClick={() => { const parsed = parseColor(value); if (parsed) update({ ...toHsv(parsed.hex), a: parsed.alpha }); }}><span style={{ background: value }} /></button>)}</div>
+      </div>}
       <div className="editor-actions"><button className="btn-ghost" onClick={() => finish(true)}>Cancel</button><button className="btn-primary" disabled={invalid || Object.values(rgbInvalid).some(Boolean)} onClick={() => finish(false)}>Done</button></div>
     </div>
   </div>, document.body);

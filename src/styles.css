@@ -956,3 +956,8 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .color-popover input[aria-invalid="true"] { border-color: var(--danger); }
 
 .color-popover { max-height: calc(100vh - 16px); overflow-y: auto; }
+
+.recent-colors { display: flex; flex-direction: column; gap: 6px; color: var(--text-secondary); font-size: 10px; }
+.recent-colors > div { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
+.recent-color { position: relative; height: 22px; border-radius: 4px; overflow: hidden; border: 1px solid var(--divider); background: conic-gradient(#ddd 25%, #fff 0 50%, #ddd 0 75%, #fff 0) 0 0 / 8px 8px; }
+.recent-color > span { position: absolute; inset: 0; }
