@@ -206,3 +206,9 @@ Browser QA on port 5181: mixed Hebrew/Latin text inherited RTL, switched to LTR,
 Typography detection now walks descendant HTML text rather than requiring a direct text node. SVG and non-content subtrees are excluded. Parent controls edit parent CSS, preserving descendant overrides; the existing plain-text editor remains limited to elements without child elements so nested markup cannot be flattened by it.
 
 Browser QA on port 5181: a heading containing span/strong/span exposed Typography and no Text content editor. Changing parent font size24 to32 produced child sizes32/32/16 with strong weight700, retaining identical innerHTML. Undo restored24 and the same markup. A container containing only SVG title/text exposed no HTML Typography section. Screenshot: /tmp/dom-canvas-nested-typography.png. Build and diff check passed.
+
+## Inspector draft stability
+
+Reproduced a field draft being erased by canvas wheel panning: an uncommitted frame width777 returned to640. Field synchronization depended on an inline callback whose identity changed on each parent render. Synchronization now depends on the property value only.
+
+Browser QA after the fix: width777 survived wheel panning while the actual frame remained640; Escape restored640, Enter applied777, and Undo restored640. Invalid text and aria-invalid also survived panning until Escape. The final temporary draft was cancelled. Screenshot: /tmp/dom-canvas-field-draft.png. Build and diff check passed.

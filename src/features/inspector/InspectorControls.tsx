@@ -54,7 +54,8 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   const options = (suggestions ?? []).filter((option) => !filterOptions || `${option.value} ${option.label ?? ""}`.toLowerCase().includes(draft.toLowerCase()));
   const chooseOption = (next: string) => { setDraft(next); setInvalid(onCommit(next) === false); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
   const cancelled = useRef(false);
-  useEffect(() => { setDraft(value); setInvalid(false); }, [value, onCommit]);
+  // Parent renders (for example, canvas panning) must not erase an edit in progress.
+  useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
   const commit = () => {
     if (cancelled.current) { cancelled.current = false; return; }
     if (draft !== value) setInvalid(onCommit(draft.trim()) === false);
