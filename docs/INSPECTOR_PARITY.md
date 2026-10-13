@@ -200,3 +200,9 @@ Browser QA on port 5181: a Hebrew document inherited rtl/he, retained its ID, cl
 Type options now exposes direction for text outside Flex/Grid containers and overflow-wrap modes for long unbroken content. Default direction removes the inline override, allowing attributes, stylesheet rules and inheritance to apply. Typography reset includes both properties. Controls use the existing compact selects inside the remembered disclosure.
 
 Browser QA on port 5181: mixed Hebrew/Latin text inherited RTL, switched to LTR, and anywhere wrapping kept scrollWidth equal to clientWidth (220px) while increasing height from45 to90px. Default restored inherited RTL and removed inline direction. Undo restored LTR. Typography reset restored RTL/normal wrapping; Undo restored LTR/anywhere. Text content remained unchanged. Screenshot: /tmp/dom-canvas-text-flow.png. Build and diff check passed.
+
+## Nested HTML typography
+
+Typography detection now walks descendant HTML text rather than requiring a direct text node. SVG and non-content subtrees are excluded. Parent controls edit parent CSS, preserving descendant overrides; the existing plain-text editor remains limited to elements without child elements so nested markup cannot be flattened by it.
+
+Browser QA on port 5181: a heading containing span/strong/span exposed Typography and no Text content editor. Changing parent font size24 to32 produced child sizes32/32/16 with strong weight700, retaining identical innerHTML. Undo restored24 and the same markup. A container containing only SVG title/text exposed no HTML Typography section. Screenshot: /tmp/dom-canvas-nested-typography.png. Build and diff check passed.

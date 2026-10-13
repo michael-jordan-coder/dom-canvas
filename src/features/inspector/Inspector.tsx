@@ -91,6 +91,18 @@ function elementKey(element: Element) {
   return elementKeys.get(element)!;
 }
 
+function containsHtmlText(element: Element) {
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (node instanceof Element) {
+        return node.matches("svg, style, script, template, noscript") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+      }
+      return node.nodeValue?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    },
+  });
+  return walker.nextNode() !== null;
+}
+
 function ElementInspector({ element, onChange }: { element: Element; onChange: () => void }) {
   const [individualPadding, setIndividualPadding] = useInspectorDisclosure("padding-sides", false);
   const [individualCorners, setIndividualCorners] = useInspectorDisclosure("corners", false);
@@ -100,7 +112,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const [typeOptions, setTypeOptions] = useInspectorDisclosure("type-options", false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
-  const hasText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.trim());
+  const hasText = containsHtmlText(element);
   const read = (prop: string) => styled.style.getPropertyValue(prop) || computed.getPropertyValue(prop);
   const set = (prop: string, value: string) => {
     if (!CSS.supports(prop, value)) return false;
@@ -242,6 +254,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     </Section>
 
     {hasText && <Section title="Typography" onReset={resetGroup(typographyProps)}>
+      {element.children.length > 0 && <p className="property-note">Nested text inherits these styles unless it has its own overrides.</p>}
       <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
       <Row><SelectField label="Weight" value={read("font-weight")} options={[{ value: "100", label: "Thin" }, { value: "200", label: "Extra light" }, { value: "300", label: "Light" }, { value: "400", label: "Regular" }, { value: "500", label: "Medium" }, { value: "600", label: "Semibold" }, { value: "700", label: "Bold" }, { value: "800", label: "Extra bold" }, { value: "900", label: "Black" }]} onCommit={(v) => set("font-weight", v)} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
       <Row>{property("Line height", "line-height", <InspectorIcon name="lineHeight" />, false)}{property("Letter spacing", "letter-spacing", <InspectorIcon name="tracking" />)}</Row>
