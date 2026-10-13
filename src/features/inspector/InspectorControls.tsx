@@ -31,7 +31,7 @@ export function Row({ single, children }: { single?: boolean; children: ReactNod
 }
 
 export function Field({ value, label, prefix, suffix, onCommit, onReset, trailing, suggestions }: {
-  value: string; label: string; prefix?: ReactNode; suffix?: string; onCommit: Commit; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
+  value: string; label: string; prefix?: ReactNode; suffix?: string; onCommit: (value: string) => boolean | void | string; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
 }) {
   const listId = useId();
   const edits = useContext(InspectorEdits);
@@ -57,7 +57,16 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   useEffect(() => { if (optionsOpen && input.current) setOptionsAbove(window.innerHeight - input.current.getBoundingClientRect().bottom < 210); }, [optionsOpen]);
   useEffect(() => { if (optionsOpen && optionIndex >= 0) document.getElementById(`${listId}-${optionIndex}`)?.scrollIntoView({ block: "nearest" }); }, [optionIndex, optionsOpen, listId]);
   const options = (suggestions ?? []).filter((option) => !filterOptions || `${option.value} ${option.label ?? ""}`.toLowerCase().includes(draft.toLowerCase()));
-  const chooseOption = (next: string) => { setDraft(next); setInvalid(onCommit(next) === false); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
+  // A setter may return the canonical value after clamping or normalization.
+  const submit = (next: string) => {
+    const result = onCommit(next);
+    setInvalid(result === false);
+    if (result === false) return null;
+    const accepted = typeof result === "string" ? result : next;
+    setDraft(accepted);
+    return accepted;
+  };
+  const chooseOption = (next: string) => { setDraft(next); submit(next); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
   const cancelled = useRef(false);
   // Parent renders (for example, canvas panning) must not erase an edit in progress.
   useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
@@ -68,9 +77,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
     const expression = numericValue ? numericExpression(draft) : null;
     if (expression && "error" in expression) { setInvalid(true); return; }
     const next = expression ? `${expression.value}${numericValue![2]}` : draft.trim();
-    const rejected = onCommit(next) === false;
-    setInvalid(rejected);
-    if (!rejected && expression) setDraft(next);
+    submit(next);
   };
   const finishScrub = (cancel: boolean) => {
     if (!drag.current) return;
@@ -106,7 +113,8 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
           current.lastX = e.clientX;
           const next = `${Math.round(candidate * 100) / 100}${current.unit}`;
           if (next === current.last) return;
-          if (onCommit(next) !== false) { current.value = candidate; current.last = next; setDraft(next); setInvalid(false); }
+          const accepted = submit(next);
+          if (accepted !== null) { current.value = parseFloat(accepted); current.last = accepted; }
         }}
         onPointerUp={(e) => { finishScrub(false); if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); }}
         onPointerCancel={() => finishScrub(true)} onLostPointerCapture={() => finishScrub(false)}
@@ -132,7 +140,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
             e.preventDefault(); e.stopPropagation();
             const step = (e.shiftKey ? 10 : e.altKey ? 0.1 : 1) * (e.key === "ArrowUp" ? 1 : -1);
             const next = `${Math.round((Number(match[1]) + step) * 100) / 100}${match[2]}`;
-            setDraft(next); setInvalid(onCommit(next) === false);
+            setDraft(next); submit(next);
           }
         }} />
       {suffix && <span className="suffix">{suffix}</span>}
@@ -177,7 +185,7 @@ export function ColorField({ value, label, onCommit, onReset }: { value: string;
     <Field label={label} value={parsed?.hex ?? value} onCommit={(v) => {
       const next = /^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v;
       const color = parseColor(next);
-      return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, parsed?.alpha || 1) : next);
+      return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, parsed?.alpha ?? 1) : next);
     }} onReset={onReset} />
     {parsed && <div className="color-alpha"><Field label={`${label} opacity`} value={String(Math.round(parsed.alpha * 100))} suffix="%" onCommit={(v) => {
       const alpha = Number(v);

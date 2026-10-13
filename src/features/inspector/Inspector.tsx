@@ -313,7 +313,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     </Section>}
 
     <Section title="Appearance" actions={<button className="inspector-icon" title="Individual corners" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}><InspectorIcon name="corners" /></button>} onReset={resetGroup(["opacity", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"])}>
-      <Row><Field label="Opacity" prefix={<InspectorIcon name="opacity" />} suffix="%" value={String(Math.round(Number(computed.opacity) * 100))} onCommit={(v) => { const n = numericInput(v, "%"); return n === null ? false : set("opacity", String(Math.min(100, Math.max(0, n)) / 100)); }} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", <InspectorIcon name="radius" />)}</Row>
+      <Row><Field label="Opacity" prefix={<InspectorIcon name="opacity" />} suffix="%" value={String(Math.round(Number(computed.opacity) * 100))} onCommit={(v) => { const n = numericInput(v, "%"); if (n === null) return false; const clamped = Math.min(100, Math.max(0, n)); return set("opacity", String(clamped / 100)) === false ? false : String(clamped); }} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", <InspectorIcon name="radius" />)}</Row>
       {individualCorners && <><Row>{property("Top left radius", "border-top-left-radius", "TL")}{property("Top right radius", "border-top-right-radius", "TR")}</Row><Row>{property("Bottom left radius", "border-bottom-left-radius", "BL")}{property("Bottom right radius", "border-bottom-right-radius", "BR")}</Row></>}
     </Section>
 

@@ -277,3 +277,10 @@ Kept Design panel at241px and property controls at24px. Position guidance now op
 Shared CodeInput adds two-space Tab/Shift+Tab indentation, Enter indentation, brace-pair newlines, and up to100 draft history states isolated from document Undo. Escape followed by Tab allows keyboard focus to exit. External value/selection-identity changes reset local draft history. History records input events rather than word-level groups; drafts/history remain session-only.
 
 Browser QA on5181: measured panel241px, sizing row217x24, width/height fields91.5x24. Position help toggled without changing properties. Element CSS multiline Tab and draft Undo restored exact text; Escape/Tab focused Discard, and Discard restored the original styles. Frame CSS with live preview off preserved white text until Cmd+Enter applied an important yellow rule; document Undo restored white. CSS help expanded to show its instructions. Three code-editing tests cover selection boundaries, outdent and brace/newline behavior. Build and diff check passed. Screenshots: /tmp/dom-canvas-inspector-density.png and /tmp/dom-canvas-css-compact.png.
+
+
+## Canonical opacity values
+
+Fixed an observed boundary mismatch: ArrowUp at100% displayed101 while computed opacity remained1. Field setters can now return their accepted text; commit, suggestions, arrow steps and pointer scrubbing use it. HTML and SVG opacity setters return clamped0–100 values, including unchanged endpoints. SVG opacity fields now accept strict percentage input through the shared numeric parser. Hex color edits preserve an existing alpha of0 instead of treating it as absent.
+
+Browser QA on5181: HTML ArrowUp at100 stayed100; typing-20 and ArrowDown stayed0;100+20 normalized to100. Scrubbing toward the upper limit kept100; reversing reduced the value and Undo restored100. Changing purple at0 alpha to orange retained rgba(255,102,0,0); successive Undo restored transparent purple then opaque purple. SVG fill paint opacity accepted50%, rejected wrong without changing0.5, and Undo restored1. Build and diff check passed. Screenshot: /tmp/dom-canvas-opacity-values.png.

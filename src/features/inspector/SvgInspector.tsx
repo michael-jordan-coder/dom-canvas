@@ -1,3 +1,4 @@
+import { numericInput } from "./numeric";
 import { getLayoutSize, setSize } from "@/features/canvas/elementStyle";
 import { layerName } from "@/features/layers/Layers";
 import { inspectorStyleValue } from "./styleValue";
@@ -12,7 +13,13 @@ export function SvgInspector({ element, onChange }: { element: SVGElement; onCha
     element.style.setProperty(property, value); onChange(); return true;
   };
   const reset = (properties: string[]) => properties.some((property) => element.style.getPropertyValue(property)) ? () => { properties.forEach((property) => element.style.removeProperty(property)); onChange(); } : undefined;
-  const opacityField = (property: string, label: string) => <Field label={label} prefix="Opacity" suffix="%" value={String(Math.round(parseFloat(read(property)) * (read(property).endsWith("%") ? 1 : 100)))} onCommit={(value) => value.trim() && Number.isFinite(Number(value)) ? set(property, String(Math.max(0, Math.min(100, Number(value))) / 100)) : false} onReset={reset([property])} />;
+  const setOpacity = (property: string, value: string) => {
+    const numeric = numericInput(value, "%");
+    if (numeric === null) return false;
+    const clamped = Math.min(100, Math.max(0, numeric));
+    return set(property, String(clamped / 100)) === false ? false : String(clamped);
+  };
+  const opacityField = (property: string, label: string) => <Field label={label} prefix="Opacity" suffix="%" value={String(Math.round(parseFloat(read(property)) * (read(property).endsWith("%") ? 1 : 100)))} onCommit={(value) => setOpacity(property, value)} onReset={reset([property])} />;
   const geometry: Record<string, string[]> = { rect: ["x", "y", "width", "height", "rx", "ry"], circle: ["cx", "cy", "r"], ellipse: ["cx", "cy", "rx", "ry"], line: ["x1", "y1", "x2", "y2"] };
   const coordinate = (property: string) => <Field key={property} label={`SVG ${property}`} prefix={property.toUpperCase()} value={read(property).replace(/px$/, "")} onCommit={(value) => {
     if (!/^-?(?:\d*\.)?\d+$/.test(value) || (["width", "height", "r", "rx", "ry"].includes(property) && Number(value) < 0)) return false;
@@ -50,7 +57,7 @@ export function SvgInspector({ element, onChange }: { element: SVGElement; onCha
       <label className="property-checkbox"><input type="checkbox" checked={read("vector-effect") === "non-scaling-stroke"} onChange={(e) => set("vector-effect", e.target.checked ? "non-scaling-stroke" : "none")} />Keep stroke width when scaled</label>
     </Section>
     <Section title="Appearance" onReset={reset(["opacity", "transform", "transform-origin"])}>
-      <Field label="Opacity" prefix="Opacity" suffix="%" value={String(Math.round(Number(computed.opacity) * 100))} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) ? set("opacity", String(Math.max(0, Math.min(100, Number(v))) / 100)) : false} />
+      <Field label="Opacity" prefix="Opacity" suffix="%" value={String(Math.round(Number(computed.opacity) * 100))} onCommit={(v) => setOpacity("opacity", v)} />
       <Field label="Vector transform" value={element.style.transform || computed.transform || "none"} onCommit={(v) => set("transform", v)} onReset={reset(["transform"])} />
     </Section>
   </>;
