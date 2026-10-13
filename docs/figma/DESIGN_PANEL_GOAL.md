@@ -27,7 +27,7 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | --- | --- | --- | --- |
 | Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames and text |
 | Object types | Frame, text, primitive shape, vector, group, section, component, instance and variants where available | Contextual controls and actions per type | Partial: frame/text |
-| Position | X/Y, rotation, flip, alignment/distribution, constraints, absolute positioning | Fields, icons, alignment groups, menus, axis labels | Availability observed; actions mostly open |
+| Position | X/Y, rotation, flip, alignment/distribution, constraints, absolute positioning | Fields, icons, alignment groups, menus, axis labels | Partial: rotation/position coupling; alignment/flip/constraints actions open |
 | Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: empty/populated horizontal frame |
 | Parent-child dependencies | Hug/Fill/Fixed availability, parent effects, child position, min/max, constraints | Enabled/disabled controls, mode badges, contextual menus | Partial: populated parent/child, Fill reflow, min width, Ignore layout |
 | Text | Resize modes, content editing, font family/style/weight/size, line height, spacing, paragraphs, decoration, case, alignment, direction | Font menus, mixed typography, type settings, resizing states | Partial: resizing/Undo, type settings inventory, font size/line-height reflow |
