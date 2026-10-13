@@ -48,3 +48,7 @@ the 240-wide state above; see PC04–PC05 in the parent-child topic.
 Component research update: live Frame2 baseline was200 ×125 (not the older150
 width). It was converted to a main component without a width edit and retained
 for instance research. Its configuration dialog is open. See topics/components.md.
+
+Variant continuation: Frame2 is now component set15:57 with Default and Variant2,
+set240 ×310; each variant200 ×125. The unchanged Property1 inline name editor
+is active. See CO03 in topics/components.md.
