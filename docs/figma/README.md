@@ -32,6 +32,7 @@
 - [Guides and export](topics/guides-export.md): Grid/Columns context and Export-to-Fill dependency.
 - [Transforms](topics/transforms.md): rotation coordinates and aspect-ratio coupling.
 - [Grid and Wrap](topics/grid-wrap.md): flow transitions, track settings and sizing controls.
+- [Multi-child Wrap](topics/wrap-multi.md): line-break thresholds, gap axes and direction history.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.

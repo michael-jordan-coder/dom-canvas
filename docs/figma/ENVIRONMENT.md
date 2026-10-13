@@ -73,3 +73,9 @@ Grid/Wrap pass: Frame3 returned to Horizontal, Wrap off, centered,80 Fixed ×50
 Hug, padding/gap10, clip off. Child8:3 selected,100 Fill/min100 ×30 Hug,
 Auto height, X-10/Y10 in flow. Grid's persisted inactive track settings were not
 audited. See topics/grid-wrap.md.
+
+Multi-child Wrap pass: new retained Frame4 (`17:68`) at500/-254,240 Fixed ×100
+Hug, Horizontal/Wrap on, centered, gap10/row gap20, padding10, clip off. Three
+text children17:69/17:70/17:71 each100 Fixed (min100) ×30 Hug, Auto height,
+Inter Regular12, fill3366FF. Frame4 selected; zoom-to-selection58%. Existing
+Frame3 unchanged. See topics/wrap-multi.md.

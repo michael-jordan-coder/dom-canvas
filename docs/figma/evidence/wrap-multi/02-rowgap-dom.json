@@ -1,0 +1,7 @@
+{
+  "state": "Horizontal Wrap, before explicit row gap edit",
+  "value": "",
+  "placeholder": "10",
+  "disabled": false,
+  "source": "Direct readonly DOM inspection of Vertical gap between rows input"
+}

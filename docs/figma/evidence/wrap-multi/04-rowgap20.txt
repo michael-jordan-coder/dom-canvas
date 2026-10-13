@@ -1,0 +1,306 @@
+- application [active]
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region "Comments on canvas":
+  - button "Create new comment"
+- region "Left sidebar":
+  - toolbar "Navigation Bar":
+    - button "Main menu":
+    - separator
+    - button "File" [expanded]:
+    - button "Agents":
+    - button "Assets":
+    - button "Tools":
+    - separator
+    - button "Variables":
+  - button "Untitled, file name": Untitled
+  - generic: File name
+  - button "Edit file menu":
+  - button "Minimize UI":
+  - link "community":
+    - /url: https://www.figma.com/files/team/1669091168837591051/project/649249618
+  - heading "Pages Find Add new page" [level=2]:
+    - button "Pages" [expanded]:
+      - generic: Pages
+    - button "Find":
+    - button "Add new page":
+  - grid:
+    - row "Page 1":
+      - gridcell "Page 1":
+        - button "Page 1":
+          - generic: Page 1
+    - row "Page 2":
+      - gridcell "Page 2":
+        - button "Page 2":
+          - generic: Page 2
+  - slider "Resize handle"
+  - heading "Layers Collapse layers" [level=2]:
+    - button "Layers" [expanded]:
+      - generic: Layers
+    - button "Collapse layers":
+  - treegrid:
+    - row "Frame 2":
+      - gridcell:
+      - gridcell "Frame 2":
+        - generic: Frame 2
+    - row "Frame 2" [expanded]:
+      - button:
+      - gridcell:
+      - gridcell "Frame 2":
+        - generic: Frame 2
+    - row "Variant2" [level=1]:
+      - gridcell:
+      - gridcell "Variant2":
+        - generic: Variant2
+    - row "Default" [level=1]:
+      - gridcell:
+      - gridcell "Default":
+        - generic: Default
+    - row "Frame 1":
+      - gridcell:
+      - gridcell "Frame 1":
+        - generic: Frame 1
+    - row "A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.":
+      - gridcell:
+      - gridcell "A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.":
+        - generic: A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.
+    - row "Frame 4 Toggle layer locking Toggle layer visibility" [expanded] [selected]:
+      - button:
+      - gridcell:
+      - gridcell "Frame 4":
+        - generic: Frame 4
+      - gridcell "Toggle layer locking":
+        - checkbox "Toggle layer locking"
+        - generic: Toggle layer locking
+      - gridcell "Toggle layer visibility":
+        - checkbox "Toggle layer visibility"
+        - generic: Toggle layer visibility
+    - row "Text tool comparison" [level=1] [selected]:
+      - gridcell:
+      - gridcell "Text tool comparison":
+        - generic: Text tool comparison
+    - row "Text tool comparison" [level=1] [selected]:
+      - gridcell:
+      - gridcell "Text tool comparison":
+        - generic: Text tool comparison
+    - row "Text tool comparison" [level=1] [selected]:
+      - gridcell:
+      - gridcell "Text tool comparison":
+        - generic: Text tool comparison
+    - row "Frame 3" [expanded]:
+      - button:
+      - gridcell:
+      - gridcell "Frame 3":
+        - generic: Frame 3
+    - row "Text tool comparison" [level=1]:
+      - gridcell:
+      - gridcell "Text tool comparison":
+        - generic: Text tool comparison
+  - slider "Resize handle"
+- region "Right sidebar":
+  - button "Multiplayer tools":
+  - group "Prototype view":
+    - button "Present":
+    - button "Prototype view":
+  - button "Share"
+  - tablist:
+    - tab "Design" [selected]:
+      - generic: Design
+      - generic: Design
+    - tab "Prototype":
+      - generic: Prototype
+      - generic: Prototype
+  - button "125%, zoom and view options":
+    - text: 58%
+  - button "Frame, Frame Dimension Presets":
+    - generic: Frame
+  - checkbox "Toggle ready for dev status"
+  - generic: Toggle ready for dev status
+  - button "Create component":
+  - button "More actions":
+  - heading "Position" [level=2]
+  - group "Alignment":
+    - generic: Alignment
+    - button "Align left" [disabled]:
+    - button "Align horizontal centers" [disabled]:
+    - button "Align right" [disabled]:
+    - button "Align top" [disabled]:
+    - button "Align vertical centers" [disabled]:
+    - button "Align bottom" [disabled]:
+  - group "Position":
+    - generic: Position
+    - generic: X
+    - spinbutton "X-position": "500"
+    - generic: "Y"
+    - spinbutton "Y-position": "-254"
+  - group "Rotation":
+    - generic: Rotation
+    - spinbutton "Rotation": 0°
+    - button "Rotate 90˚ right":
+    - button "Flip horizontal":
+    - button "Flip vertical":
+  - heading "Auto layout" [level=2]
+  - checkbox "Toggle auto layout" [checked]
+  - generic: Toggle auto layout
+  - group "Flow":
+    - generic: Flow
+    - radiogroup "Layout":
+      - generic: Layout
+      - radio "Freeform"
+      - generic: Freeform
+      - radio "Vertical"
+      - generic: Vertical
+      - radio "Horizontal" [checked]
+      - generic: Horizontal
+      - radio "Grid"
+      - generic: Grid
+    - checkbox "Wrap" [checked]
+    - generic: Wrap
+  - group "Resizing":
+    - generic: Resizing
+    - listbox
+    - generic: W
+    - generic "Horizontal resizing":
+      - combobox "Horizontal resizing": "240"
+    - option [selected]:
+      - generic: Fixed width (240)
+    - option [selected]:
+      - generic: Hug contents
+    - option [selected]:
+    - option [selected]:
+      - generic: Add min width…
+    - option [selected]:
+      - generic: Add max width…
+    - listbox
+    - generic: H
+    - generic "Vertical resizing":
+      - combobox "Vertical resizing": "100"
+      - generic: Hug
+    - option [selected]:
+      - generic: Fixed height (100)
+    - option [selected]:
+      - generic: Hug contents
+    - option [selected]:
+    - option [selected]:
+      - generic: Add min height…
+    - option [selected]:
+      - generic: Add max height…
+    - checkbox "Lock aspect ratio"
+    - generic: Lock aspect ratio
+  - radiogroup "Alignment":
+    - generic: Alignment
+    - radio "Align top left"
+    - generic: Align top left
+    - radio "Align top center"
+    - generic: Align top center
+    - radio "Align top right"
+    - generic: Align top right
+    - radio "Align left"
+    - generic: Align left
+    - radio "Align center" [checked]
+    - generic: Align center
+    - radio "Align right"
+    - generic: Align right
+    - radio "Align bottom left"
+    - generic: Align bottom left
+    - radio "Align bottom center"
+    - generic: Align bottom center
+    - radio "Align bottom right"
+    - generic: Align bottom right
+  - listbox
+  - generic "Horizontal gap between objects":
+    - combobox "Horizontal gap between objects": "10"
+  - listbox
+  - generic "Vertical gap between rows":
+    - combobox "Vertical gap between rows": "20"
+  - button "Auto layout settings":
+  - generic "Horizontal padding":
+    - textbox "Horizontal padding": "10"
+  - generic "Vertical padding":
+    - textbox "Vertical padding": "10"
+  - button "Individual padding":
+  - checkbox "Clip content"
+  - generic: Clip content
+  - heading "Appearance" [level=2]
+  - checkbox "Hide"
+  - generic: Hide
+  - button "Apply blend mode":
+  - generic "Opacity":
+    - textbox "Opacity": 100%
+  - generic "Corner radius":
+    - textbox "Corner radius": "0"
+  - button "Individual corners" [expanded]:
+  - generic "Top left corner radius":
+    - textbox "Top left corner radius": "0"
+  - generic "Top right corner radius":
+    - textbox "Top right corner radius": "0"
+  - generic "Bottom left corner radius":
+    - textbox "Bottom left corner radius": "0"
+  - generic "Bottom right corner radius":
+    - textbox "Bottom right corner radius": "0"
+  - button "Corner smoothing":
+  - button "Fill":
+    - heading "Fill" [level=2]
+  - button "Fill, Apply styles and variables":
+  - button "Add fill":
+  - button "Stroke":
+    - heading "Stroke" [level=2]
+  - button "Stroke, Apply styles and variables":
+  - button "Add stroke":
+  - button "Effects":
+    - heading "Effects" [level=2]
+  - button "Effects, Apply styles":
+  - button "Add effect":
+  - heading "Selection colors" [level=2]
+  - 'button "Solid color hex: 3366FF"'
+  - generic: Color
+  - generic: Autofill available. Type to see suggestions.
+  - combobox "Color": 3366FF
+  - generic "Opacity":
+    - textbox "Opacity": "100"
+    - generic: "%"
+  - button "Layout guide":
+    - heading "Layout guide" [level=2]
+  - button "Layout guide, Apply styles":
+  - button "Add layout guide":
+  - button "Export":
+    - generic: Export
+  - button "Add export settings":
+  - slider "Resize handle"
+- region "Application toolbar":
+  - toolbar "Editor":
+    - group "Move":
+      - button "Move" [pressed]:
+      - button "Move tools":
+    - group "Frame":
+      - button "Frame":
+      - button "Region tools":
+    - group "Rectangle":
+      - button "Rectangle":
+      - button "Shape tools":
+    - group "Pen":
+      - button "Pen":
+      - button "Creation tools":
+    - group "Text":
+      - button "Text":
+      - button "Type tools":
+    - group "Comment":
+      - button "Comment":
+      - button "Comment tools":
+    - button "Actions":
+    - radiogroup "Toolbelt Mode":
+      - generic: Toolbelt Mode
+      - radio "Draw"
+      - generic: Draw
+      - radio "Design" [checked]
+      - generic: Design
+      - radio "Motion"
+      - generic: Motion
+      - radio "Dev Mode"
+      - generic: Dev Mode
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- status
+- alert
+- alert

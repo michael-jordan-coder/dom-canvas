@@ -77,7 +77,8 @@ Evidence: [return](../evidence/grid-wrap/08-return-horizontal.txt),
 
 ## Open
 
-- Multi-child wrapping, row gap auto/numeric behavior and alignment effects.
+- [Multi-child wrapping](wrap-multi.md) now covers fixed equal children, numeric
+  row gap and a width threshold; automatic gaps and flexible children remain open.
 - Multiple tracks, fr weighting, track Hug/Fixed resizing, adding/removing tracks.
 - Grid child placement, spans, automatic positioning toggle and overflow.
 - Undo/Redo, retained grid configuration after changing modes, keyboard navigation.
