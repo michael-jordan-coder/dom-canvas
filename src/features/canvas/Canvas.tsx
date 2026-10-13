@@ -98,7 +98,7 @@ export function Canvas(props: Props) {
   };
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => { if (e.code === "Space" && !isTyping(e)) { setSpaceHeld(true); e.preventDefault(); } };
+    const down = (e: KeyboardEvent) => { if (e.code === "Space" && !e.defaultPrevented && !isTyping(e) && !isInteractiveControl(e)) { setSpaceHeld(true); e.preventDefault(); } };
     const up = (e: KeyboardEvent) => { if (e.code === "Space") setSpaceHeld(false); };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -536,4 +536,14 @@ function selectedElement(selection: Selection, hosts: Map<string, HTMLDivElement
 export function isTyping(e: Event) {
   const t = e.composedPath()[0];
   return t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || (t instanceof HTMLElement && t.isContentEditable);
+}
+
+export function isInteractiveControl(e: Event) {
+  const target = e.composedPath()[0];
+  return target instanceof Element && !!target.closest('button, a[href], summary, [role="button"], [role="tab"], [role="slider"], [role="spinbutton"], [role="menu"], [role="dialog"]');
+}
+
+export function isPopupControl(e: Event) {
+  const target = e.composedPath()[0];
+  return target instanceof Element && !!target.closest('[role="dialog"], [role="menu"]');
 }

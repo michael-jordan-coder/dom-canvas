@@ -176,3 +176,9 @@ Browser QA now verifies shared open integration through paste: the actual downlo
 HTML image selections expose object-fit modes, nine-point object-position, a free CSS position field, alt text and intrinsic dimensions. Load/error listeners refresh source status. Section reset only removes fit/position overrides, and the existing inspector transaction/history system covers edits.
 
 Browser QA on port 5181: imported a 300x100 three-band SVG image in a 180x180 img box. Fill/right computed cover and 100% 50%, retained the 180x180 box and visibly cropped to the orange right band. Fit computed contain; alt editing updated the attribute. Two Undo operations restored cover and the original alt. Reset restored fill/50% 50%; Undo restored cover/right. Screenshot: /tmp/dom-canvas-image-controls.png. Build and diff check passed.
+
+## Keyboard focus boundaries
+
+Reproduced Space failing to activate inspector section buttons because the canvas pan listener prevented its default. Pan now ignores handled events and interactive controls. App shortcuts ignore handled events and menu/dialog focus, and unmodified canvas shortcuts ignore buttons, tabs, summaries and other interactive controls. Popup focus also excludes document paste.
+
+Verified after a clean reload on port 5181: Space toggled Position open/closed. Delete on the section button preserved the image. Delete, Cmd+D and R on the color dialog's Cancel button left one image, the dialog open and Move selected. Space activated Cancel and closed it. Delete with canvas focus removed the image, and Undo restored it. Build and diff check passed.

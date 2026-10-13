@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Canvas, isTyping } from "@/features/canvas/Canvas";
+import { Canvas, isTyping, isInteractiveControl, isPopupControl } from "@/features/canvas/Canvas";
 import { getTranslate, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
@@ -161,7 +161,7 @@ export function App() {
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
-      if (isTyping(e)) return;
+      if (e.defaultPrevented || isTyping(e) || isPopupControl(e)) return;
       const plain = e.clipboardData?.getData("text/plain") ?? "";
       const rich = e.clipboardData?.getData("text/html") ?? "";
       if (isProjectClipboard(plain)) {
@@ -357,7 +357,7 @@ export function App() {
   useEffect(() => {
     const TOOL_KEYS: Record<string, Tool> = { v: "move", f: "frame", a: "frame", r: "rect", t: "text", h: "hand" };
     const onKey = (e: KeyboardEvent) => {
-      if (isTyping(e)) return;
+      if (e.defaultPrevented || isTyping(e) || isPopupControl(e)) return;
       const mod = e.metaKey || e.ctrlKey;
       const key = e.key.toLowerCase();
 
@@ -366,11 +366,11 @@ export function App() {
       if (mod && key === "d") { e.preventDefault(); duplicateSelection(); return; }
       if (mod && e.key === "\\") { e.preventDefault(); setUiHidden((v) => !v); return; }
       if (mod || e.altKey) return;
+      if (isInteractiveControl(e)) return;
 
       if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); deleteSelection(); return; }
       if (e.key === "Escape") { selectParent(); setTool("move"); return; }
       if (e.key.startsWith("Arrow")) {
-        if ((e.target as HTMLElement).closest("button, [role=tab]")) return;
         e.preventDefault();
         const step = e.shiftKey ? 10 : 1;
         const [dx, dy] = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key] ?? [0, 0];
