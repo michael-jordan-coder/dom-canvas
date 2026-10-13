@@ -961,3 +961,10 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .recent-colors > div { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
 .recent-color { position: relative; height: 22px; border-radius: 4px; overflow: hidden; border: 1px solid var(--divider); background: conic-gradient(#ddd 25%, #fff 0 50%, #ddd 0 75%, #fff 0) 0 0 / 8px 8px; }
 .recent-color > span { position: absolute; inset: 0; }
+
+.gradient-stop-selector { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.gradient-stop-selector button { display: flex; align-items: center; justify-content: center; gap: 3px; height: 26px; padding: 2px; border: 1px solid transparent; border-radius: 4px; color: var(--text-secondary); }
+.gradient-stop-selector button:hover { background: var(--hover); }
+.gradient-stop-selector button[aria-pressed="true"] { border-color: var(--accent); background: var(--row-selected); color: var(--accent); }
+.gradient-stop-selector button > span { width: 14px; height: 18px; border: 1px solid var(--divider); border-radius: 2px; }
+.gradient-stop-selector small { font-size: 9px; }
