@@ -8,6 +8,7 @@ import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
 import { ActionSearch } from "@/features/canvas/ActionSearch";
 import { Toolbar } from "@/features/canvas/Toolbar";
 import { ZoomControl } from "@/features/canvas/ZoomControl";
+import { KeyboardHelp } from "@/features/canvas/KeyboardHelp";
 import { PanelToggle } from "@/features/canvas/PanelToggle";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
@@ -53,6 +54,8 @@ export function App() {
   const [htmlImportOpen, setHtmlImportOpen] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState(emptyHtmlDraft);
   const closeActionSearch = useCallback(() => setActionSearchOpen(false), []);
+  const [keyboardHelpOpen, setKeyboardHelpOpen] = useState(false);
+  const closeKeyboardHelp = useCallback(() => setKeyboardHelpOpen(false), []);
   const [uiHidden, setUiHidden] = useState(false);
   const [layersVisible, setLayersVisible] = useState(true);
   const [inspectorVisible, setInspectorVisible] = useState(true);
@@ -398,6 +401,7 @@ export function App() {
       if (mod && key === "d") { e.preventDefault(); duplicateSelection(); return; }
       if (mod && e.key === "\\") { e.preventDefault(); setUiHidden((v) => !v); return; }
       if (mod || e.altKey) return;
+      if (e.key === "?") { e.preventDefault(); setKeyboardHelpOpen(true); return; }
       if (e.key === "F2") { e.preventDefault(); renameSelection(); return; }
       if (isInteractiveControl(e)) return;
 
@@ -467,6 +471,7 @@ export function App() {
   const searchActions: SelectionAction[] = [
     { label: "Paste HTML", run: () => setHtmlImportOpen(true) },
     { label: "Undo", shortcut: "⌘/Ctrl Z", disabled: !doc.canUndo, run: () => travel("undo") },
+    { label: "Keyboard shortcuts", shortcut: "?", run: () => setKeyboardHelpOpen(true) },
     { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
     ...selectionActions,
     ...inspectorActions,
@@ -577,9 +582,11 @@ export function App() {
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[...selectionActions, ...inspectorActions]} />}
       {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}
       {htmlImportOpen && <HtmlImportDialog draft={htmlDraft} onDraft={setHtmlDraft} onClose={() => setHtmlImportOpen(false)} onCreate={content => { addArtboard(content); setHtmlImportOpen(false); setHtmlDraft(emptyHtmlDraft); }} />}
+      {keyboardHelpOpen && <KeyboardHelp onClose={closeKeyboardHelp} />}
       <Toolbar tool={tool} onToolChange={setTool}>
         <button className="tool" aria-label="Paste HTML" title="Paste HTML" onClick={() => setHtmlImportOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="m6 5-4 5 4 5m8-10 4 5-4 5M12 3 8 17"/></svg></button>
         <button className="tool" aria-label="Find an action" title="Find an action (⌘/Ctrl+K)" onClick={() => setActionSearchOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg></button>
+        <button className="tool" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setKeyboardHelpOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M8 7a2 2 0 0 1 4 0c0 2-2 2-2 4m0 2v1"/></svg></button>
         <ImportButton busy={importing} error={importError} onImport={importSite} />
       </Toolbar>
     </div>

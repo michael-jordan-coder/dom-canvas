@@ -1033,3 +1033,12 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .canvas-navigation > :first-child { margin-left: auto; }
 .canvas-navigation > :last-child { margin-right: auto; }
 .canvas-navigation > * { flex-shrink: 0; }
+
+.keyboard-help { width: min(480px, calc(100vw - 32px)); }
+.keyboard-help-results { max-height: min(440px, 55vh); overflow-y: auto; margin-top: 10px; }
+.keyboard-help h3 { margin: 12px 0 4px; font-size: 11px; color: var(--text-secondary); }
+.keyboard-help dl { margin: 0; }
+.keyboard-help dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; font-size: 11px; }
+.keyboard-help dt { min-width: 0; }
+.keyboard-help dd { margin: 0; flex-shrink: 0; }
+.keyboard-help kbd { font: inherit; color: var(--text-secondary); }

@@ -440,3 +440,9 @@ Browser QA on 5181: frame width 720 / 0 retained focus, draft and aria-invalid, 
 Shared Field arrow changes now start an InspectorEdits preview transaction and finish on matching keyup, field/window blur, typed input or another editing key. Repeated keydowns for the same held arrow share the transaction. Escape during the hold cancels to its initial value; unmount also cancels. Shift and Alt can change step size without splitting an active hold. Modifier-based native navigation with Ctrl/Meta is left to the input. Suggestion navigation keeps its existing behavior.
 
 Browser QA on 5181: width720 advanced to721 and Undo returned720. Separate Shift+Up and Alt+Up presses produced730 then730.1; successive Undo returned730 then720, and Redo restored730. The native duration-based key tool emitted only one increment, so continuous OS autorepeat, Escape during a held key, and window-blur finalization were code-reviewed but remain unverified in the browser. Build and diff check passed. Screenshot: /tmp/dom-canvas-key-adjustments.png.
+
+## Searchable keyboard help
+
+Added a compact native modal with grouped shortcut descriptions, search and a no-results state. Entry points: toolbar help, ? outside text fields/popups, and action search. Entries reflect current handlers, including frame/parent selection, zoom, nudging, numeric editing and code-editor focus escape. Native modal focus containment and Escape closing are used; previous focus is restored on close. The footer explains contextual arrow behavior.
+
+Browser QA on 5181: toolbar and ? opened the dialog; Escape returned focus to its trigger. Searching numeric returned the numeric adjustment entry, and an unknown query showed No matching shortcuts. Typing ? in layer search did not open help. Invoking Keyboard shortcuts from action search opened the modal with its search field focused. Build and diff check passed. Screenshot: /tmp/dom-canvas-keyboard-help.png.
