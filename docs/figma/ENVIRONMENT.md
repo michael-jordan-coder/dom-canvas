@@ -79,3 +79,10 @@ Hug, Horizontal/Wrap on, centered, gap10/row gap20, padding10, clip off. Three
 text children17:69/17:70/17:71 each100 Fixed (min100) ×30 Hug, Auto height,
 Inter Regular12, fill3366FF. Frame4 selected; zoom-to-selection58%. Existing
 Frame3 unchanged. See topics/wrap-multi.md.
+
+Multi-track Grid pass supersedes Frame4's Wrap state: Grid2 columns / Auto rows,
+automatic positioning on,240 Fixed ×100 Hug, X500/Y-254, gaps10/20, padding10,
+clip off, columns1fr/1fr.17:71 restored span1,105 Fill/min100 ×30 Hug. Grid
+conversion also changed other child sizing (17:69 observed Fill height/Fixed size).
+Frame4 remains selected. See topics/grid-multi.md for positioning toggle and
+inconclusive Undo; previous Wrap child modes are no longer the current fixture.

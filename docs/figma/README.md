@@ -33,6 +33,7 @@
 - [Transforms](topics/transforms.md): rotation coordinates and aspect-ratio coupling.
 - [Grid and Wrap](topics/grid-wrap.md): flow transitions, track settings and sizing controls.
 - [Multi-child Wrap](topics/wrap-multi.md): line-break thresholds, gap axes and direction history.
+- [Multi-track Grid](topics/grid-multi.md): spans, fractional tracks, minimum widths and parent resizing.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
