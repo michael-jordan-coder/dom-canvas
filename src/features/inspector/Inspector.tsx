@@ -65,7 +65,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
         <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
         <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
         <div className="property-subheading"><span>Resizing</span><button className="small-toggle" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}>{ab.aspectRatio ? "Ratio locked" : "Lock ratio"}</button></div>
-        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} suffix="px" onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row>
+        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} suffix="px" onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row>
       </Section>
       <Section title="Position">
         <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => update({ x: number(v, ab.x) })} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => update({ y: number(v, ab.y) })} /></Row>
@@ -141,7 +141,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         if (main) { styled.style.flexGrow = "0"; styled.style.flexBasis = "auto"; }
         return set(axis, v);
       }}
-      trailing={<select className="size-mode" aria-label={`${label} sizing`} value={mode} title={`${label} sizing. CSS follows the stylesheet. Fill uses available parent space.`} onChange={(e) => { setSizeMode(styled, axis, e.target.value as SizeMode, measured); if (e.target.value !== "fixed" && read("aspect-ratio") !== "auto") styled.style.aspectRatio = "auto"; onChange(); }}>
+      trailing={<select className="size-mode" data-mode={mode} aria-label={`${label} sizing`} value={mode} title={`${label}: ${mode === "css" ? "Stylesheet" : mode}. CSS follows the stylesheet. Fill uses available parent space.`} onChange={(e) => { setSizeMode(styled, axis, e.target.value as SizeMode, measured); if (e.target.value !== "fixed" && read("aspect-ratio") !== "auto") styled.style.aspectRatio = "auto"; onChange(); }}>
         <option value="css">CSS</option><option value="fixed">Fixed</option><option value="hug">Hug</option><option value="fill">Fill</option>{mode === "custom" && <option value="custom">Custom</option>}
       </select>} />;
   };
@@ -155,17 +155,16 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
 
-    <Section title={isFlex || isGrid ? "Auto layout" : "Layout"} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
+    <Section title={isFlex || isGrid ? "Auto layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
-      <div className="property-subheading"><span>Resizing</span><div><button className="small-toggle" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
+      <div className="sizing-row"><Row>{sizeField("width")}{sizeField("height")}</Row><button className="inspector-icon" title="Lock aspect ratio" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
         if (read("aspect-ratio") !== "auto") { set("aspect-ratio", "auto"); return; }
         const { width: w, height: h } = getLayoutSize(element);
         setSize(styled, { width: w, height: h });
         styled.style.aspectRatio = `${parseFloat(getComputedStyle(element).width) || w} / ${parseFloat(getComputedStyle(element).height) || h}`;
         onChange();
-      }}>{read("aspect-ratio") !== "auto" ? "Ratio locked" : "Lock ratio"}</button><button className="small-toggle" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}>Min / Max</button></div></div>
-      <Row>{sizeField("width")}{sizeField("height")}</Row>
+      }}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 10 4-4M5 7l-1 1a2.8 2.8 0 0 0 4 4l1-1M7 5l1-1a2.8 2.8 0 0 1 4 4l-1 1" /></svg></button></div>
       {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row><p className="property-note">Min / Max follow the CSS box model. In content-box, padding and borders add to these limits.</p></>}
       {isFlex && <>
         <Segmented label="Direction" value={read("flex-direction").startsWith("column") ? "column" : "row"} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", `${v}${read("flex-direction").endsWith("reverse") ? "-reverse" : ""}`)} />
@@ -173,7 +172,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
       </>}
       {(isFlex || isGrid) && <>
-        <SelectField label="Reading direction" value={read("direction")} options={[{ value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => set("direction", v)} />
+        <SelectField label="Reading order" value={read("direction")} options={[{ value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => set("direction", v)} />
         <div className="property-subheading"><span>{isGrid ? "Cell alignment" : "Content alignment"}</span></div>
         <div className="layout-alignment">
           <div className="alignment-grid" role="group" aria-label="Content alignment">

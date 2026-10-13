@@ -6,12 +6,13 @@ export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel
 
 type Commit = (value: string) => boolean | void;
 
-export function Section({ title, children, defaultOpen = true, onReset }: { title: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void }) {
+export function Section({ title, children, defaultOpen = true, onReset, actions }: { title: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode }) {
   const [open, setOpen] = useState(defaultOpen);
   const headingId = useId();
   return <section className="property-section" aria-labelledby={headingId}>
     <div className="property-section-heading">
       <button id={headingId} className="section-toggle" aria-expanded={open} onClick={() => setOpen(!open)}><span className={`section-chevron${open ? " open" : ""}`} aria-hidden="true" />{title}</button>
+      {actions}
       {onReset && <button className="property-reset" title={`Reset ${title.toLowerCase()} overrides`} aria-label={`Reset ${title.toLowerCase()} overrides`} onClick={onReset}>Reset</button>}
     </div>
     {open && <div className="property-section-body">{children}</div>}
@@ -51,7 +52,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   const options = (suggestions ?? []).filter((option) => !filterOptions || `${option.value} ${option.label ?? ""}`.toLowerCase().includes(draft.toLowerCase()));
   const chooseOption = (next: string) => { setDraft(next); setInvalid(onCommit(next) === false); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
   const cancelled = useRef(false);
-  useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
+  useEffect(() => { setDraft(value); setInvalid(false); }, [value, onCommit]);
   const commit = () => {
     if (cancelled.current) { cancelled.current = false; return; }
     if (draft !== value) setInvalid(onCommit(draft.trim()) === false);

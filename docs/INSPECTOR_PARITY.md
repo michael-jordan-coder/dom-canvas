@@ -60,3 +60,9 @@ Browser evidence on isolated port 5181: Grid bottom-right placed a 40px child at
 - Vector path point editing and visual editing of SVG paint-server gradients are not implemented; authored data is retained.
 
 Compatibility: outside a flex main axis, Fill uses CSS stretch when available, with a percentage fallback. Vertical Fill depends on the containing block having a definite height. The editor does not infer authored sizing modes from resolved computed pixels; CSS mode explicitly represents stylesheet ownership.
+
+## Density correction after user review
+
+Re-inspected the actual Figma desktop sidebar on 2026-10-13: 241px sidebar and approximately 24px property fields at logical pixel scale. Corrected the oversized 288px/30px implementation: right panel 241px, fields/selects/swatches 24px, smaller section gaps and 28px layer rows. Removed the redundant Inspector header, moved Copy to a compact header action, replaced the Resizing action row with an inline ratio icon and a constraints icon in the section heading. Fixed/CSS sizing uses an unobtrusive dropdown arrow; Hug/Fill remain labeled and all modes retain accessible names and tooltips. Removed prominent blue override rails.
+
+Browser checks on isolated port 5181: the reported 687.31 and 491.88 values fit without horizontal input scrolling; panel measured 241px and field outer height 24px. Mode changes, ratio pressed state and constraint disclosure worked. Also corrected stale numeric drafts when CSS constraints resolve an entered dimension back to the same prior measured value (687.31 request clamped to 484 by the imported max-width). Main document was inspected without editing its content. Screenshot: /tmp/dom-canvas-compact-inspector.png.

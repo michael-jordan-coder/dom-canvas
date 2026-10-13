@@ -385,13 +385,7 @@ export function App() {
       </aside>
 
       <aside className={`panel right${inspectorTab === "css" ? " code-panel" : ""}`}>
-        <div className="panel-top">
-          <div className="file-name">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? "Element" : "Inspector"}</div>
-          <button className="btn-primary" onClick={copyCode} disabled={!activeArtboard} title="Copy this frame’s HTML and applied CSS">
-            {copied ? "Copied" : "Copy frame"}
-          </button>
-        </div>
-        {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
+        <div className="inspector-header">
         <div className="inspector-tabs" role="tablist" aria-label="Inspector mode" onKeyDown={(e) => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
           e.preventDefault(); e.stopPropagation();
@@ -403,6 +397,9 @@ export function App() {
           <button id="design-tab" role="tab" tabIndex={inspectorTab === "design" ? 0 : -1} aria-selected={inspectorTab === "design"} aria-controls="inspector-content" onClick={() => setInspectorTab("design")}>Design</button>
           <button id="css-tab" role="tab" tabIndex={inspectorTab === "css" ? 0 : -1} aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS{activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <span className="draft-dot" aria-label="Draft pending" />}</button>
         </div>
+          <button className="copy-control" onClick={copyCode} disabled={!activeArtboard} title="Copy frame HTML and CSS" aria-label={copied ? "Copied" : "Copy frame"}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="8" rx="1.5"/><path d="M9.5 3H4A1.5 1.5 0 0 0 2.5 4.5V10"/></svg></button>
+        </div>
+        {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
         {inspectorTab === "design" && activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <div className="draft-notice">CSS draft kept. Open CSS to preview or apply it.</div>}
         <div className="panel-scroll" id="inspector-content" role="tabpanel" aria-labelledby={`${inspectorTab}-tab`}>
           {inspectorTab === "css" ? activeArtboard ? (

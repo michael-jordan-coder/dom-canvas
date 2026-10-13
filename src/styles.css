@@ -294,7 +294,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 40px;
+  height: 32px;
   padding: 0 16px;
   font-weight: 550;
   flex-shrink: 0;
@@ -332,7 +332,7 @@ button:disabled {
 .layer {
   display: flex;
   align-items: center;
-  height: 32px;
+  height: 28px;
   padding-right: 8px;
   margin: 0 8px;
   border-radius: var(--radius-control);
@@ -704,49 +704,49 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .layer[role="treeitem"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* Property panel: compact controls, explicit hierarchy and CSS overrides. */
-.panel.right { width: 288px; bottom: var(--gutter); font-size: 12px; }
+.panel.right { width: 241px; bottom: var(--gutter); font-size: 11px; }
 .panel.right.code-panel { width: min(380px, calc(100vw - 32px)); }
-.canvas-navigation { right: 304px; }
+.canvas-navigation { right: 257px; }
 .css-mode .canvas-navigation { right: 396px; }
 .panel.right .panel-top { height: 48px; }
 .panel.right .btn-primary { height: 28px; }
-.panel.right .selection-path { flex-wrap: nowrap; overflow-x: auto; padding: 8px 12px; flex-shrink: 0; min-height: 40px; }
+.panel.right .selection-path { flex-wrap: nowrap; overflow-x: auto; padding: 3px 8px; flex-shrink: 0; min-height: 28px; }
 .selection-path > button, .selection-path .path-item { flex-shrink: 0; }
-.selection-summary { padding: 16px 16px 4px; display: flex; gap: 8px; align-items: center; }
-.selection-summary strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.selection-summary { padding: 12px 12px 4px; display: flex; gap: 8px; align-items: center; }
+.selection-summary strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
 .node-badge { font: 10px/18px var(--mono); padding: 0 5px; background: var(--field); color: var(--text-secondary); border-radius: 4px; }
 .frame-badge { color: #8b5cf6; }
-.selection-meta { padding: 4px 16px 12px; display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 10px; }
+.selection-meta { padding: 2px 12px 8px; display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 10px; }
 .selection-meta > span { font: 10px var(--mono); }
 .property-section { border-bottom: 1px solid var(--divider); }
-.property-section-heading { display: flex; align-items: center; min-height: 42px; padding: 0 12px; gap: 8px; }
-.section-toggle { display: flex; align-items: center; gap: 8px; flex: 1; min-height: 34px; text-align: left; font-size: 12px; font-weight: 600; }
+.property-section-heading { display: flex; align-items: center; min-height: 36px; padding: 0 12px; gap: 4px; }
+.section-toggle { display: flex; align-items: center; gap: 6px; flex: 1; min-height: 28px; text-align: left; font-size: 12px; font-weight: 600; }
 .section-chevron { width: 5px; height: 5px; border-right: 1.5px solid var(--text-secondary); border-bottom: 1.5px solid var(--text-secondary); transform: rotate(-45deg); margin: 0 2px; }
 .section-chevron.open { transform: rotate(45deg); }
 .property-reset { color: var(--accent); font-size: 10px; padding: 5px; border-radius: 4px; }
 .property-reset:hover { background: var(--row-selected); }
-.property-section-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.property-section-body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px; }
 .property-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .property-row.single { grid-template-columns: minmax(0, 1fr); }
 .property-shell { display: flex; flex-wrap: wrap; align-items: center; position: relative; min-width: 0; }
-.property-shell > .field { flex: 1; height: 30px; }
+.property-shell > .field { flex: 1; height: 24px; }
 .property-shell .field .prefix { width: auto; min-width: 26px; padding: 0 6px; font-size: 10px; }
 .property-shell .field input { font-size: 11px; font-variant-numeric: tabular-nums; }
-.property-shell.overridden > .field { box-shadow: inset 2px 0 var(--accent); }
+.property-shell.overridden > .field .prefix { color: var(--accent); }
 .reset-value { width: 20px; flex-shrink: 0; align-self: stretch; color: var(--text-secondary); font-size: 14px; border-radius: 4px; }
 .reset-value:hover { color: var(--accent); background: var(--row-selected); }
 .field.invalid { border-color: var(--danger); }
 .invalid-value { width: 100%; color: var(--danger); font-size: 10px; margin-top: 3px; }
-.segmented { display: flex; padding: 3px; border-radius: 6px; background: var(--field); gap: 2px; min-height: 32px; }
-.segmented button { flex: 1; min-width: 0; padding: 4px; border-radius: 4px; font-size: 11px; color: var(--text-secondary); }
+.segmented { display: flex; padding: 2px; border-radius: 5px; background: var(--field); gap: 2px; min-height: 24px; }
+.segmented button { flex: 1; min-width: 0; padding: 2px 4px; border-radius: 3px; font-size: 11px; color: var(--text-secondary); }
 .segmented button:hover { color: var(--text); }
 .segmented button[aria-pressed="true"] { color: var(--text); background: var(--panel); box-shadow: 0 1px 3px #00000012; }
-.property-section .select-field { margin: 0; min-width: 0; min-height: 30px; font-size: 11px; }
-.property-section .select-field select { width: 140px; height: 30px; border-color: transparent; }
+.property-section .select-field { margin: 0; min-width: 0; min-height: 24px; font-size: 11px; }
+.property-section .select-field select { width: 120px; height: 24px; border-color: transparent; }
 .property-row .select-field { gap: 4px; }
 .property-row .select-field select { flex: 1; width: 0; }
 .layout-alignment { display: flex; gap: 12px; align-items: center; }
-.alignment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 5px; width: 72px; height: 72px; flex-shrink: 0; border: 1px solid var(--divider); border-radius: 6px; }
+.alignment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 5px; width: 60px; height: 60px; flex-shrink: 0; border: 1px solid var(--divider); border-radius: 6px; }
 .alignment-grid button { display: grid; place-items: center; border-radius: 3px; }
 .alignment-grid button > span { width: 3px; height: 3px; border-radius: 50%; background: var(--text-secondary); }
 .alignment-grid button:hover { background: var(--hover); }
@@ -755,13 +755,13 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .alignment-options { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .alignment-options .select-field { display: block; }
 .alignment-options .select-field > span { display: block; font-size: 10px; margin-bottom: 3px; color: var(--text-secondary); }
-.alignment-options .select-field select { width: 100%; height: 26px; }
+.alignment-options .select-field select { width: 100%; height: 24px; }
 .property-subheading { display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); font-size: 11px; min-height: 18px; }
 .small-toggle { font-size: 10px; color: var(--text-secondary); padding: 2px 4px; border-radius: 3px; }
 .small-toggle:hover, .small-toggle[aria-pressed="true"] { color: var(--accent); background: var(--row-selected); }
 .color-property { display: flex; gap: 8px; min-width: 0; align-items: center; }
 .color-property > .property-shell { flex: 1; }
-.color-picker { position: relative; width: 30px; height: 30px; flex-shrink: 0; border-radius: 5px; overflow: hidden; border: 1px solid var(--divider); background: conic-gradient(#ddd 25%, #fff 0 50%, #ddd 0 75%, #fff 0) 0 0 / 8px 8px; }
+.color-picker { position: relative; width: 24px; height: 24px; flex-shrink: 0; border-radius: 5px; overflow: hidden; border: 1px solid var(--divider); background: conic-gradient(#ddd 25%, #fff 0 50%, #ddd 0 75%, #fff 0) 0 0 / 8px 8px; }
 .color-picker > span { position: absolute; inset: 0; }
 .color-picker input { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
 .color-picker:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -812,5 +812,27 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 :root[data-scrubbing] * { cursor: ew-resize !important; user-select: none !important; }
 .gradient-summary { display: flex; align-items: center; gap: 8px; min-height: 30px; font-size: 11px; text-align: left; border-radius: 5px; }
 .gradient-summary:hover { background: var(--hover); }
-.gradient-summary-swatch { width: 30px; height: 30px; border: 1px solid var(--divider); border-radius: 5px; }
+.gradient-summary-swatch { width: 24px; height: 24px; border: 1px solid var(--divider); border-radius: 5px; }
 .gradient-disclosure { margin-left: auto; color: var(--text-secondary); padding-right: 5px; }
+
+/* Inspector density matches the 24px controls in the observed Figma sidebar. */
+.inspector-header { display: flex; align-items: center; padding-right: 8px; border-bottom: 1px solid var(--divider); flex-shrink: 0; }
+.inspector-tabs { padding: 6px 8px; align-items: center; min-height: 40px; flex-shrink: 0; border-bottom: 0; }
+.inspector-tabs button { padding: 4px 8px; font-size: 11px; }
+.inspector-header .copy-control { margin-left: auto; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; }
+.inspector-header .copy-control:hover { background: var(--hover); }
+.inspector-icon { display: grid; place-items: center; width: 24px; height: 24px; padding: 4px; flex-shrink: 0; border-radius: 4px; color: var(--text-secondary); }
+.inspector-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.inspector-icon:hover { background: var(--hover); color: var(--text); }
+.inspector-icon[aria-pressed="true"], .inspector-icon[aria-expanded="true"] { background: var(--row-selected); color: var(--accent); }
+.sizing-row { display: flex; align-items: center; gap: 4px; }
+.sizing-row > .property-row { flex: 1; min-width: 0; gap: 6px; }
+.sizing-row .field .size-mode { width: 32px; border: 0; padding: 0 1px; font-size: 10px; }
+.sizing-row .size-mode[data-mode="fixed"], .sizing-row .size-mode[data-mode="css"] { width: 16px; color: transparent; appearance: none; }
+.sizing-row .size-mode option { color: var(--text); background: var(--panel); }
+.sizing-row .field:has(.size-mode[data-mode="fixed"]), .sizing-row .field:has(.size-mode[data-mode="css"]) { position: relative; }
+.sizing-row .field:has(.size-mode[data-mode="fixed"])::after, .sizing-row .field:has(.size-mode[data-mode="css"])::after { content: ""; position: absolute; right: 5px; top: 9px; width: 4px; height: 4px; border-right: 1px solid var(--text-secondary); border-bottom: 1px solid var(--text-secondary); transform: rotate(45deg); pointer-events: none; }
+.sizing-row .field input { padding-right: 0; }
+.property-shell .reset-value { position: absolute; right: 0; top: -10px; width: 16px; height: 16px; background: var(--panel); opacity: 0; pointer-events: none; }
+.property-shell:hover .reset-value, .property-shell:focus-within .reset-value { opacity: 1; pointer-events: auto; }
+.inspector-footnote { padding: 12px; font-size: 10px; }
