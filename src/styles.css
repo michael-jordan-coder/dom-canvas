@@ -282,6 +282,7 @@ button:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.file-controls { display: flex; gap: 2px; align-items: center; }
 
 .file-name small {
   display: block;

@@ -9,6 +9,8 @@ import { ZoomControl } from "@/features/canvas/ZoomControl";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
+import { FileControls } from "@/features/document/FileControls";
+import { encodeProject, inertProjectHtml, type ProjectFile } from "@/features/document/projectFile";
 import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
@@ -93,6 +95,24 @@ export function App() {
   const commitArtboard = useCallback((id: string, patch: Partial<Artboard>, group?: symbol) => {
     commit((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)), group);
   }, [commit]);
+
+  const saveProject = () => {
+    const snapshot = artboards.map(ab => { const root = hostsRef.current.get(ab.id)?.shadowRoot; return root ? { ...ab, html: serializeRoot(root) } : ab; });
+    const url = URL.createObjectURL(new Blob([encodeProject(snapshot, camera)], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = "Untitled.domcanvas.json"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setNotice("Canvas file exported — applied styles only. CSS drafts remain in the editor.");
+  };
+  const openProject = (project: ProjectFile) => {
+    const loaded = project.artboards.map(ab => ({ ...ab, id: newId(), html: inertProjectHtml(ab.html) }));
+    pendingSelection.current = null; pendingFocus.current = null;
+    setSelectionMenu(null); setCssPreview(null);
+    commit(() => loaded);
+    setCamera(project.camera);
+    setSelection(loaded.length ? { kind: "artboard", artboardId: loaded[0].id } : { kind: "none" });
+    setNotice(`Opened ${loaded.length} frames. Undo restores the previous document.`);
+  };
 
   const addArtboard = useCallback((content: Pick<Artboard, "html" | "css" | "fonts"> & Partial<Pick<Artboard, "name" | "width">>) => {
     const id = newId();
@@ -407,6 +427,7 @@ export function App() {
             Untitled
             <small role="status" className={doc.saveStatus.startsWith("Not saved") ? "save-error" : ""}>{doc.saveStatus}</small>
           </div>
+          <FileControls onSave={saveProject} onOpen={openProject} onError={setNotice} />
         </div>
         <div className="section-label">Layers<div className="history-controls"><button title="Undo (⌘/Ctrl+Z)" disabled={!doc.canUndo} onClick={() => travel("undo")}>Undo</button><button title="Redo (⌘/Ctrl+Shift+Z)" disabled={!doc.canRedo} onClick={() => travel("redo")}>Redo</button></div></div>
         <Layers
