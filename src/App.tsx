@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, isTyping } from "@/features/canvas/Canvas";
-import { getTranslate, setTranslate } from "@/features/canvas/elementStyle";
+import { getTranslate, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
@@ -280,10 +280,11 @@ export function App() {
     } else if (selection.kind === "element") {
       const el = selection.element as HTMLElement | SVGElement;
       const t = getTranslate(el);
-      setTranslate(el, t.x + dx, t.y + dy);
+      const delta = screenDeltaToLocal(el, dx * camera.z, dy * camera.z);
+      setTranslate(el, t.x + delta.x, t.y + delta.y);
       commit();
     }
-  }, [selection, artboards, commit, commitArtboard]);
+  }, [selection, artboards, camera.z, commit, commitArtboard]);
 
   const selectParent = useCallback(() => {
     if (selection.kind === "element") {

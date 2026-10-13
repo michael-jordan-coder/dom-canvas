@@ -22,7 +22,7 @@ Open http://localhost:5180.
 - Select a frame by its canvas label, the Layers list, or Cmd/Ctrl-click inside it. Frame outlines are purple; element outlines are blue. Alt-click or use the selection breadcrumb to move to a parent.
 - Choose Mobile (390px), Tablet (768px), or Desktop (1440px) frame widths, and fit height to content. These presets change the frame width; they do not emulate viewport media queries.
 - Edit Flex/Grid layout, position, overflow, size, fill and typography in the Design panel. "Copy code" exports the frame back to HTML and CSS.
-- Open the CSS tab to edit the selected frame stylesheet, including selectors, custom properties, nested rules and keyframes supported by the browser. Use `:host` to target the frame. Existing imported styles have already been scoped to it.
+- Open the CSS tab to edit the selected element’s inline declarations or its frame stylesheet, including selectors, custom properties, nested rules and keyframes supported by the browser. Use `:host` to target the frame. Existing imported styles have already been scoped to it.
 - CSS drafts preview live without entering history. Apply CSS (Cmd/Ctrl+Enter) saves one undo step; Discard restores the saved stylesheet. Drafts are kept per frame while switching tabs and selections during the current session. Refreshing the page discards unapplied drafts. Inline styles from Design may override stylesheet rules; invalid CSS is ignored by the browser.
 - The document and camera are saved to localStorage automatically.
 
@@ -32,8 +32,8 @@ Open http://localhost:5180.
 | Cmd+Z / Cmd+Shift+Z | Undo / redo |
 | Cmd+D | Duplicate |
 | Backspace | Delete |
-| Arrows (Shift for 10px) | Nudge |
-| Esc | Select parent |
+| Arrows (Shift for 10px) | Nudge along canvas axes, including transformed parents |
+| Esc | Cancel an active drag; otherwise select parent |
 | Shift+0 / Shift+1 / Shift+2 | Zoom to 100% / fit all / fit selection |
 | Space + drag, scroll | Pan |
 | Cmd+scroll, pinch | Zoom |
@@ -58,3 +58,12 @@ Open http://localhost:5180.
 - Canvas controls expose zoom, Fit all and Fit selection. Selecting an offscreen layer reveals its frame.
 - The Layers tree supports arrow-key navigation, Home/End, Enter/Space selection and F2 renaming. Arrow keys in the tree do not move canvas objects.
 - Copy frame exports the selected frame with applied CSS. Pending CSS drafts are not exported. Save status reports successful local storage writes or storage failures.
+
+## Editing behavior
+
+- The inspector uses a 241px Design panel with 24px fields. CSS mode opens a wider code editor.
+- Width/height support CSS, Fixed, Hug and Fill, plus constraints and ratio locking.
+- Numeric labels scrub with one undo step. Colors, gradients, shadows and SVG properties have contextual controls.
+- Selection outlines and resize handles follow affine 2D transforms. Rotated resizing keeps the opposite corner anchored; perspective and fragmented inline boxes use an axis-aligned fallback.
+- Selected-element CSS uses explicit Apply/Discard. If Design changes while a draft is open, the editor shows a comparison before an explicit replacement. Element drafts survive tab/selection changes for the same live DOM node, but not reloads or document remounts.
+- See [inspector verification notes](docs/INSPECTOR_PARITY.md) for browser evidence and remaining QA limits.

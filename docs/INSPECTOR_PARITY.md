@@ -100,3 +100,7 @@ Verified on isolated port 5181 with parent rotate(-12deg) scale(.9) and child ro
 Canvas gestures now capture the original inline style or frame geometry. Escape in capture phase, pointer cancellation, lost pointer capture and window blur restore that snapshot without committing history; pan cancellation restores its initial camera and drawing cancellation removes the preview. Pointer IDs isolate the active gesture. Normal pointer-up clears rollback state before releasing capture so lost-capture cannot cancel a completed gesture.
 
 Build and diff review passed. Browser regression: an ordinary east-edge drag changed width 376.625 to 359.023, and one Undo restored 376.625 with history then empty. The available UI automation performs drags atomically, so Escape/blur during a held pointer gesture remains a manual QA item; restoration and event ordering were code-reviewed, not claimed as directly exercised.
+
+### Canvas-axis keyboard movement
+
+Keyboard nudge now uses the same parent-coordinate inverse as pointer dragging, with the camera scale removed so arrow steps remain document pixels. On the nested affine fixture, Shift+Right produced a measured canvas delta (10.00145, -0.000425); Undo restored the exact original screen position. README now reflects element CSS, conflict handling, compact inspector controls and gesture cancellation.
