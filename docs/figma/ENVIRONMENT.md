@@ -130,3 +130,8 @@ See topics/layout-details.md; final pair-label repeat did not confirm any value 
 Blur-effects pass: Star18:79 Layer/Background blur tests removed. Star100 ×100
 at240/200, Count7/Ratio50%, D9D9D9 Fill100%, object opacity100%, no Effects.
 Star selected, editor closed, canvas101%. See topics/blur-effects.md.
+
+Material-effects pass: Noise→Texture→Glass conversions tested on Star18:79.
+Glass changed Fill alpha to20; effect removed and Fill explicitly restored100.
+Final Star has no effects, D9D9D9 Fill100%, object opacity100%, original geometry
+and Count7/Ratio50%; selected, zoom101%. See topics/material-effects.md.

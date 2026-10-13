@@ -1,0 +1,264 @@
+{
+  "controls": [
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Angle",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 64,
+        "x": 428,
+        "y": 625.5
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "30°"
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Intensity",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 24,
+        "width": 63,
+        "x": 429,
+        "y": 651.5
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "80%"
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Refraction",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 48,
+        "x": 444,
+        "y": 713
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "40"
+    },
+    {
+      "ariaMax": "100",
+      "ariaMin": "0",
+      "ariaNow": "40",
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Refraction",
+      "lineHeight": "16px",
+      "radius": "0px",
+      "rect": {
+        "height": 44,
+        "width": 96,
+        "x": 348,
+        "y": 698.5
+      },
+      "role": "slider",
+      "tag": "DIV",
+      "value": ""
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Depth",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 48,
+        "x": 444,
+        "y": 745
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "20"
+    },
+    {
+      "ariaMax": "100",
+      "ariaMin": "1",
+      "ariaNow": "20",
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Depth",
+      "lineHeight": "16px",
+      "radius": "0px",
+      "rect": {
+        "height": 44,
+        "width": 96,
+        "x": 348,
+        "y": 730.5
+      },
+      "role": "slider",
+      "tag": "DIV",
+      "value": ""
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Dispersion",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 48,
+        "x": 444,
+        "y": 777
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "50"
+    },
+    {
+      "ariaMax": "100",
+      "ariaMin": "0",
+      "ariaNow": "50",
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Dispersion",
+      "lineHeight": "16px",
+      "radius": "0px",
+      "rect": {
+        "height": 44,
+        "width": 96,
+        "x": 348,
+        "y": 762.5
+      },
+      "role": "slider",
+      "tag": "DIV",
+      "value": ""
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Frost",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 48,
+        "x": 444,
+        "y": 809
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "5"
+    },
+    {
+      "ariaMax": "100",
+      "ariaMin": "0",
+      "ariaNow": "5",
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Frost",
+      "lineHeight": "16px",
+      "radius": "0px",
+      "rect": {
+        "height": 44,
+        "width": 96,
+        "x": 348,
+        "y": 794.5
+      },
+      "role": "slider",
+      "tag": "DIV",
+      "value": ""
+    },
+    {
+      "ariaMax": null,
+      "ariaMin": null,
+      "ariaNow": null,
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Splay",
+      "lineHeight": "16px",
+      "radius": "2px",
+      "rect": {
+        "height": 15,
+        "width": 48,
+        "x": 444,
+        "y": 841
+      },
+      "role": null,
+      "tag": "INPUT",
+      "value": "0"
+    },
+    {
+      "ariaMax": "100",
+      "ariaMin": "0",
+      "ariaNow": "0",
+      "bg": "rgba(0, 0, 0, 0)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "label": "Splay",
+      "lineHeight": "16px",
+      "radius": "0px",
+      "rect": {
+        "height": 44,
+        "width": 96,
+        "x": 348,
+        "y": 826.5
+      },
+      "role": "slider",
+      "tag": "DIV",
+      "value": ""
+    }
+  ],
+  "dialog": {
+    "ariaMax": null,
+    "ariaMin": null,
+    "ariaNow": null,
+    "bg": "rgba(0, 0, 0, 0)",
+    "fontSize": "11px",
+    "fontWeight": "400",
+    "label": null,
+    "lineHeight": "16px",
+    "radius": "0px",
+    "rect": {
+      "height": 313,
+      "width": 240,
+      "x": 269,
+      "y": 564
+    },
+    "role": "dialog",
+    "tag": "DIV",
+    "value": ""
+  }
+}
