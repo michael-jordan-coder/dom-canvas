@@ -190,3 +190,7 @@ Instance selected69%, manager closed. See topics/variable-alias.md.
 Alias-object pass: instance15:62 temporarily boundPanel alias andMode2, restored
 directPanel color/AutoMode1, blue, original geometry/radius0/1xPNG; selected69%.
 Variable values unchanged. See topics/alias-object.md.
+
+Boolean-property pass: set15:57 retains unused Research visible=True. Existing
+instance15:62 does not expose it in its panel. Set selected69%; source and instance
+geometry/paint untouched. Binding remains open. See topics/boolean-property.md.

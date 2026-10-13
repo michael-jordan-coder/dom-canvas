@@ -84,3 +84,5 @@ Do not copy private content, account details, console/network logs or entire sou
 bundles into evidence. Keep only the UI measurements and disposable fixture results.
 
 [Interim coverage audit](INTERIM_AUDIT.md) records prioritized gaps; it is not a completion claim.
+
+[Boolean property creation and unbound state](topics/boolean-property.md).

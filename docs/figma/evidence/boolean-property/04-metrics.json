@@ -1,0 +1,11 @@
+{
+  "background": "rgb(230, 230, 230)",
+  "borderRadius": "5px",
+  "color": "rgb(0, 0, 0)",
+  "fontSize": "11px",
+  "fontWeight": "400",
+  "height": 24,
+  "lineHeight": "16px",
+  "padding": "0px",
+  "width": 128
+}
