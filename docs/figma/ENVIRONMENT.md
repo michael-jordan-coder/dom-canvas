@@ -181,3 +181,8 @@ Variable-mode pass: Variable collection now retains Mode1=3366FF and
 Mode2=22AA66 for Research/Panel color. Instance15:62 restoredAuto(Mode1), blue
 binding, original200 ×125/-163/-67/radius0,1xPNG. Selected69%, manager closed.
 Mode2 deliberately retained for further research. See topics/variable-modes.md.
+
+Variable-alias pass: new Research/Panel alias retained in Variable collection.
+Mode1 references Research/Panel color; Mode2 rawFFFFFF. Source restoredMode1
+3366FF/Mode2 22AA66; instance remains directly bound toPanel color/AutoMode1.
+Instance selected69%, manager closed. See topics/variable-alias.md.

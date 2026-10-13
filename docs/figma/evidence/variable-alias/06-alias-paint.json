@@ -1,0 +1,16 @@
+[
+  {
+    "background": "rgb(170, 51, 85)",
+    "rect": {
+      "bottom": 216,
+      "height": 16,
+      "left": 508,
+      "right": 524,
+      "top": 200,
+      "width": 16,
+      "x": 508,
+      "y": 200
+    },
+    "tag": "DIV"
+  }
+]
