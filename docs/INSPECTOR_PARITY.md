@@ -256,3 +256,9 @@ Browser QA on port5181: locked heading ignored ArrowRight/Delete and had zero re
 Shadow roots intercept native click/auxclick/submit/reset activation while editing, keeping links/forms/checkboxes from performing browser actions. This is an editing interaction boundary, not a general script sandbox. Double-click QA also exposed pointer capture retargeting the event to the canvas; editing now falls back to the recorded pointer hit, with connected-element, lock and bounds checks. Corrected the row-eye hover selector so inactive visible layers do not show every eye icon at rest.
 
 Browser QA on port5181: mouse clicks on a hash link, submit button and checkbox left the URL unchanged and checkbox unchecked. Keyboard Enter on the link and a form input and Space on the checkbox also preserved the document URL/state. Double-click enabled plaintext editing, changed the heading, and Escape ended/committed the edit. Undo restored its original text. Screenshot: /tmp/dom-canvas-edit-activation.png. Build and diff check passed.
+
+## Image source replacement
+
+Added remembered Image source disclosure with URL validation and existing history integration. Explicit replacement clears img srcset/sizes and direct picture source srcset attributes, preserving other markup, styles and alt text. A contextual note explains the responsive-image change before editing. Loading status now takes precedence over stale natural dimensions while an image request is pending.
+
+Browser QA on port5181: a responsive blue300x100 image was replaced with an orange120x240 image. The box stayed180x180 with cover,100%50% position and rounded corners; all responsive source candidates were cleared. One Undo restored the original natural size, img srcset/sizes and picture source. A non-image data URL was rejected. Screenshot: /tmp/dom-canvas-replace-image.png. Build and diff check passed. File upload is not part of this control.
