@@ -1,0 +1,71 @@
+{
+  "ancestors": [
+    {
+      "ariaDisabled": null,
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "cursor": "auto",
+      "disabled": false,
+      "height": 24,
+      "opacity": "1",
+      "radius": "0px",
+      "role": null,
+      "tag": "DIV",
+      "width": 24
+    },
+    {
+      "ariaDisabled": null,
+      "background": "rgb(245, 245, 245)",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "cursor": "auto",
+      "disabled": false,
+      "height": 24,
+      "opacity": "1",
+      "radius": "5px",
+      "role": null,
+      "tag": "DIV",
+      "width": 120
+    }
+  ],
+  "input": {
+    "ariaDisabled": "true",
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(0, 0, 0)",
+    "cursor": "auto",
+    "disabled": false,
+    "height": 24,
+    "opacity": "0",
+    "radius": "0px",
+    "role": null,
+    "tag": "INPUT",
+    "width": 24
+  },
+  "siblings": [
+    {
+      "ariaDisabled": null,
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "cursor": "auto",
+      "disabled": false,
+      "height": 24,
+      "opacity": "1",
+      "radius": "0px",
+      "role": null,
+      "tag": "svg",
+      "width": 24
+    },
+    {
+      "ariaDisabled": null,
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "cursor": "auto",
+      "disabled": false,
+      "height": 1,
+      "opacity": "1",
+      "radius": "0px",
+      "role": null,
+      "tag": "LABEL",
+      "width": 1
+    }
+  ]
+}

@@ -41,6 +41,7 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
+- [Type settings UI](topics/type-ui.md): shell/tab measurements, disabled icon paint, keyboard focus and tab retention.
 - [Lists and Fill recovery](topics/text-list.md): contextual list controls and verified restoration via Actions.
 - [Constraint resizing](topics/constraints-resize.md): tested Left/Right/Center geometry and sizing transition.
 - [Text truncation and trim](topics/text-trim.md): Max lines, trimmed text bounds and parent Hug reflow.

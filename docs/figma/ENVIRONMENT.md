@@ -167,3 +167,7 @@ Fill recovery/list pass: prior Fixed gap CLOSED. Actions → Set width to fill
 container succeeded; parent180 produced child160 Fill, then restored parent80
 ×50 and child100 Fill/min100 ×30 Hug at-10/10. No list restored. Child selected,
 215%, editor closed. See topics/text-list.md.
+
+Type-UI pass: UI navigation/measurement only; child8:3 still100 Fill/min100 ×30
+Hug, original typography, selected at215%. Type settings restored to Basics and
+closed. See topics/type-ui.md.

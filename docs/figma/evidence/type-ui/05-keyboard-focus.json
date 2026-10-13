@@ -1,0 +1,45 @@
+{
+  "elements": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgb(0, 0, 0)",
+      "boxShadow": "none",
+      "height": 24,
+      "outline": "rgb(0, 0, 0) none 3px",
+      "radius": "0px",
+      "tag": "INPUT",
+      "width": 24
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "boxShadow": "none",
+      "height": 24,
+      "outline": "rgba(0, 0, 0, 0.898) none 3px",
+      "radius": "0px",
+      "tag": "DIV",
+      "width": 24
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "boxShadow": "rgb(230, 230, 230) 0px 0px 0px 1px inset",
+      "height": 24,
+      "outline": "rgb(13, 153, 255) solid 1px",
+      "radius": "5px",
+      "tag": "SPAN",
+      "width": 24
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "boxShadow": "none",
+      "height": 1,
+      "outline": "rgba(0, 0, 0, 0.898) none 3px",
+      "radius": "0px",
+      "tag": "LABEL",
+      "width": 1
+    }
+  ],
+  "focused": true
+}
