@@ -1,3 +1,4 @@
+import { flippedScale } from "@/features/canvas/scale";
 import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
 import { inspectorStyleValue } from "./styleValue";
@@ -227,7 +228,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <Section title="Position" help={<>
       <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
       <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement. Alignment uses the visible bounds of the element and its frame, without changing document flow.</p>
-    </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
+    </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "scale", "transform-origin", "z-index"])}>
       <div className="position-align" role="group" aria-label="Align to frame">
         {([
           { icon: "alignLeft", label: "Align left to frame", x: 0 },
@@ -239,12 +240,19 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         ] as const).map(action => <button key={action.icon} className="inspector-icon" aria-label={action.label} title={action.label} disabled={!hasLayoutBox || !geometry.hasFrame} onClick={() => moveTo("x" in action ? action.x : geometry.x, "y" in action ? action.y : geometry.y)}><InspectorIcon name={action.icon} /></button>)}
       </div>
       {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
-      <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
+      <div className="transform-row"><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />
+        {([0, 1] as const).map(axis => {
+          const next = flippedScale(computed.scale, axis);
+          const label = axis === 0 ? "Flip horizontally" : "Flip vertically";
+          return <button key={axis} className="inspector-icon" aria-label={label} title={`${label} around transform origin`} disabled={next === null} onClick={() => { if (next !== null) set("scale", next); }}><InspectorIcon name={axis === 0 ? "flipHorizontal" : "flipVertical"} /></button>;
+        })}
+      </div>
       <details className="layout-details" open={positionOptions} onToggle={e => setPositionOptions(e.currentTarget.open)}>
         <summary><span>CSS positioning</span><span className="disclosure-value">{read("position") === "static" ? "Flow" : read("position")}</span></summary>
         <div className="layout-details-body">
       <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
       {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
+      <Row>{property("Scale", "scale", "Scale", false)}{property("Z index", "z-index", "Z", false)}</Row>
       <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
       {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}
         </div>

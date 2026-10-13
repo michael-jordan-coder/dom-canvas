@@ -298,3 +298,12 @@ Browser QA on5181: X40->50 and Undo40; advanced left inset40->60 updated compute
 Added six icon actions at the top of Position: physical left/center/right and top/middle/bottom relative to the containing canvas frame. Uses measured visual bounds and the existing transform-aware movement path, preserving authored flow/insets. Each action commits normally to history. Controls are disabled when the element has no layout box or frame. This is single-element frame alignment; it does not implement distribution, multi-selection or SVG alignment. Perspective/3D retains the existing movement limitations.
 
 Browser QA on5181: a240x120 element in a640x160 frame aligned to X0/200/400 and Y0/20/40 within0.001px; Undo of bottom alignment restoredY20. A child with its own rotation/nonuniform scale under a rotated/scaled parent centered with errors0.0019px/0.0027px. All six actions disabled for a display:none layer. The row measures217x24 with no horizontal overflow. Build and diff check passed. Screenshot: /tmp/dom-canvas-frame-alignment.png.
+
+
+## Compact flip actions and readable transformed labels
+
+Added horizontal/vertical flips beside Rotation, moving Z index into CSS positioning alongside a Scale field. Flips negate the resolved individual CSS scale axis, preserving magnitudes, third-axis scale, rotate and transform. Position reset includes scale. Unknown/unresolved scale and zero axes disable the corresponding action. These are local scale-axis reflections around transform-origin, not world-axis matrix decomposition; SVG/frame transform controls are unchanged.
+
+Visual QA found that selection captions and dimensions inherited the reflected outline transform. Moved those labels into a separate axis-aligned overlay using measured visual bounds. Resize handles retain the transformed outline and existing cursor/resize behavior.
+
+Browser QA on5181:125%75%2 resolved to1.25 .75 2, both flips produced-1.25 -.75 2, and Undo restored each state through none. Scale0 2 disabled horizontal only. A child with imported matrix(0.952628,0.55,-0.4,0.69282,0,0) retained the exact matrix through two flips; its scale reset returned the stylesheet value1. Flip row217x24 had no overflow. The reflected card rendered mirrored text while the overlay remained readable, with computed label-container transform:none. Two parser tests cover preserved axes, involution, percentages, invalid expressions and zero axes. Build and diff check passed. Screenshot: /tmp/dom-canvas-flip-controls.png.

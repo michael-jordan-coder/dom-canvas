@@ -491,17 +491,19 @@ export function Canvas(props: Props) {
 
       <div className="overlay" data-version={version}>
         {hoverRect && <div className="outline hover" style={rectStyle(hoverRect)} />}
-        {selectedRect && (
+        {selectedRect && <>
           <div className={`outline selected ${selection.kind === "artboard" ? "frame-selection" : "element-selection"}`} style={{ ...rectStyle(selectedRect), transform: selectedRect.transform, transformOrigin: "0 0" }}>
-            <div className="selection-caption">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? selection.element.tagName.toLowerCase() : ""}</div>
             {canResize && HANDLES.map((h) => (
               <span key={h} className={`handle ${h}`} style={{ cursor: resizeCursor(h, selectedRect.transform) }} onPointerDown={startResize(h)} />
             ))}
+          </div>
+          <div className={`selection-labels ${selection.kind === "artboard" ? "frame-selection" : "element-selection"}`} style={rectStyle(selectedRect.visualBounds ?? selectedRect)}>
+            <div className="selection-caption">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? selection.element.tagName.toLowerCase() : ""}</div>
             <div className="size-pill">
               {Math.round(selectedRect.layoutWidth ?? selectedRect.width / camera.z)} × {Math.round(selectedRect.layoutHeight ?? selectedRect.height / camera.z)}
             </div>
           </div>
-        )}
+        </>}
         {drawPreview && <div className="outline draw" style={rectStyle(drawPreview)} />}
       </div>
 
@@ -514,14 +516,14 @@ export function Canvas(props: Props) {
   );
 }
 
-type OutlineRect = Rect & { transform?: string; layoutWidth?: number; layoutHeight?: number };
+type OutlineRect = Rect & { visualBounds?: Rect; transform?: string; layoutWidth?: number; layoutHeight?: number };
 function selectionOutline(element: Element, canvas: HTMLElement): OutlineRect {
   const box = affineBorderBox(element);
   if (!box) return elementRectInCanvas(element, canvas);
   const bounds = canvas.getBoundingClientRect();
   const sx = Math.hypot(box.matrix.a, box.matrix.b);
   const sy = Math.hypot(box.matrix.c, box.matrix.d);
-  return { left: box.origin.x - bounds.left, top: box.origin.y - bounds.top, width: box.size.width * sx, height: box.size.height * sy,
+  return { visualBounds: elementRectInCanvas(element, canvas), left: box.origin.x - bounds.left, top: box.origin.y - bounds.top, width: box.size.width * sx, height: box.size.height * sy,
     transform: `matrix(${box.matrix.a / sx},${box.matrix.b / sx},${box.matrix.c / sy},${box.matrix.d / sy},0,0)`, layoutWidth: box.size.width, layoutHeight: box.size.height };
 }
 

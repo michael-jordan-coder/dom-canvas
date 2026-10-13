@@ -1,4 +1,6 @@
 const paths = {
+  flipHorizontal: 'M8 1v3m0 2v4m0 2v3M2 4v8l4-4-4-4Zm12 0v8l-4-4 4-4Z',
+  flipVertical: 'M1 8h3m2 0h4m2 0h3M4 2h8L8 6 4 2Zm0 12h8l-4-4-4 4Z',
   alignLeft: 'M2 2v12M5 4h8v3H5zM5 10h5v3H5z',
   alignCenterX: 'M8 1v14M3 4h10v3H3zM5 10h6v3H5z',
   alignRight: 'M14 2v12M3 4h8v3H3zM6 10h5v3H6z',

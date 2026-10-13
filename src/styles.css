@@ -931,3 +931,9 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .position-align .inspector-icon { width: 28px; }
 .position-align .inspector-icon:nth-child(4) { margin-left: 8px; }
 .position-align .inspector-icon:disabled { opacity: .35; cursor: default; background: transparent; }
+
+.transform-row { display: flex; align-items: center; gap: 6px; }
+.transform-row > .property-shell { flex: 1; }
+.transform-row .inspector-icon:disabled { opacity: .35; cursor: default; background: transparent; }
+
+.selection-labels { position: absolute; pointer-events: none; }
