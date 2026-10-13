@@ -52,3 +52,6 @@ for instance research. Its configuration dialog is open. See topics/components.m
 Variant continuation: Frame2 is now component set15:57 with Default and Variant2,
 set240 ×310; each variant200 ×125. The unchanged Property1 inline name editor
 is active. See CO03 in topics/components.md.
+
+Instance continuation: node15:62 is now verified, selected Variant2 of Frame2,
+200 ×125 at -163/-67. Width override260 was reset to200 via Reset instance.

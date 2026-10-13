@@ -114,3 +114,33 @@ The native screenshot was viewed during the experiment but not saved as a durabl
 file; do not treat this paragraph as a pixel-measurement record. Next insertion
 attempt requires a fresh rendered/native state before any mutation. Native/DOM
 agreement is now an explicit verification requirement for this overlay.
+
+
+## CO06 — Instance verified, width reset and variant switch
+
+On the next fresh native AX observation the selected node was15:62 with an
+instance header. Browser DOM independently agreed. Thus insertion ultimately
+succeeded after CO05; exact timing and which pending action completed it are not
+established. Do not repeat insertion. The instance starts at -163/-67,200 ×125.
+
+Instance header exposes Frame2, More actions, From this file, Property1=Default
+and Apply variable. Compared with the main variant, Layout lacks the Flow
+selector and Toggle auto layout in this fixture. Width/height and Clip content
+remain. More actions exposes Create component, Detach instance, Reset instance,
+Reset specific changes, dev status and Use as mask.
+
+Set Width260, Enter, then More actions → Reset instance. Width returns200 while
+height stays125. This verifies the width override/reset path only, not reset
+semantics for every property or nested layer. Open Property1 and select Variant2:
+the instance property updates to Variant2. The two fixtures look identical, so
+this proves property switching, not a visible style difference between variants.
+
+Evidence: [verified instance](../evidence/components/18-instance-verified.txt),
+[width override/menu](../evidence/components/19-instance-override-menu.txt),
+[reset](../evidence/components/20-reset-instance.txt),
+[variant switch](../evidence/components/22-instance-switched.txt),
+[screenshot](../evidence/components/22-instance.png).
+
+Retained instance15:62 selects Variant2 at200 ×125. Remaining: source-to-instance
+propagation, nested/partial overrides, Reset specific changes, detach, component
+properties beyond variants, style/variable interactions and detailed UI metrics.
