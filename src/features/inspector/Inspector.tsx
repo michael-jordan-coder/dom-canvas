@@ -127,7 +127,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const isGrid = display.includes("grid");
   const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "justify-items", "align-items", "direction", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
   const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
-  const typographyProps = ["font-family", "font-size", "font-weight", "font-style", "line-height", "letter-spacing", "word-spacing", "text-align", "text-transform", "text-decoration-line", "white-space", "color"];
+  const typographyProps = ["font-family", "font-size", "font-weight", "font-style", "line-height", "letter-spacing", "word-spacing", "text-align", "text-transform", "text-decoration-line", "white-space", "direction", "overflow-wrap", "color"];
   const decorationLines = computed.textDecorationLine.split(/\s+/).filter(value => value !== "none");
   const toggleDecoration = (line: string) => {
     const next = decorationLines.includes(line) ? decorationLines.filter(value => value !== line) : [...decorationLines, line];
@@ -257,6 +257,8 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
           </div>
           <SelectField label="Case" value={read("text-transform")} options={[{ value: "none", label: "Original" }, { value: "uppercase", label: "UPPERCASE" }, { value: "lowercase", label: "lowercase" }, { value: "capitalize", label: "Title Case" }]} onCommit={(v) => set("text-transform", v)} />
           <SelectField label="Wrapping" value={read("white-space")} options={[{ value: "normal", label: "Wrap" }, { value: "nowrap", label: "No wrap" }, { value: "pre-wrap", label: "Preserve breaks" }, { value: "break-spaces", label: "Preserve spaces" }]} onCommit={(v) => set("white-space", v)} />
+          <SelectField label="Text direction" value={styled.style.direction || "default"} options={[{ value: "default", label: "Default" }, { value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => { if (v === "default") { reset(["direction"]); return; } return set("direction", v); }} />
+          <SelectField label="Long words" value={read("overflow-wrap")} options={[{ value: "normal", label: "Keep whole" }, { value: "break-word", label: "Break if needed" }, { value: "anywhere", label: "Fit width" }]} onCommit={(v) => set("overflow-wrap", v)} />
           {property("Word spacing", "word-spacing", "Words")}
         </div>
       </details>

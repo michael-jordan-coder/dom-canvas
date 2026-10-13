@@ -194,3 +194,9 @@ Browser QA on port 5181: a direct child of a flex frame grew from 100px to 420px
 Full HTML paste preserves body style/class/id/dir/lang in a DOM-serialized wrapper. Direction and language fall back to html attributes when absent on body. Serialization escapes quotes and ampersands, fixing quoted font names breaking interpolated style attributes. Fragments without these attributes retain the existing unwrapped structure.
 
 Browser QA on port 5181: a Hebrew document inherited rtl/he, retained its ID, class containing an ampersand, quoted Arial font, padding and blue background. A second document with html rtl/he and body ltr/en computed ltr and retained en and its quoted font. Undo removed the second frame and restored the prior document. Screenshot: /tmp/dom-canvas-rtl-paste.png. This does not address root-qualified selectors such as body.class or arbitrary html attributes.
+
+## Text direction and long words
+
+Type options now exposes direction for text outside Flex/Grid containers and overflow-wrap modes for long unbroken content. Default direction removes the inline override, allowing attributes, stylesheet rules and inheritance to apply. Typography reset includes both properties. Controls use the existing compact selects inside the remembered disclosure.
+
+Browser QA on port 5181: mixed Hebrew/Latin text inherited RTL, switched to LTR, and anywhere wrapping kept scrollWidth equal to clientWidth (220px) while increasing height from45 to90px. Default restored inherited RTL and removed inline direction. Undo restored LTR. Typography reset restored RTL/normal wrapping; Undo restored LTR/anywhere. Text content remained unchanged. Screenshot: /tmp/dom-canvas-text-flow.png. Build and diff check passed.
