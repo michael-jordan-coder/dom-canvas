@@ -996,3 +996,13 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .action-search-results kbd { color: var(--text-secondary); font-size: 10px; font-family: inherit; }
 .action-search-empty { padding: 16px 8px; font-size: 12px; color: var(--text-secondary); }
 .action-search-footer { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--divider); font-size: 10px; color: var(--text-secondary); }
+.variable-row, .variable-add { display: flex; flex-direction: column; gap: 5px; }
+.variable-heading { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.variable-heading code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 10px var(--mono); }
+.variable-heading > span { color: var(--text-secondary); font-size: 9px; }
+.variable-reset { width: 18px; height: 18px; color: var(--text-secondary); border-radius: 3px; }
+.variable-reset:hover { color: var(--accent); background: var(--row-selected); }
+.variable-color { display: block; width: 12px; height: 12px; border: 1px solid var(--divider); border-radius: 2px; }
+.variable-input { width: 100%; height: 24px; border: 1px solid transparent; border-radius: var(--radius-control); padding: 0 6px; background: var(--field); color: var(--text); font: 11px var(--font); }
+.variable-input:focus-visible { outline: 1px solid var(--accent); }
+.variable-error { margin: 0; font-size: 10px; color: var(--danger); }

@@ -13,6 +13,7 @@ import { ImageControls } from "./ImageControls";
 import { LayoutItemControls } from "./LayoutItemControls";
 import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
+import { CssVariables } from "./CssVariables";
 import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { layerName } from "@/features/layers/Layers";
@@ -89,7 +90,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
   }
   const el = selection.element;
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
-  if (el instanceof SVGElement) return <SvgInspector key={elementKey(el)} element={el} onChange={onChange} />;
+  if (el instanceof SVGElement) return <><SvgInspector key={elementKey(el)} element={el} onChange={onChange} /><CssVariables key={`variables-${elementKey(el)}`} element={el} onChange={onChange} /></>;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
 }
 
@@ -422,6 +423,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <ShadowEditor value={read("box-shadow")} computedValue={computed.boxShadow} onCommit={(v) => set("box-shadow", v)} />
       <SelectField label="Overflow" value={read("overflow")} options={["visible", "hidden", "clip", "auto", "scroll"]} onCommit={(v) => set("overflow", v)} />
     </Section>
+    <CssVariables element={styled} onChange={onChange} />
     <div className="inspector-footnote">↑ ↓ to adjust values · Shift for 10 · Alt for 0.1<br />Blue markers show inline overrides. Reset returns to the stylesheet.</div>
   </>;
 }
