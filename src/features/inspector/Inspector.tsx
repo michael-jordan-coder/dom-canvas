@@ -345,16 +345,17 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <ColorField label="Stroke color" value={computed.borderTopColor} onCommit={(v) => set("border-color", v)} onReset={resetProperty("border-color")} />
     </Section>
 
-    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
-      <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
+    <Section title="Position" defaultOpen={false} help={<>
       <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
+      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
+    </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
+      <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
       {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
       <div className="property-subheading"><span>Visual position in frame</span></div>
       {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
       <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
       <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
       {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}
-      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
     </Section>
 
     <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "overflow"])}>

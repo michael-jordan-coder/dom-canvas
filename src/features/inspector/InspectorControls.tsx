@@ -9,15 +9,19 @@ export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel
 
 type Commit = (value: string) => boolean | void;
 
-export function Section({ title, preferenceKey, children, defaultOpen = true, onReset, actions }: { title: string; preferenceKey?: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode }) {
+export function Section({ title, preferenceKey, children, defaultOpen = true, onReset, actions, help }: { title: string; preferenceKey?: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode; help?: ReactNode }) {
   const [open, setOpen] = useInspectorDisclosure(`section:${preferenceKey ?? title}`, defaultOpen);
   const headingId = useId();
+  const helpId = useId();
+  const [helpOpen, setHelpOpen] = useState(false);
   return <section className="property-section" aria-labelledby={headingId}>
     <div className="property-section-heading">
       <button id={headingId} className="section-toggle" aria-expanded={open} onClick={() => setOpen(!open)}><span className={`section-chevron${open ? " open" : ""}`} aria-hidden="true" />{title}</button>
       {actions}
+      {help && <button className="inspector-icon section-help-toggle" aria-label={`${title} help`} title={`${title} help`} aria-expanded={helpOpen} aria-controls={helpOpen ? helpId : undefined} onClick={() => setHelpOpen(!helpOpen)}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" /><path d="M8 7v4M8 4.5v.5" /></svg></button>}
       {onReset && <button className="property-reset" title={`Reset ${title.toLowerCase()} overrides`} aria-label={`Reset ${title.toLowerCase()} overrides`} onClick={onReset}>Reset</button>}
     </div>
+    {help && helpOpen && <div id={helpId} className="section-help">{help}</div>}
     {open && <div className="property-section-body">{children}</div>}
   </section>;
 }

@@ -916,3 +916,11 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .layer-lock { margin-left: auto; }
 .layer-visibility { margin-left: 0; }
 .frame-clipping { display: flex; align-items: center; justify-content: space-between; min-height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border); }
+
+/* Contextual guidance stays available without displacing editing controls. */
+.section-help { padding: 0 12px 10px; display: grid; gap: 6px; }
+.section-help-toggle { width: 20px; height: 20px; padding: 2px; }
+.css-editor { padding: 12px; gap: 8px; }
+.editor-guidance { color: var(--text-secondary); font-size: 11px; }
+.editor-guidance summary { cursor: pointer; min-height: 24px; line-height: 24px; }
+.editor-guidance .editor-help { font-size: 11px; margin-top: 6px; }

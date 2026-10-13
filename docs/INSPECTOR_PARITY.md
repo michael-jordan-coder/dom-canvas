@@ -268,3 +268,12 @@ Browser QA on port5181: a responsive blue300x100 image was replaced with an oran
 Added frame Clip content with optional clipContent metadata, Reset, normal history and project validation/persistence. Frame hosts apply the explicit overflow setting; disabling clipping also removes paint containment. The base stylesheet uses layout/style containment and retains default overflow:hidden, allowing imported overflow rules to work. Copied code includes browser-normalized overflow/contain overrides alongside frame fill.
 
 Browser QA on port5181: a120px child beginning100px down a160px frame became visible60px beyond its boundary when clipping was disabled, without changing frame height. Undo restored hidden overflow; Redo restored visible. Copied/pasted code retained visible overflow and layout/style containment. Reset restored hidden; Undo and reload retained visible. Four project-file tests and build passed. Screenshot: /tmp/dom-canvas-frame-clipping.png.
+
+
+## Inspector guidance density and CSS keyboard editing
+
+Kept Design panel at241px and property controls at24px. Position guidance now opens from an accessible info button instead of occupying permanent rows. CSS introductions and shortcut guidance share a native disclosure below the editor; padding/gap are12px/8px. Apply buttons expose the keyboard shortcut in their titles, and the textarea has an accessible keyboard-exit description.
+
+Shared CodeInput adds two-space Tab/Shift+Tab indentation, Enter indentation, brace-pair newlines, and up to100 draft history states isolated from document Undo. Escape followed by Tab allows keyboard focus to exit. External value/selection-identity changes reset local draft history. History records input events rather than word-level groups; drafts/history remain session-only.
+
+Browser QA on5181: measured panel241px, sizing row217x24, width/height fields91.5x24. Position help toggled without changing properties. Element CSS multiline Tab and draft Undo restored exact text; Escape/Tab focused Discard, and Discard restored the original styles. Frame CSS with live preview off preserved white text until Cmd+Enter applied an important yellow rule; document Undo restored white. CSS help expanded to show its instructions. Three code-editing tests cover selection boundaries, outdent and brace/newline behavior. Build and diff check passed. Screenshots: /tmp/dom-canvas-inspector-density.png and /tmp/dom-canvas-css-compact.png.

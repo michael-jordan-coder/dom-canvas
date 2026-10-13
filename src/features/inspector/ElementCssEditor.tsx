@@ -1,5 +1,6 @@
 import { layerName } from "@/features/layers/Layers";
 import type { Styled } from "@/features/canvas/elementStyle";
+import { CodeInput } from "./CodeInput";
 
 export type ElementCssDraft = { value: string; base: string };
 
@@ -31,18 +32,17 @@ export function ElementCssEditor({ element, draft, onDraft, onApply }: Props) {
   };
   return <section className="css-editor" aria-label="Selected element CSS editor">
     <div className="css-editor-heading"><strong>{layerName(element)}</strong><span role="status">{dirty ? "Unapplied changes" : "Inline styles"}</span></div>
-    <p className="editor-help">Declarations for this element only. These override its stylesheet. Clear a declaration to return to the stylesheet value.</p>
+
     {conflict && <div className="css-conflict" role="alert">
       <strong>Styles changed in Design</strong>
       <p>The element changed after this draft started. Compare the current styles before replacing them.</p>
       <details><summary>Current inline styles</summary><pre>{source || "No inline styles"}</pre></details>
       <div className="editor-actions"><button className="btn-ghost" onClick={() => onDraft(null)}>Use current styles</button><button className="btn-ghost" onClick={() => apply(true)}>Replace with draft</button></div>
     </div>}
-    <textarea className="code-input" aria-label="Element CSS" value={value} placeholder={'color: #1e1e1e;\npadding: 16px;'} spellCheck={false} autoCapitalize="off" autoCorrect="off" wrap="off" onChange={(event) => onDraft(event.target.value === source ? null : event.target.value)} onKeyDown={(event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") { event.preventDefault(); apply(); }
-    }} />
-    <div className="editor-actions"><button className="btn-ghost" disabled={!dirty} onClick={() => onDraft(null)}>Discard</button><button className="btn-primary" disabled={!dirty || !element.isConnected || conflict} onClick={() => apply()}>Apply to element</button></div>
+    <CodeInput label="Element CSS" identity={element} value={value} placeholder={'color: #1e1e1e;\npadding: 16px;'} onChange={next => onDraft(next === source ? null : next)} onApply={() => apply()} />
+    <div className="editor-actions"><button className="btn-ghost" disabled={!dirty} onClick={() => onDraft(null)}>Discard</button><button className="btn-primary" title="Apply (⌘/Ctrl+Enter)" disabled={!dirty || !element.isConnected || conflict} onClick={() => apply()}>Apply to element</button></div>
     <details className="css-parsed"><summary>Browser interpretation</summary><pre>{format() || "No supported declarations"}</pre></details>
-    <p className="editor-help">⌘/Ctrl + Enter to apply as one undo step. Unsupported declarations are kept in the source but ignored by the browser.</p>
+
+    <details className="editor-guidance"><summary>CSS help & keyboard shortcuts</summary><p className="editor-help">⌘/Ctrl + Enter to apply as one undo step. Unsupported declarations are kept in the source but ignored by the browser.</p><p className="editor-help">Declarations for this element only. These override its stylesheet. Clear a declaration to return to the stylesheet value.</p><p className="editor-help">Tab / Shift+Tab indent. Enter continues indentation. ⌘/Ctrl+Z undoes draft edits; Shift+⌘/Ctrl+Z redoes them. Escape then Tab moves focus out.</p></details>
   </section>;
 }
