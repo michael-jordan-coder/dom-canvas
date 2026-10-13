@@ -75,3 +75,10 @@ Left/Top as last explicitly set; constraints hidden in normal flow.
 Open: Fill restoration, Left+Right/Scale enabled contexts, vertical constraints,
 unequal/rotated children, direct parent canvas resize, Undo/Redo, constraint widget
 hit targets and focus/disabled UI measurements.
+
+## Follow-up: restoration gap closed
+
+[Lists and Fill recovery](text-list.md#tl02--fill-restored-with-the-explicit-actions-command)
+restored Fill through Actions → Set width to fill container, then verified child
+width160 under parent180 and restored100/min100 under parent80. The Current
+fixture paragraph above describes the historical end of this pass, now superseded.

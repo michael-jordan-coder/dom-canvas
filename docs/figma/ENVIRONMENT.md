@@ -162,3 +162,8 @@ Constraints-resize pass: Frame3 restored80 ×50. Child8:3 back in flow at-10/10,
 original Fill sizing NOT restored; several popup actions left Fixed. Restore Fill
 before any case assuming baseline. Child selected,215%, constraints hidden.
 See topics/constraints-resize.md and evidence/constraints-resize/12-final-fixed.txt.
+
+Fill recovery/list pass: prior Fixed gap CLOSED. Actions → Set width to fill
+container succeeded; parent180 produced child160 Fill, then restored parent80
+×50 and child100 Fill/min100 ×30 Hug at-10/10. No list restored. Child selected,
+215%, editor closed. See topics/text-list.md.

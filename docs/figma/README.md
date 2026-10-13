@@ -41,7 +41,8 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
-- [Constraint resizing](topics/constraints-resize.md): tested Left/Right/Center geometry and pending Fill restoration.
+- [Lists and Fill recovery](topics/text-list.md): contextual list controls and verified restoration via Actions.
+- [Constraint resizing](topics/constraints-resize.md): tested Left/Right/Center geometry and sizing transition.
 - [Text truncation and trim](topics/text-trim.md): Max lines, trimmed text bounds and parent Hug reflow.
 - [Text case and underline](topics/text-case.md): case rendering, nested decoration editor, center alignment and disabled states.
 - [Alignment and spacing](topics/alignment.md): selection-edge alignment, distribution and contextual spacing fields.
