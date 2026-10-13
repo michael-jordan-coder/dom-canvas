@@ -226,8 +226,18 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
     <Section title="Position" help={<>
       <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
-      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
+      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement. Alignment uses the visible bounds of the element and its frame, without changing document flow.</p>
     </>} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
+      <div className="position-align" role="group" aria-label="Align to frame">
+        {([
+          { icon: "alignLeft", label: "Align left to frame", x: 0 },
+          { icon: "alignCenterX", label: "Align horizontal center to frame", x: (geometry.frameWidth - geometry.width) / 2 },
+          { icon: "alignRight", label: "Align right to frame", x: geometry.frameWidth - geometry.width },
+          { icon: "alignTop", label: "Align top to frame", y: 0 },
+          { icon: "alignCenterY", label: "Align vertical center to frame", y: (geometry.frameHeight - geometry.height) / 2 },
+          { icon: "alignBottom", label: "Align bottom to frame", y: geometry.frameHeight - geometry.height },
+        ] as const).map(action => <button key={action.icon} className="inspector-icon" aria-label={action.label} title={action.label} disabled={!hasLayoutBox || !geometry.hasFrame} onClick={() => moveTo("x" in action ? action.x : geometry.x, "y" in action ? action.y : geometry.y)}><InspectorIcon name={action.icon} /></button>)}
+      </div>
       {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
       <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
       <details className="layout-details" open={positionOptions} onToggle={e => setPositionOptions(e.currentTarget.open)}>
@@ -378,11 +388,11 @@ function frameGeometry(element: Element) {
   const root = element.getRootNode();
   const host = root instanceof ShadowRoot ? (root.host as HTMLElement) : null;
   const rect = element.getBoundingClientRect();
-  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height, zoom: 1 };
+  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height, zoom: 1, frameWidth: 0, frameHeight: 0, hasFrame: false };
   const parent = host.getBoundingClientRect();
   const zoom = parent.width / host.offsetWidth || 1;
   const round = (n: number) => Math.round(n * 100) / 100;
-  return { zoom, x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
+  return { zoom, frameWidth: parent.width / zoom, frameHeight: parent.height / zoom, hasFrame: true, x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
 }
 function trimNumber(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+px$/.test(part) ? String(Math.round(parseFloat(part) * 100) / 100) : part).join(" "); }
 function withPx(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+$/.test(part) ? `${part}px` : part).join(" "); }

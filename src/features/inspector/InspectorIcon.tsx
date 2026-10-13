@@ -1,4 +1,10 @@
 const paths = {
+  alignLeft: 'M2 2v12M5 4h8v3H5zM5 10h5v3H5z',
+  alignCenterX: 'M8 1v14M3 4h10v3H3zM5 10h6v3H5z',
+  alignRight: 'M14 2v12M3 4h8v3H3zM6 10h5v3H6z',
+  alignTop: 'M2 2h12M3 5h3v8H3zM10 5h3v5h-3z',
+  alignCenterY: 'M1 8h14M3 3h3v10H3zM10 5h3v6h-3z',
+  alignBottom: 'M2 14h12M3 3h3v8H3zM10 6h3v5h-3z',
   italic: 'M6 3h7M3 13h7M10 3 6 13',
   underline: 'M4 2v5a4 4 0 0 0 8 0V2M3 14h10',
   strikethrough: 'M12 4c-1-3-8-3-8 1 0 2 3 2 4 3s4 1 4 3c0 3-7 4-9 1M2 8h12',

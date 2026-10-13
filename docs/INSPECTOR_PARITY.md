@@ -291,3 +291,10 @@ Browser QA on5181: HTML ArrowUp at100 stayed100; typing-20 and ArrowDown stayed0
 Compared the local canvas reference NodeProperties: Position precedes Layout with coordinates and rotation first. Reordered HTML controls accordingly and moved frame X/Y ahead of frame sizing. HTML position is open by default while preserving any explicit saved collapse preference. Coordinates, rotation and stacking remain directly available; flow mode, insets and transform origin sit in remembered CSS positioning disclosure, with a compact current-mode summary. This changes presentation, not the existing DOM transform/flow semantics.
 
 Browser QA on5181: X40->50 and Undo40; advanced left inset40->60 updated computed left60px, Undo restored40. Switching to the frame exposed section order Position, Frame, Fill. Returning to the element retained the open advanced disclosure; after closing it, Tab from Z index focused its summary. The final compact view shows Position, Layout, Appearance and Fill without scrolling. Build and diff check passed. Screenshot: /tmp/dom-canvas-position-first.png.
+
+
+## Align HTML elements to their frame
+
+Added six icon actions at the top of Position: physical left/center/right and top/middle/bottom relative to the containing canvas frame. Uses measured visual bounds and the existing transform-aware movement path, preserving authored flow/insets. Each action commits normally to history. Controls are disabled when the element has no layout box or frame. This is single-element frame alignment; it does not implement distribution, multi-selection or SVG alignment. Perspective/3D retains the existing movement limitations.
+
+Browser QA on5181: a240x120 element in a640x160 frame aligned to X0/200/400 and Y0/20/40 within0.001px; Undo of bottom alignment restoredY20. A child with its own rotation/nonuniform scale under a rotated/scaled parent centered with errors0.0019px/0.0027px. All six actions disabled for a display:none layer. The row measures217x24 with no horizontal overflow. Build and diff check passed. Screenshot: /tmp/dom-canvas-frame-alignment.png.
