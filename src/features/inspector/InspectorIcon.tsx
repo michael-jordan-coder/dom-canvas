@@ -1,4 +1,5 @@
 const paths = {
+  duplicate: 'M6 6h7v7H6zM3 10H2V2h8v1',
   moveUp: 'M8 13V3M4 7l4-4 4 4',
   moveDown: 'M8 3v10M4 9l4 4 4-4',
   remove: 'M4 4l8 8M12 4l-8 8',

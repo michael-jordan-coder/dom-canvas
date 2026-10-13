@@ -48,6 +48,14 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
     if (onLayersChange(order.map(i => layers[i]), order)) setExpandedLayer(current => current === index ? target : current === target ? index : current);
   };
   const computedLayers = splitCss(computedValue, ",");
+  const duplicate = (index: number) => {
+    const order = layers.map((_, i) => i);
+    order.splice(index + 1, 0, index);
+    if (onLayersChange(order.map(i => layers[i]), order)) {
+      setExpandedLayer(index + 1);
+      setSelectedStop(0);
+    }
+  };
   const update = (index: number, gradient: Gradient) => onCommit(layers.map((layer, i) => i === index ? serialize(gradient) : layer).join(", "));
   return <>
     {layers.map((layer, index) => {
@@ -55,6 +63,7 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
       const resolved = computedLayers.length === layers.length ? parseGradient(computedLayers[index]) : null;
       return <div className="gradient-layer" key={index}>
         <div className="effect-heading"><span className="background-layer-label">{gradient ? "Linear gradient" : "Image / custom"} {layers.length > 1 ? index + 1 : ""}</span>
+          <button className="inspector-icon" title="Duplicate background layer" aria-label={`Duplicate background layer ${index + 1}`} onClick={() => duplicate(index)}><InspectorIcon name="duplicate" /></button>
           {layers.length > 1 && <>
             <button className="inspector-icon" title="Move background up" aria-label={`Move background layer ${index + 1} up`} disabled={index === 0} onClick={() => move(index, -1)}><InspectorIcon name="moveUp" /></button>
             <button className="inspector-icon" title="Move background down" aria-label={`Move background layer ${index + 1} down`} disabled={index === layers.length - 1} onClick={() => move(index, 1)}><InspectorIcon name="moveDown" /></button>

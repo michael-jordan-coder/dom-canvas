@@ -35,6 +35,11 @@ export function ShadowEditor({ value, computedValue, onCommit }: { value: string
       setExpandedLayer(current => current === null || current === index ? null : current > index ? current - 1 : current);
     }
   };
+  const duplicate = (index: number) => {
+    const next = [...layers];
+    next.splice(index + 1, 0, layers[index]);
+    if (onCommit(next.join(", "))) setExpandedLayer(index + 1);
+  };
   return <>
     {layers.length === 0 && <p className="property-note">No shadows</p>}
     {layers.map((layer, index) => {
@@ -48,6 +53,7 @@ export function ShadowEditor({ value, computedValue, onCommit }: { value: string
             <span className="effect-swatch" style={{ background: shadow?.color ?? "transparent" }} />
             <span>{shadow ? shadow.inset ? "Inner shadow" : "Drop shadow" : "Custom shadow"}</span>
           </button>
+          <button className="inspector-icon" title="Duplicate shadow" aria-label={`Duplicate shadow ${index + 1}`} onClick={() => duplicate(index)}><InspectorIcon name="duplicate" /></button>
           {layers.length > 1 && <>
             <button className="inspector-icon" title="Move shadow up" aria-label={`Move shadow ${index + 1} up`} disabled={index === 0} onClick={() => move(index, -1)}><InspectorIcon name="moveUp" /></button>
             <button className="inspector-icon" title="Move shadow down" aria-label={`Move shadow ${index + 1} down`} disabled={index === layers.length - 1} onClick={() => move(index, 1)}><InspectorIcon name="moveDown" /></button>
