@@ -11,6 +11,7 @@ import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocu
 import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
+import { ElementCssEditor } from "@/features/inspector/ElementCssEditor";
 import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
@@ -35,6 +36,8 @@ export function App() {
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
+  const [cssScope, setCssScope] = useState<"element" | "frame">("element");
+  const elementCssDrafts = useRef(new WeakMap<Element, string>());
   const [cssDrafts, setCssDrafts] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState<string | null>(null);
   const [liveCssPreview, setLiveCssPreview] = useState(true);
@@ -339,6 +342,7 @@ export function App() {
     }
   };
 
+  const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
   const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
 
@@ -395,15 +399,18 @@ export function App() {
           document.getElementById(`${tab}-tab`)?.focus();
         }}>
           <button id="design-tab" role="tab" tabIndex={inspectorTab === "design" ? 0 : -1} aria-selected={inspectorTab === "design"} aria-controls="inspector-content" onClick={() => setInspectorTab("design")}>Design</button>
-          <button id="css-tab" role="tab" tabIndex={inspectorTab === "css" ? 0 : -1} aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS{activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <span className="draft-dot" aria-label="Draft pending" />}</button>
+          <button id="css-tab" role="tab" tabIndex={inspectorTab === "css" ? 0 : -1} aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS{activeArtboard && (cssDrafts[activeArtboard.id] !== undefined || hasElementCssDraft) && <span className="draft-dot" aria-label="Draft pending" />}</button>
         </div>
           <button className="copy-control" onClick={copyCode} disabled={!activeArtboard} title="Copy frame HTML and CSS" aria-label={copied ? "Copied" : "Copy frame"}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="8" rx="1.5"/><path d="M9.5 3H4A1.5 1.5 0 0 0 2.5 4.5V10"/></svg></button>
         </div>
         {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
-        {inspectorTab === "design" && activeArtboard && cssDrafts[activeArtboard.id] !== undefined && <div className="draft-notice">CSS draft kept. Open CSS to preview or apply it.</div>}
+        {inspectorTab === "design" && activeArtboard && (cssDrafts[activeArtboard.id] !== undefined || hasElementCssDraft) && <div className="draft-notice">{hasElementCssDraft ? "Element CSS draft kept. Open CSS to apply or discard." : "Frame CSS draft kept. Open CSS to preview or apply."}</div>}
         <div className="panel-scroll" id="inspector-content" role="tabpanel" aria-labelledby={`${inspectorTab}-tab`}>
           {inspectorTab === "css" ? activeArtboard ? (
-            <CssEditor key={activeArtboard.id} artboard={activeArtboard} draft={cssDrafts[activeArtboard.id] ?? activeArtboard.css} live={liveCssPreview} onLiveChange={setLiveCssPreview} onDraftChange={(value) => changeCssDraft(activeArtboard.id, value)} onPreview={setCssPreview} onApply={(css) => { commitArtboard(activeArtboard.id, { css }); setNotice(`CSS applied to ${activeArtboard.name}`); }} />
+            <>
+            {selection.kind === "element" && <div className="css-scope" role="group" aria-label="CSS scope"><button aria-pressed={cssScope === "element"} onClick={() => setCssScope("element")}>Selected element</button><button aria-pressed={cssScope === "frame"} onClick={() => setCssScope("frame")}>Frame stylesheet</button></div>}
+            {selection.kind === "element" && cssScope === "element" && (selection.element instanceof HTMLElement || selection.element instanceof SVGElement) ? <ElementCssEditor element={selection.element} draft={elementCssDrafts.current.get(selection.element)} onDraft={(value) => { if (value === null) elementCssDrafts.current.delete(selection.element); else elementCssDrafts.current.set(selection.element, value); bump(); }} onApply={() => { commit(); setNotice("Element CSS applied"); }} /> : <CssEditor key={activeArtboard.id} artboard={activeArtboard} draft={cssDrafts[activeArtboard.id] ?? activeArtboard.css} live={liveCssPreview} onLiveChange={setLiveCssPreview} onDraftChange={(value) => changeCssDraft(activeArtboard.id, value)} onPreview={setCssPreview} onApply={(css) => { commitArtboard(activeArtboard.id, { css }); setNotice(`CSS applied to ${activeArtboard.name}`); }} />}
+            </>
           ) : <div className="empty">Select a frame or layer to edit its frame stylesheet.</div> : (
             <Inspector selection={selection} artboards={artboards} onUpdateArtboard={commitArtboard} version={version} onChange={() => commit()} onPreview={bump} onPreviewArtboard={updateArtboard} />
           )}

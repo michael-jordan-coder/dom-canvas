@@ -840,3 +840,9 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .field .prefix:has(.property-icon) { display: grid; place-items: center; min-width: 24px; padding: 0 4px; }
 .segmented button:has(.property-icon) { display: grid; place-items: center; padding: 2px; }
 .property-subheading > .inspector-icon { width: 20px; height: 20px; padding: 2px; }
+.css-scope { display: flex; gap: 2px; padding: 3px; margin: 12px 12px 0; background: var(--field); border-radius: 5px; }
+.css-scope button { flex: 1; height: 24px; font-size: 11px; border-radius: 3px; color: var(--text-secondary); }
+.css-scope button[aria-pressed="true"] { background: var(--panel); color: var(--text); box-shadow: 0 1px 2px #0001; }
+.css-parsed { font-size: 11px; color: var(--text-secondary); }
+.css-parsed summary { cursor: pointer; }
+.css-parsed pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px; background: var(--field); border-radius: 4px; color: var(--text); line-height: 1.5; }
