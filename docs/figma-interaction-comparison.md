@@ -27,20 +27,38 @@ An existing implementation or remembered Figma behavior is not evidence of parit
 | Marquee only intersects a frame | Not yet verified | Full containment currently required |
 | Marquee starts inside a frame/container | Not yet verified | Bare frame background only |
 | Shift adds/removes selection | Not yet verified in this comparison | Implemented; parity unproven |
-| Text click versus drawn box | Not yet verified in this comparison | Implemented inside frames |
-| Text created outside a frame | Not yet verified in this comparison | Missing |
+| Text click versus drawn box | Click: Auto width; drag: Fixed size, both dimensions retained | Drawn box currently auto height; mismatch |
+| Text created outside a frame | Verified on Page 2 | Missing |
 | Resize multiple selected objects | Not yet verified | Missing |
 
 ## Access status
 
 The user explicitly approved a separate test page in this Untitled file after
 automatic approval review rejected the initial Add new page action. Do not ask
-again for that same test page. No test page has been successfully created yet.
+again for that same test page. On retry, Page 2 (`8:2`) was present and empty.
 
 Native accessibility and screenshots were readable, but subsequent input/capture
 calls intermittently failed with missing-window or screen-capture errors. The
 browser account does not have access to this file; its account picker exposes
 only that account. No access request was submitted and no sharing was changed.
 
-Resume with an operable native Figma window, create the approved test page, and
-record the actual gesture results before changing selection/text behavior.
+## Successful foreground-window retry
+
+Native input worked with Figma in front. This does not prove window switching was
+the sole cause of the previous failures. Tests on approved Page 2:
+
+- Click-created text `8:3`: Auto width, 119 x 15 after pasting
+  `Text tool comparison`. Initial typeText did not insert content; double-click
+  plus paste did. Do not interpret that automation issue as Figma behavior.
+- Drag-created text `8:4`: 170 x 45 logical pixels, Fixed size selected.
+  Pasting a wrapping sentence retained both dimensions.
+- Marquee from screenshot (810,460) to (1240,810) enclosed both text layers:
+  accessibility reported **2 items selected**.
+- Marquee from (810,600) to (950,690) partially intersected the second text box
+  (850,650 to 1190,740) and selected it. Its position and dimensions were unchanged.
+  Therefore text selection does not require full containment. Frame/container
+  rules remain unverified and must not be inferred from this text-only test.
+- Screenshot: `/tmp/figma-text-selection-reference.png` (2x pixels).
+
+Next: compare frame/container selection separately; correct drawn text sizing
+and verify the local result against this fixed-width, fixed-height reference.
