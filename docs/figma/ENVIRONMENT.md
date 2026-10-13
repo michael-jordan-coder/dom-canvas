@@ -40,3 +40,7 @@ Native `typeText` initially produced an empty text layer; double-click plus past
 inserted the intended string. Browser label selection and DOM measurements now work.
 Selecting the enclosing Layers `row` produced no change; clicking its named
 `gridcell` selected Frame 1 and exposed X -99, Y -19, W 150, H 125.
+
+Latest continuation: Frame 3 is now 80 Fixed × 50 Hug. Child 8:3 is
+100 Fill (min width 100) × 30 Hug, Auto height, relative -10/10. This supersedes
+the 240-wide state above; see PC04–PC05 in the parent-child topic.

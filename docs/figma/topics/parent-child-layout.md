@@ -92,3 +92,44 @@ Evidence: [fixed parent](../evidence/parent-child/11-parent-fixed240.txt),
 
 Retained research fixture: Frame 3 width 240 Fixed, height 35 Hug; text child
 220 Fill × 15 Hug, Auto height. Ignore auto layout is off. No product code changed.
+
+
+## PC04 — Parent shrink propagates through Fill and Hug height
+
+From the retained 240 × 35 parent / 220 × 15 child, set parent width to 80.
+The parent becomes 80 Fixed × 65 Hug; the text becomes 60 Fill × 45 Hug,
+still Auto height. The screenshot shows three wrapped lines. This is a chain
+of parent width → child width → text reflow → child height → parent Hug height.
+
+Evidence: [parent 80](../evidence/parent-child/16-parent80.txt),
+[child reflow](../evidence/parent-child/17-child60-reflow.txt).
+
+## PC05 — Min width can exceed the available container width
+
+Open the child's width menu; activate Add min width, then enter 100 and Enter
+in the newly exposed Min width combobox. In this centered, unclipped fixture:
+
+- Child remains Fill but becomes 100 × 30, Auto height, relative X=-10 and Y=10.
+- Parent stays width 80 Fixed and becomes height 50 Hug.
+- Width input label becomes `Horizontal resizing + min width`.
+- Width menu representation now includes `Min width: 100` and `Remove min`.
+- The separate Min width editing row is visible immediately after editing.
+  Select the parent and reselect the child: that row disappears, while the
+  100 minimum remains represented in the width field/menu. Do not model this
+  editor's expanded state as identical to whether the document has a limit.
+
+Evidence: [child after min](../evidence/parent-child/20-min100-child.txt),
+[screenshot](../evidence/parent-child/20-min100-child.png),
+[parent result](../evidence/parent-child/21-parent-after-min100.txt),
+[reselected child](../evidence/parent-child/22-child-reselected.txt).
+
+Automation qualification: Enter on an option locator did not itself reliably
+move menu focus to that option. A successful attempt followed an observed
+`optionFocused` class on Add min width after reopening. A previous click merely
+closed the menu. Do not document unsuccessful attempts as product semantics.
+The attempt to measure the Min width input after reselection failed because
+its transient editor had closed; no CSS measurement is claimed for this field.
+
+Latest retained state supersedes PC03: Frame 3 is 80 Fixed × 50 Hug; its child
+is 100 Fill (min 100) × 30 Hug, Auto height, relative -10/10. Max constraints,
+removing limits, conflicting min/max, and Undo of limits remain open.
