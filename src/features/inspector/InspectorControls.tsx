@@ -1,3 +1,4 @@
+import { ColorPopover } from "./ColorPopover";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { colorWithAlpha, parseColor } from "./color";
@@ -151,11 +152,14 @@ export function TextArea({ value, onCommit }: { value: string; onCommit: Commit 
 
 export function ColorField({ value, label, onCommit, onReset }: { value: string; label: string; onCommit: Commit; onReset?: () => void }) {
   const parsed = parseColor(value);
+  const edits = useContext(InspectorEdits);
+  const swatch = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
   return <div className="color-property">
-    <label className="color-picker" title={`Pick ${label}`}>
+    <button ref={swatch} className="color-picker" title={`Pick ${label}`} aria-label={`Pick ${label}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) { edits?.finish(false); setOpen(false); } else { edits?.begin(); setOpen(true); } }}>
       <span style={{ background: value }} />
-      <input type="color" aria-label={`Pick ${label}`} value={parsed?.hex ?? "#000000"} onChange={(e) => onCommit(colorWithAlpha(e.target.value, parsed?.alpha || 1))} />
-    </label>
+    </button>
+    {open && swatch.current && <ColorPopover label={label} value={value} anchor={swatch.current} onPreview={onCommit} onClose={(cancel) => { edits?.finish(cancel); setOpen(false); }} />}
     <Field label={label} value={parsed?.hex ?? value} onCommit={(v) => {
       const next = /^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v;
       const color = parseColor(next);

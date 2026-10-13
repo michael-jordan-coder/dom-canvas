@@ -865,3 +865,24 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .layout-details .alignment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .layout-details > summary > span:first-child { white-space: nowrap; }
 .layout-state { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.color-popover { position: fixed; z-index: 50; width: 240px; background: var(--panel); color: var(--text); border: 1px solid var(--panel-border); border-radius: 8px; box-shadow: 0 8px 28px #0003; font: 11px var(--font); overflow: hidden; }
+.color-popover-heading { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 4px 12px; height: 32px; }
+.color-popover-heading strong { font-size: 11px; font-weight: 600; }
+.color-popover-heading button { width: 24px; height: 24px; font-size: 18px; color: var(--text-secondary); }
+.color-sv { position: relative; height: 144px; background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); touch-action: none; cursor: crosshair; }
+.color-sv span { position: absolute; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 2px #0008; transform: translate(-50%, -50%); pointer-events: none; }
+.color-popover-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.color-range { display: flex; align-items: center; gap: 6px; min-height: 16px; }
+.color-range > span { width: 30px; color: var(--text-secondary); }
+.color-range input { flex: 1; min-width: 0; height: 12px; margin: 0; accent-color: var(--accent); }
+.color-range output { width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
+.hue-range { appearance: none; border-radius: 10px; background: linear-gradient(to right,red,#ff0,#0f0,#0ff,#00f,#f0f,red); }
+.hue-range::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border: 2px solid white; border-radius: 50%; background: transparent; box-shadow: 0 0 2px #0009; }
+.color-channels { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.color-channels label { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary); font-size: 10px; }
+.color-popover input[type=number], .color-hex input { height: 24px; width: 100%; border: 1px solid transparent; border-radius: 4px; background: var(--field); color: var(--text); padding: 0 6px; font: 11px var(--font); }
+.color-popover input:focus-visible { outline: 1px solid var(--accent); }
+.color-hex { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+.color-hex input { min-width: 0; flex: 1; }
+.color-popover .editor-actions button { height: 24px; font-size: 11px; }
+.color-picker { cursor: pointer; }

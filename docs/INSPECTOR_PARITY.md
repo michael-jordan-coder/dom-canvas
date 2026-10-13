@@ -104,3 +104,9 @@ Build and diff review passed. Browser regression: an ordinary east-edge drag cha
 ### Canvas-axis keyboard movement
 
 Keyboard nudge now uses the same parent-coordinate inverse as pointer dragging, with the camera scale removed so arrow steps remain document pixels. On the nested affine fixture, Shift+Right produced a measured canvas delta (10.00145, -0.000425); Undo restored the exact original screen position. README now reflects element CSS, conflict handling, compact inspector controls and gesture cancellation.
+
+## In-product color picker
+
+Replaced the OS color input with a compact 240px popover: saturation/value surface, hue and alpha sliders, keyboard-editable saturation/brightness and hex. Preview stays in one InspectorEdits transaction; Done/outside dismissal commits once, Cancel/Escape restores the original attributes. No-change closes do not enter history. Focus is contained within the dialog and returns to the swatch on explicit close. The portal avoids inspector clipping; cleanup handles StrictMode remount checks without prematurely closing.
+
+Browser checks on port 5181: blue at 1% alpha rendered rgba(37,99,235,.01), Cancel restored white with Undo still disabled. Hex plus SV dragging produced #562BB8; Done followed by one Undo restored white and left history empty. Opening/closing without changing color added no history. Escape after a red preview closed the dialog, restored white, and left Undo disabled. Screenshot: /tmp/dom-canvas-color-picker.png.
