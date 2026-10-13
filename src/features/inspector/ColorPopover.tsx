@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { colorWithAlpha, parseColor } from "./color";
 
@@ -14,6 +14,19 @@ function toHex(h: number, s: number, v: number) {
 }
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
+function RgbChannel({ label, value, onCommit, onInvalid }: { label: string; value: number; onCommit: (value: number) => void; onInvalid: (invalid: boolean) => void }) {
+  const [draft, setDraft] = useState(String(value));
+  const [invalid, setInvalid] = useState(false);
+  useEffect(() => { setDraft(String(value)); setInvalid(false); onInvalid(false); }, [value]);
+  const commit = () => {
+    const number = Number(draft);
+    if (!draft.trim() || !Number.isFinite(number)) { setInvalid(true); onInvalid(true); return; }
+    const next = Math.max(0, Math.min(255, Math.round(number)));
+    setDraft(String(next)); setInvalid(false); onInvalid(false); onCommit(next);
+  };
+  return <label>{label[0]}<input aria-label={`Picker ${label}`} aria-invalid={invalid || undefined} type="number" min="0" max="255" step="1" value={draft} onChange={e => { setDraft(e.target.value); setInvalid(false); onInvalid(false); }} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commit(); } }} /></label>;
+}
+
 type Props = { label: string; value: string; anchor: HTMLElement; onPreview: (value: string) => void; onClose: (cancel: boolean) => void };
 export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props) {
   const initial = parseColor(value) ?? { hex: "#000000", alpha: 1 };
@@ -22,7 +35,17 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
   const [color, setColor] = useState(() => ({ ...toHsv(initial.hex), a: initial.alpha }));
   const [hexDraft, setHexDraft] = useState(initial.hex);
   const [invalid, setInvalid] = useState(false);
+  const [format, setFormat] = useState<"hex" | "rgb">("hex");
+  const [rgbInvalid, setRgbInvalid] = useState<Record<string, boolean>>({});
   const dialog = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = dialog.current;
+    if (!el) return;
+    const anchorBounds = anchor.getBoundingClientRect();
+    const bounds = el.getBoundingClientRect();
+    el.style.left = `${Math.max(8, Math.min(window.innerWidth - bounds.width - 8, anchorBounds.left - bounds.width - 8))}px`;
+    el.style.top = `${Math.max(8, Math.min(anchorBounds.top - 8, window.innerHeight - bounds.height - 8))}px`;
+  });
   const finished = useRef(false);
   const mounted = useRef(false);
   const latest = useRef({ onPreview, onClose });
@@ -68,7 +91,7 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
   return createPortal(<div ref={dialog} className="color-popover" role="dialog" aria-label={`${label} picker`} style={{ left, top }} onKeyDown={(event) => {
     event.stopPropagation();
     if (event.key !== "Tab") return;
-    const controls = Array.from(dialog.current!.querySelectorAll<HTMLElement>('input:not(:disabled), button:not(:disabled)'));
+    const controls = Array.from(dialog.current!.querySelectorAll<HTMLElement>('input:not(:disabled), select:not(:disabled), button:not(:disabled)'));
     const first = controls[0], last = controls.at(-1);
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -84,9 +107,20 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
         <label>Saturation<input aria-label="Saturation" type="number" min="0" max="100" value={Math.round(color.s * 100)} onChange={(e) => update({ ...color, s: clamp(Number(e.target.value) / 100) })} /></label>
         <label>Brightness<input aria-label="Brightness" type="number" min="0" max="100" value={Math.round(color.v * 100)} onChange={(e) => update({ ...color, v: clamp(Number(e.target.value) / 100) })} /></label>
       </div>
-      <label className="color-hex">Hex<input aria-label="Picker hex" aria-invalid={invalid || undefined} spellCheck={false} value={hexDraft} onChange={(e) => { setHexDraft(e.target.value); setInvalid(false); }} onBlur={applyHex} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyHex(); } }} /></label>
-      {invalid && <span className="invalid-value">Enter a valid hex color.</span>}
-      <div className="editor-actions"><button className="btn-ghost" onClick={() => finish(true)}>Cancel</button><button className="btn-primary" disabled={invalid} onClick={() => finish(false)}>Done</button></div>
+      <div className="color-value-row">
+        <select className="color-format" aria-label="Color format" value={format} onChange={e => { setFormat(e.target.value as "hex" | "rgb"); setInvalid(false); setRgbInvalid({}); setHexDraft(toHex(color.h, color.s, color.v)); }}><option value="hex">Hex</option><option value="rgb">RGB</option></select>
+        {format === "hex" ? <label className="color-hex"><input aria-label="Picker hex" aria-invalid={invalid || undefined} spellCheck={false} value={hexDraft} onChange={(e) => { setHexDraft(e.target.value); setInvalid(false); }} onBlur={applyHex} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyHex(); } }} /></label> : <div className="color-channels rgb-channels">
+          {(["Red", "Green", "Blue"] as const).map((channel, index) => {
+            const hex = toHex(color.h, color.s, color.v);
+            return <RgbChannel key={channel} label={channel} onInvalid={invalid => setRgbInvalid(current => current[channel] === invalid ? current : { ...current, [channel]: invalid })} value={parseInt(hex.slice(1 + index * 2, 3 + index * 2), 16)} onCommit={value => {
+              const next = hex.slice(0, 1 + index * 2) + value.toString(16).padStart(2, "0") + hex.slice(3 + index * 2);
+              update({ ...toHsv(next), a: color.a });
+            }} />;
+          })}
+        </div>}
+      </div>
+      {invalid && format === "hex" && <span className="invalid-value">Enter a valid hex color.</span>}
+      <div className="editor-actions"><button className="btn-ghost" onClick={() => finish(true)}>Cancel</button><button className="btn-primary" disabled={invalid || Object.values(rgbInvalid).some(Boolean)} onClick={() => finish(false)}>Done</button></div>
     </div>
   </div>, document.body);
 }
