@@ -307,3 +307,10 @@ Added horizontal/vertical flips beside Rotation, moving Z index into CSS positio
 Visual QA found that selection captions and dimensions inherited the reflected outline transform. Moved those labels into a separate axis-aligned overlay using measured visual bounds. Resize handles retain the transformed outline and existing cursor/resize behavior.
 
 Browser QA on5181:125%75%2 resolved to1.25 .75 2, both flips produced-1.25 -.75 2, and Undo restored each state through none. Scale0 2 disabled horizontal only. A child with imported matrix(0.952628,0.55,-0.4,0.69282,0,0) retained the exact matrix through two flips; its scale reset returned the stylesheet value1. Flip row217x24 had no overflow. The reflected card rendered mirrored text while the overlay remained readable, with computed label-container transform:none. Two parser tests cover preserved axes, involution, percentages, invalid expressions and zero axes. Build and diff check passed. Screenshot: /tmp/dom-canvas-flip-controls.png.
+
+
+## Compact effect layers and paint ordering
+
+Shadows now use single-open compact rows with color swatch, drop/inner/custom label, reorder arrows and remove icon. New shadows open for immediate editing. Moving/removing a layer updates the expanded index so it follows the same effect; endpoint arrows disable. Reordering preserves each authored shadow string, including effects that require the CSS fallback. Gradient removal now similarly shifts or clears its expanded index instead of opening a different layer.
+
+Browser QA on5181: three distinct shadows rendered as31px rows at217px width with no overflow. Moving the blue inner shadow from second to first updated box-shadow order and kept its8px blur editor open; Undo restored original order. Removing a preceding red shadow retained the green shadow's open controls at its new index. Added shadows opened with16px blur. Top-up and bottom-down were disabled. Two gradients with angles135/90 retained the90-degree editor after removing the first layer. Build and diff check passed. Screenshot: /tmp/dom-canvas-compact-effects.png.

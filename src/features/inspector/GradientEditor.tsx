@@ -45,7 +45,7 @@ export function GradientEditor({ value, computedValue, onCommit }: { value: stri
       const gradient = parseGradient(layer);
       const resolved = computedLayers.length === layers.length ? parseGradient(computedLayers[index]) : null;
       return <div className="gradient-layer" key={index}>
-        <div className="property-subheading"><span>{gradient ? "Linear gradient" : "Image / custom gradient"} {layers.length > 1 ? index + 1 : ""}</span><button className="small-toggle" aria-label={`Remove background layer ${index + 1}`} onClick={() => onCommit(layers.filter((_, i) => i !== index).join(", ") || "none")}>Remove</button></div>
+        <div className="property-subheading"><span>{gradient ? "Linear gradient" : "Image / custom gradient"} {layers.length > 1 ? index + 1 : ""}</span><button className="small-toggle" aria-label={`Remove background layer ${index + 1}`} onClick={() => { if (onCommit(layers.filter((_, i) => i !== index).join(", ") || "none")) setExpandedLayer(current => current === null || current === index ? null : current > index ? current - 1 : current); }}>Remove</button></div>
         {gradient && <button className="gradient-summary" aria-label={`Edit gradient ${index + 1}`} aria-expanded={expandedLayer === index} onClick={() => setExpandedLayer(expandedLayer === index ? null : index)}><span className="gradient-summary-swatch" style={{ backgroundImage: layer }} /><span>{gradient.stops.length} colors · {Math.round(gradient.angle)}°</span><span className="gradient-disclosure">{expandedLayer === index ? "⌃" : "⌄"}</span></button>}
         {gradient && expandedLayer === index ? <>
           <div className="gradient-preview" style={{ backgroundImage: layer }} />

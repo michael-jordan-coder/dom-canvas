@@ -937,3 +937,12 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .transform-row .inspector-icon:disabled { opacity: .35; cursor: default; background: transparent; }
 
 .selection-labels { position: absolute; pointer-events: none; }
+
+.effect-heading { display: flex; align-items: center; gap: 2px; min-height: 24px; }
+.effect-summary { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; height: 24px; font-size: 11px; text-align: left; }
+.effect-summary > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.effect-swatch { width: 14px; height: 14px; flex-shrink: 0; border: 1px solid var(--divider); border-radius: 3px; }
+.effect-heading > .inspector-icon { width: 20px; height: 24px; padding: 2px; }
+.effect-heading > .inspector-icon:disabled { opacity: .3; cursor: default; background: transparent; }
+.shadow-layer { gap: 6px; padding-bottom: 6px; }
+.shadow-layer + .shadow-layer { padding-top: 0; }

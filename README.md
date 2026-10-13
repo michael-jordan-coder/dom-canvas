@@ -22,6 +22,7 @@ Open http://localhost:5180.
 - Click to select, drag to move, drag the handles to resize. Double-click a layer to rename it.
 - Select a frame by its canvas label, the Layers list, or Cmd/Ctrl-click inside it. Frame outlines are purple; element outlines are blue. Alt-click or use the selection breadcrumb to move to a parent.
 - Choose Mobile (390px), Tablet (768px), or Desktop (1440px) frame widths, and fit height to content. These presets change the frame width; they do not emulate viewport media queries.
+- Effects lists shadows as compact expandable rows. Open one to edit its color and geometry; move it up/down to change paint order, or remove it. New shadows open automatically, and document Undo restores edits.
 - Flip horizontally or vertically beside Rotation. Flips use individual CSS scale around the transform origin and preserve existing transform/rotate values. CSS positioning also exposes Scale and its stylesheet reset.
 - Six compact alignment buttons move an HTML element to the frame’s left, center, right, top, middle or bottom using its visual bounds. They preserve CSS flow and support Undo; hidden elements cannot be aligned.
 - Position and rotation sit at the top of the Design panel. Expand CSS positioning for flow mode, insets and transform origin; the disclosure remembers your preference.

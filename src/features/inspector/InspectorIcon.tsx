@@ -1,4 +1,7 @@
 const paths = {
+  moveUp: 'M8 13V3M4 7l4-4 4 4',
+  moveDown: 'M8 3v10M4 9l4 4 4-4',
+  remove: 'M4 4l8 8M12 4l-8 8',
   flipHorizontal: 'M8 1v3m0 2v4m0 2v3M2 4v8l4-4-4-4Zm12 0v8l-4-4 4-4Z',
   flipVertical: 'M1 8h3m2 0h4m2 0h3M4 2h8L8 6 4 2Zm0 12h8l-4-4-4 4Z',
   alignLeft: 'M2 2v12M5 4h8v3H5zM5 10h5v3H5z',
