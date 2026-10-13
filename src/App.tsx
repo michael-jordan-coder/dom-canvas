@@ -485,10 +485,10 @@ export function App() {
   const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
   const activeArtboard = selection.kind === "none" || selection.kind === "multiple" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
-  const inspectorScope = selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
+  const inspectorScope = selection.kind === "multiple" ? "multiple" : selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
   const inspectorActions: SelectionAction[] = [
-    { label: "Collapse Design sections", disabled: selection.kind === "none" || selection.kind === "multiple" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
-    { label: "Expand Design sections", disabled: selection.kind === "none" || selection.kind === "multiple" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, true) },
+    { label: "Collapse Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
+    { label: "Expand Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, true) },
   ];
 
   const selectionActions: SelectionAction[] = selection.kind === "none" ? [] : [

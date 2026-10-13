@@ -205,7 +205,7 @@ export function TextArea({ value, onCommit }: { value: string; onCommit: Commit 
   return <textarea className="content-input" aria-label="Text content" rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={() => { if (cancelled.current) { cancelled.current = false; return; } if (draft !== value) onCommit(draft); }} onKeyDown={(e) => { if (e.key === "Escape") { cancelled.current = true; setDraft(value); e.currentTarget.blur(); } }} />;
 }
 
-export function ColorField({ value, label, onCommit, onReset }: { value: string; label: string; onCommit: Commit; onReset?: () => void }) {
+export function ColorField({ value, label, onCommit, onReset, mixed = false }: { value: string; label: string; onCommit: Commit; onReset?: () => void; mixed?: boolean }) {
   const parsed = parseColor(value);
   const edits = useContext(InspectorEdits);
   const swatch = useRef<HTMLButtonElement>(null);
@@ -213,15 +213,15 @@ export function ColorField({ value, label, onCommit, onReset }: { value: string;
   const [open, setOpen] = useState(false);
   return <div className="color-property">
     <button ref={swatch} className="color-picker" title={`Pick ${label}`} aria-label={`Pick ${label}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) { if (value !== openingColor.current) rememberRecentColor(value); edits?.finish(false); setOpen(false); } else { openingColor.current = value; edits?.begin(); setOpen(true); } }}>
-      <span style={{ background: value }} />
+      <span style={{ background: mixed ? undefined : value }}>{mixed ? "—" : null}</span>
     </button>
     {open && swatch.current && <ColorPopover label={label} value={value} anchor={swatch.current} onPreview={onCommit} onClose={(cancel) => { edits?.finish(cancel); setOpen(false); }} />}
-    <Field label={label} value={parsed?.hex ?? value} onCommit={(v) => {
+    <Field label={label} value={mixed ? "Mixed" : parsed?.hex ?? value} onCommit={(v) => {
       const next = /^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v;
       const color = parseColor(next);
-      return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, parsed?.alpha ?? 1) : next);
+      return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, mixed ? 1 : parsed?.alpha ?? 1) : next);
     }} onReset={onReset} />
-    {parsed && <div className="color-alpha"><Field label={`${label} opacity`} value={String(Math.round(parsed.alpha * 100))} suffix="%" onCommit={(v) => {
+    {parsed && !mixed && <div className="color-alpha"><Field label={`${label} opacity`} value={String(Math.round(parsed.alpha * 100))} suffix="%" onCommit={(v) => {
       const alpha = Number(v);
       if (!v || !Number.isFinite(alpha) || alpha < 0 || alpha > 100) return false;
       return onCommit(colorWithAlpha(parsed.hex, alpha / 100));

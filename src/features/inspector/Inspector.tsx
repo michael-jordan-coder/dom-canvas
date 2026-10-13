@@ -1,3 +1,4 @@
+import { MultipleInspector } from "./MultipleInspector";
 import { FontWeightField } from "./FontWeightField";
 import { splitCss, remapCssLayers } from "./cssList";
 import { flippedScale } from "@/features/canvas/scale";
@@ -34,7 +35,16 @@ export function Inspector(props: Props) {
   const session = useRef<{ dirty: boolean; restore: () => void } | null>(null);
   const begin = () => {
     const selection = props.selection;
-    if (selection.kind === "element") {
+    if (selection.kind === "multiple") {
+      const snapshots = selection.items.flatMap(item => item.kind === "element" ? [{ element: item.element, attributes: Array.from(item.element.attributes).map(attribute => ({ name: attribute.name, value: attribute.value, namespace: attribute.namespaceURI })) }] : []);
+      session.current = { dirty: false, restore: () => {
+        snapshots.forEach(({ element, attributes }) => {
+          Array.from(element.attributes).forEach(attribute => element.removeAttributeNode(attribute));
+          attributes.forEach(attribute => element.setAttributeNS(attribute.namespace, attribute.name, attribute.value));
+        });
+        props.onPreview();
+      } };
+    } else if (selection.kind === "element") {
       const element = selection.element;
       const attributes = Array.from(element.attributes).map((attribute) => ({ name: attribute.name, value: attribute.value, namespace: attribute.namespaceURI }));
       session.current = { dirty: false, restore: () => {
@@ -53,7 +63,7 @@ export function Inspector(props: Props) {
     if (!current?.dirty) return;
     if (cancel) current.restore(); else props.onChange();
   };
-  const scope = props.selection.kind === "artboard" ? "frame" : props.selection.kind === "element" && props.selection.element instanceof SVGElement ? "svg" : "html";
+  const scope = props.selection.kind === "multiple" ? "multiple" : props.selection.kind === "artboard" ? "frame" : props.selection.kind === "element" && props.selection.element instanceof SVGElement ? "svg" : "html";
   return <InspectorScope.Provider value={scope}><InspectorEdits.Provider value={{ begin, finish }}><InspectorContent {...props}
     onChange={() => { if (session.current) { session.current.dirty = true; props.onPreview(); } else props.onChange(); }}
     onUpdateArtboard={(id, patch) => { if (session.current) { session.current.dirty = true; props.onPreviewArtboard(id, patch); } else props.onUpdateArtboard(id, patch); }}
@@ -62,7 +72,7 @@ export function Inspector(props: Props) {
 
 function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: Props) {
   if (selection.kind === "none") return <div className="inspector-empty"><strong>Nothing selected</strong><p>Select a frame or an element to edit its properties.</p><span>⌘/Ctrl-click selects the frame.<br />Alt-click selects a parent.</span></div>;
-  if (selection.kind === "multiple") return <div className="inspector-empty"><strong>{selection.items.length} selected</strong><p>Drag to move together. Shift-click to add or remove. Use the selection menu to duplicate or delete the selection.</p></div>;
+  if (selection.kind === "multiple") return <MultipleInspector items={selection.items} onChange={onChange} />;
   if (selection.kind === "artboard") {
     const ab = artboards.find((item) => item.id === selection.artboardId);
     if (!ab) return null;
