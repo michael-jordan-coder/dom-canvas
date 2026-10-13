@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { getTranslate, setSize, setTranslate } from "@/features/canvas/elementStyle";
+import { useRef, useState } from "react";
+import { getLayoutSize, getTranslate, setSize, setTranslate } from "@/features/canvas/elementStyle";
+import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
 import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { layerName } from "@/features/layers/Layers";
-import { ColorField, Field, Row, Section, Segmented, SelectField, TextArea } from "./InspectorControls";
+import { ColorField, Field, InspectorEdits, Row, Section, Segmented, SelectField, TextArea } from "./InspectorControls";
 
 type Props = {
   selection: Selection;
@@ -12,9 +13,36 @@ type Props = {
   onUpdateArtboard: (id: string, patch: Partial<Artboard>) => void;
   version: number;
   onChange: () => void;
+  onPreview: () => void;
+  onPreviewArtboard: (id: string, patch: Partial<Artboard>) => void;
 };
 
-export function Inspector({ selection, artboards, onUpdateArtboard, onChange }: Props) {
+export function Inspector(props: Props) {
+  const session = useRef<{ dirty: boolean; restore: () => void } | null>(null);
+  const begin = () => {
+    const selection = props.selection;
+    if (selection.kind === "element") {
+      const element = selection.element;
+      const style = element.getAttribute("style");
+      session.current = { dirty: false, restore: () => { if (style === null) element.removeAttribute("style"); else element.setAttribute("style", style); props.onPreview(); } };
+    } else if (selection.kind === "artboard") {
+      const original = props.artboards.find((ab) => ab.id === selection.artboardId);
+      if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio }) };
+    }
+  };
+  const finish = (cancel: boolean) => {
+    const current = session.current;
+    session.current = null;
+    if (!current?.dirty) return;
+    if (cancel) current.restore(); else props.onChange();
+  };
+  return <InspectorEdits.Provider value={{ begin, finish }}><InspectorContent {...props}
+    onChange={() => { if (session.current) { session.current.dirty = true; props.onPreview(); } else props.onChange(); }}
+    onUpdateArtboard={(id, patch) => { if (session.current) { session.current.dirty = true; props.onPreviewArtboard(id, patch); } else props.onUpdateArtboard(id, patch); }}
+  /></InspectorEdits.Provider>;
+}
+
+function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: Props) {
   if (selection.kind === "none") return <div className="inspector-empty"><strong>Nothing selected</strong><p>Select a frame or an element to edit its properties.</p><span>⌘/Ctrl-click selects the frame.<br />Alt-click selects a parent.</span></div>;
   if (selection.kind === "artboard") {
     const ab = artboards.find((item) => item.id === selection.artboardId);
@@ -90,13 +118,14 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     const label = axis === "width" ? "Width" : "Height";
     const mode = sizeMode(styled, axis);
     const main = isFlexMainAxis(element, axis);
-    const measured = axis === "width" ? (element as HTMLElement).offsetWidth || geometry.width : (element as HTMLElement).offsetHeight || geometry.height;
+    const measured = getLayoutSize(element)[axis];
     const value = mode === "custom" ? styled.style.getPropertyValue(axis) : String(measured);
     return <Field prefix={axis === "width" ? "W" : "H"} label={label} value={value}
       onReset={resetGroup(sizingProperties(element, axis))}
       onCommit={(v) => {
         if (/^\d*\.?\d+$/.test(v)) {
-          const ratio = ((element as HTMLElement).offsetWidth || geometry.width) / ((element as HTMLElement).offsetHeight || geometry.height);
+          const dimensions = getLayoutSize(element);
+          const ratio = dimensions.width / dimensions.height;
           setSizeMode(styled, axis, "fixed", Number(v));
           if (read("aspect-ratio") !== "auto" && Number.isFinite(ratio) && ratio > 0) setSizeMode(styled, axis === "width" ? "height" : "width", "fixed", axis === "width" ? Number(v) / ratio : Number(v) * ratio);
           onChange(); return true;
@@ -124,14 +153,13 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
       <div className="property-subheading"><span>Resizing</span><div><button className="small-toggle" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
         if (read("aspect-ratio") !== "auto") { set("aspect-ratio", "auto"); return; }
-        const w = (element as HTMLElement).offsetWidth || geometry.width;
-        const h = (element as HTMLElement).offsetHeight || geometry.height;
+        const { width: w, height: h } = getLayoutSize(element);
         setSize(styled, { width: w, height: h });
         styled.style.aspectRatio = `${parseFloat(getComputedStyle(element).width) || w} / ${parseFloat(getComputedStyle(element).height) || h}`;
         onChange();
       }}>{read("aspect-ratio") !== "auto" ? "Ratio locked" : "Lock ratio"}</button><button className="small-toggle" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}>Min / Max</button></div></div>
       <Row>{sizeField("width")}{sizeField("height")}</Row>
-      {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row></>}
+      {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row><p className="property-note">Min / Max follow the CSS box model. In content-box, padding and borders add to these limits.</p></>}
       {isFlex && <>
         <Segmented label="Direction" value={read("flex-direction")} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", v)} />
         <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
@@ -188,7 +216,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <Section title="Fill" onReset={resetGroup(["background", "background-color", "background-image", "background-size", "background-position"])}>
       <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
       <div className="property-subheading"><span>Image or gradient</span></div>
-      <Field label="Background image or gradient" value={read("background-image")} onCommit={(v) => set("background-image", v)} onReset={resetProperty("background-image")} />
+      <GradientEditor value={read("background-image")} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} />
       {read("background-image") !== "none" && <><SelectField label="Image sizing" value={read("background-size")} options={[{ value: "auto", label: "Original size" }, { value: "cover", label: "Cover" }, { value: "contain", label: "Contain" }]} onCommit={(v) => set("background-size", v)} /><Field label="Background position" prefix="Position" value={read("background-position")} onCommit={(v) => set("background-position", v)} /></>}
     </Section>
 

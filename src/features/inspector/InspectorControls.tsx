@@ -1,14 +1,17 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { colorWithAlpha, parseColor } from "./color";
+
+export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel: boolean) => void } | null>(null);
 
 type Commit = (value: string) => boolean | void;
 
 export function Section({ title, children, defaultOpen = true, onReset }: { title: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void }) {
   const [open, setOpen] = useState(defaultOpen);
-  return <section className="property-section">
+  const headingId = useId();
+  return <section className="property-section" aria-labelledby={headingId}>
     <div className="property-section-heading">
-      <button className="section-toggle" aria-expanded={open} onClick={() => setOpen(!open)}><span className={`section-chevron${open ? " open" : ""}`} aria-hidden="true" />{title}</button>
+      <button id={headingId} className="section-toggle" aria-expanded={open} onClick={() => setOpen(!open)}><span className={`section-chevron${open ? " open" : ""}`} aria-hidden="true" />{title}</button>
       {onReset && <button className="property-reset" title={`Reset ${title.toLowerCase()} overrides`} aria-label={`Reset ${title.toLowerCase()} overrides`} onClick={onReset}>Reset</button>}
     </div>
     {open && <div className="property-section-body">{children}</div>}
@@ -23,20 +26,88 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   value: string; label: string; prefix?: string; suffix?: string; onCommit: Commit; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
 }) {
   const listId = useId();
+  const edits = useContext(InspectorEdits);
+  const input = useRef<HTMLInputElement>(null);
+  const [scrubbing, setScrubbing] = useState(false);
+  const drag = useRef<{ x: number; value: number; unit: string; initial: string; last: string; lastX: number; moved: boolean } | null>(null);
+  const latestEdits = useRef(edits);
+  latestEdits.current = edits;
+  useEffect(() => {
+    if (!scrubbing) return;
+    document.documentElement.dataset.scrubbing = "";
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); event.stopImmediatePropagation(); finishScrub(true); } };
+    window.addEventListener("keydown", escape, true);
+    return () => { delete document.documentElement.dataset.scrubbing; window.removeEventListener("keydown", escape, true); };
+  }, [scrubbing]);
+  useEffect(() => () => { if (drag.current) latestEdits.current?.finish(true); }, []);
   const [draft, setDraft] = useState(value);
   const [invalid, setInvalid] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [optionIndex, setOptionIndex] = useState(-1);
+  const [filterOptions, setFilterOptions] = useState(false);
+  const [optionsAbove, setOptionsAbove] = useState(false);
+  useEffect(() => { if (optionsOpen && input.current) setOptionsAbove(window.innerHeight - input.current.getBoundingClientRect().bottom < 210); }, [optionsOpen]);
+  useEffect(() => { if (optionsOpen && optionIndex >= 0) document.getElementById(`${listId}-${optionIndex}`)?.scrollIntoView({ block: "nearest" }); }, [optionIndex, optionsOpen, listId]);
+  const options = (suggestions ?? []).filter((option) => !filterOptions || `${option.value} ${option.label ?? ""}`.toLowerCase().includes(draft.toLowerCase()));
+  const chooseOption = (next: string) => { setDraft(next); setInvalid(onCommit(next) === false); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
   const cancelled = useRef(false);
   useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
   const commit = () => {
     if (cancelled.current) { cancelled.current = false; return; }
     if (draft !== value) setInvalid(onCommit(draft.trim()) === false);
   };
+  const finishScrub = (cancel: boolean) => {
+    if (!drag.current) return;
+    const initial = drag.current.initial;
+    drag.current = null;
+    setScrubbing(false);
+    edits?.finish(cancel);
+    if (cancel) { setDraft(initial); setInvalid(false); }
+  };
+  const numeric = /^(-?\d*\.?\d+)([a-z%]*)$/i.test(value);
   return <div className={`property-shell${onReset ? " overridden" : ""}`}>
     <div className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : label}>
-      {prefix && <span className="prefix">{prefix}</span>}
-      <input list={suggestions ? listId : undefined} aria-label={label} aria-invalid={invalid || undefined} value={draft}
-        onChange={(e) => { setDraft(e.target.value); setInvalid(false); }} onBlur={commit} onFocus={(e) => e.target.select()}
+      {prefix && <span className={`prefix${numeric && edits ? " scrub-label" : ""}`} title={numeric && edits ? `Drag to adjust ${label}. Shift: 10× · Alt: 0.1× · Escape: cancel` : undefined}
+        tabIndex={numeric && edits ? 0 : undefined} role={numeric && edits ? "button" : undefined} aria-label={numeric && edits ? `Adjust ${label}` : undefined}
+        onPointerDown={(e) => {
+          if (!numeric || !edits || e.button !== 0) return;
+          e.preventDefault(); e.stopPropagation();
+          input.current?.blur();
+          const match = value.match(/^(-?\d*\.?\d+)([a-z%]*)$/i)!;
+          drag.current = { x: e.clientX, value: Number(match[1]), unit: match[2], initial: value, last: value, lastX: e.clientX, moved: false };
+          edits.begin(); e.currentTarget.focus(); e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          const current = drag.current;
+          if (!current || (!current.moved && Math.abs(e.clientX - current.x) < 2)) return;
+          if (!current.moved) setScrubbing(true);
+          current.moved = true;
+          const step = e.shiftKey ? 10 : e.altKey ? 0.1 : 1;
+          // Follow clamped values, and apply modifier speed only to new travel.
+          const observed = parseFloat(value);
+          if (Number.isFinite(observed) && value !== current.last) current.value = observed;
+          const candidate = current.value + (e.clientX - current.lastX) * step;
+          current.lastX = e.clientX;
+          const next = `${Math.round(candidate * 100) / 100}${current.unit}`;
+          if (next === current.last) return;
+          if (onCommit(next) !== false) { current.value = candidate; current.last = next; setDraft(next); setInvalid(false); }
+        }}
+        onPointerUp={(e) => { finishScrub(false); if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); }}
+        onPointerCancel={() => finishScrub(true)} onLostPointerCapture={() => finishScrub(false)}
+        onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finishScrub(true); } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.focus(); } }}
+      >{prefix}</span>}
+      <input ref={input} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} value={draft}
+        onChange={(e) => { setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { setOptionsOpen(false); commit(); }} onFocus={(e) => e.target.select()}
         onKeyDown={(e) => {
+          if (suggestions && (e.key === "ArrowDown" || e.key === "ArrowUp") && !e.shiftKey && !e.altKey) {
+            e.preventDefault(); e.stopPropagation();
+            setOptionsOpen(true);
+            setOptionIndex((current) => options.length ? current < 0 ? (e.key === "ArrowDown" ? 0 : options.length - 1) : (current + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length : -1);
+            return;
+          }
+          if (optionsOpen && (e.key === "Home" || e.key === "End")) { e.preventDefault(); e.stopPropagation(); setOptionIndex(e.key === "Home" ? 0 : options.length - 1); return; }
+          if (optionsOpen && e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOptionsOpen(false); return; }
+          if (optionsOpen && e.key === "Enter" && optionIndex >= 0 && options[optionIndex]) { e.preventDefault(); chooseOption(options[optionIndex].value); return; }
           if (e.key === "Enter") e.currentTarget.blur();
           if (e.key === "Escape") { e.preventDefault(); cancelled.current = true; setDraft(value); setInvalid(false); e.currentTarget.blur(); }
           if (e.key === "ArrowUp" || e.key === "ArrowDown") {
@@ -49,9 +120,12 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
           }
         }} />
       {suffix && <span className="suffix">{suffix}</span>}
+      {suggestions && <button type="button" className="suggestion-toggle" aria-label={`Show ${label} options`} tabIndex={-1} onMouseDown={(e) => e.preventDefault()} onClick={() => { setOptionsOpen(!optionsOpen); setFilterOptions(false); setOptionIndex(-1); input.current?.focus(); }}>⌄</button>}
       {trailing}
     </div>
-    {suggestions && <datalist id={listId}>{suggestions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</datalist>}
+    {suggestions && optionsOpen && <div className={`field-options${optionsAbove ? " above" : ""}`} role="listbox" id={listId} aria-label={`${label} options`}>
+      {options.length ? options.map((option, index) => <button type="button" role="option" tabIndex={-1} id={`${listId}-${index}`} aria-selected={index === optionIndex} key={option.value} onMouseDown={(e) => e.preventDefault()} onClick={() => chooseOption(option.value)}>{option.label ?? option.value}</button>) : <div className="field-options-empty">Press Enter to use this value</div>}
+    </div>}
     {onReset && <button className="reset-value" title={`Reset ${label} to stylesheet`} aria-label={`Reset ${label} to stylesheet`} onMouseDown={(e) => e.preventDefault()} onClick={() => { setDraft(value); setInvalid(false); onReset(); }}>↺</button>}
     {invalid && <span className="invalid-value" role="alert">Invalid value</span>}
   </div>;

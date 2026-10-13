@@ -27,13 +27,24 @@ Browser checks ran on a separate origin, 127.0.0.1:5181, to avoid editing the ac
 
 Browser evidence: fill alpha 50% rendered rgba(..., 0.5); two shadows rendered independently at 30% and 15%, including an inset shadow. Removing a shadow and Undo restored both. Width 192 -> 288 with lock changed height 132 -> 198. A Fill element dragged from 344 -> 294 retained height 198 without lock; Undo restored Fill and width 344. With lock the same drag yielded 294 x 169 (rounded), preserving the original 344/198 ratio. An individual bottom stroke rendered 4px solid with the top remaining 0px. Frame ratio lock changed 640 x 281 to 800 x 351; Undo restored the preceding frame state.
 
+## Numeric editing, fonts and gradients
+
+- Numeric labels scrub with live preview and one document commit on release. A click without movement creates no history entry. Escape restores the original style/frame snapshot; abandoned gestures cancel safely. Pointer speed is applied incrementally, and clamped values are followed without accumulating out-of-range travel.
+- Font family/size suggestions are explicit searchable comboboxes. Arrows, Home/End, Enter and Escape navigate them; Shift/Alt+arrows retain numeric stepping. Lists open upward near the viewport edge and scroll their active option into view.
+- Linear gradients support angles, color stops, positions, alpha, add/remove, and multiple background layers. Compact gradient summaries disclose detailed controls. Unsupported/custom backgrounds remain editable as raw CSS.
+- Layout size readings retain fractional pixels and exclude element transforms. Min/max controls explicitly describe their CSS box-model semantics.
+
+Browser evidence: a numeric-label drag changed width 294 to 324; one Undo returned 294 and disabled Undo in a fresh history. Clicking the label without moving kept history empty. Gradient 90deg with three stops rendered exactly, including green at 35% and 60% opacity. Removing a stop and Undo restored it. Typing Georgia then ArrowDown/Enter applied Georgia, serif. End/Enter in the font-size menu selected 128, and Undo returned 24. Build and diff checks passed. Modifier changes mid-gesture and Escape restoration are code-reviewed, not separately exercised by the available pointer automation.
+
+## Local technical/UI reference
+
+User-approved reference: `/Users/home-daniel/Desktop/Coding-Projects/products/canvas`, read-only. Scope is editing technique and UI.
+
+Inspected `apps/editor/src/ui/NumberField.tsx`, `ColorField.tsx`, `ColorPicker.tsx`, `PropertiesPanel.module.css`, `styles/tokens.css`, and `docs/FIGMA_PARITY.md`. Adapted incremental scrub deltas, boundary feedback, capture-phase Escape handling, neutral control hierarchy and progressive disclosure. The DOM canvas retains its own HTML/CSS document and history implementation. No changes were made to the reference checkout.
+
 ## Remaining work in this goal
 
-- Give numeric labels drag-to-adjust behavior with one undo transaction.
-- Make sizing constraints communicate CSS versus visual box sizes clearly.
-- Improve font selectors and keyboard navigation beyond native datalist suggestions.
 - Further refine stroke controls for per-side colors and styles.
-- Add visual gradient editing alongside the existing arbitrary background-image CSS field.
 - Clarify flow placement versus absolute position; contextual controls.
 - Verify grid alignment and reverse/RTL flex behavior with representative documents.
 - Review frame selection, nested navigation, and selection bounds after sizing changes.

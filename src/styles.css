@@ -794,3 +794,23 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .effect-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .add-property { min-height: 28px; border: 1px solid var(--divider); border-radius: 5px; padding: 4px 8px; font-size: 11px; }
 .add-property:hover { background: var(--hover); }
+.scrub-label { cursor: ew-resize; touch-action: none; }
+.scrub-label:focus-visible { outline: 1px solid var(--accent); border-radius: 3px; }
+.suggestion-toggle { flex-shrink: 0; width: 22px; height: 100%; color: var(--text-secondary); }
+.suggestion-toggle:hover { background: var(--hover); }
+.field-options { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; min-width: 120px; max-height: 180px; overflow-y: auto; background: var(--panel); border: 1px solid var(--panel-border); box-shadow: 0 6px 20px #0002; border-radius: 6px; padding: 4px; }
+.field-options [role="option"] { display: block; width: 100%; min-height: 28px; text-align: left; padding: 5px 8px; border-radius: 4px; font-size: 11px; }
+.field-options [role="option"]:hover, .field-options [aria-selected="true"] { background: var(--row-selected); color: var(--accent); }
+.field-options-empty { font-size: 11px; color: var(--text-secondary); padding: 8px; }
+.field-options.above { top: auto; bottom: calc(100% + 4px); }
+.gradient-layer { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--divider); padding-bottom: 12px; }
+.gradient-preview { height: 36px; border: 1px solid var(--divider); border-radius: 5px; }
+.gradient-stop { display: flex; flex-direction: column; gap: 5px; padding: 6px 0; }
+.gradient-stop-position { display: flex; gap: 8px; align-items: center; }
+.gradient-stop-position > .property-shell { flex: 1; }
+.small-toggle:disabled { opacity: .4; cursor: default; }
+:root[data-scrubbing] * { cursor: ew-resize !important; user-select: none !important; }
+.gradient-summary { display: flex; align-items: center; gap: 8px; min-height: 30px; font-size: 11px; text-align: left; border-radius: 5px; }
+.gradient-summary:hover { background: var(--hover); }
+.gradient-summary-swatch { width: 30px; height: 30px; border: 1px solid var(--divider); border-radius: 5px; }
+.gradient-disclosure { margin-left: auto; color: var(--text-secondary); padding-right: 5px; }

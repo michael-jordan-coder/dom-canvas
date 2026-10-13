@@ -2,6 +2,18 @@ import { parseTranslate } from "./geometry";
 
 export type Styled = HTMLElement | SVGElement;
 
+// Layout dimensions exclude visual transforms and retain fractional CSS pixels.
+export function getLayoutSize(el: Element) {
+  const style = getComputedStyle(el);
+  const extra = (properties: string[]) => style.boxSizing === "border-box" ? 0 : properties.reduce((sum, property) => sum + (parseFloat(style.getPropertyValue(property)) || 0), 0);
+  const width = parseFloat(style.width);
+  const height = parseFloat(style.height);
+  return {
+    width: Number.isFinite(width) ? round(width + extra(["padding-left", "padding-right", "border-left-width", "border-right-width"])) : (el as HTMLElement).offsetWidth || el.getBoundingClientRect().width,
+    height: Number.isFinite(height) ? round(height + extra(["padding-top", "padding-bottom", "border-top-width", "border-bottom-width"])) : (el as HTMLElement).offsetHeight || el.getBoundingClientRect().height,
+  };
+}
+
 export function getTranslate(el: Styled) {
   return parseTranslate(el.style.translate);
 }
