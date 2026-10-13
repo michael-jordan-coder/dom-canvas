@@ -5,6 +5,7 @@ import { getTranslate, setTranslate, screenDeltaToLocal } from "@/features/canva
 import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
+import { ActionSearch } from "@/features/canvas/ActionSearch";
 import { Toolbar } from "@/features/canvas/Toolbar";
 import { ZoomControl } from "@/features/canvas/ZoomControl";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
@@ -19,7 +20,7 @@ import { ElementCssEditor, type ElementCssDraft } from "@/features/inspector/Ele
 import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
-import { SelectionMenu, type MenuAnchor } from "@/features/layers/SelectionMenu";
+import { SelectionMenu, type MenuAnchor, type SelectionAction } from "@/features/layers/SelectionMenu";
 import { isLayerHidden, toggleLayerVisibility } from "@/features/layers/visibility";
 import { lockedAncestor, toggleLayerLock } from "@/features/layers/locking";
 
@@ -40,6 +41,8 @@ export function App() {
   // Start offset so the first artboard clears the floating layers panel.
   const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
   const [tool, setTool] = useState<Tool>("move");
+  const [actionSearchOpen, setActionSearchOpen] = useState(false);
+  const closeActionSearch = useCallback(() => setActionSearchOpen(false), []);
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [selectionMenu, setSelectionMenu] = useState<MenuAnchor | null>(null);
@@ -367,6 +370,7 @@ export function App() {
       const mod = e.metaKey || e.ctrlKey;
       const key = e.key.toLowerCase();
       const target = e.composedPath()[0];
+      if (!e.defaultPrevented && !isPopupControl(e) && mod && key === "k") { e.preventDefault(); setActionSearchOpen(true); return; }
       const rangeHistory = mod && (key === "z" || key === "y") && target instanceof HTMLInputElement && target.type === "range";
       if (e.defaultPrevented || (isTyping(e) && !rangeHistory) || isPopupControl(e)) return;
 
@@ -417,6 +421,34 @@ export function App() {
   const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
   const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
+
+  const selectionActions: SelectionAction[] = selection.kind === "none" ? [] : [
+    { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
+    ...(selection.kind === "element" ? [
+      { label: "Copy appearance", run: () => { setAppearanceClipboard(captureAppearance(selection.element)); setNotice("Appearance copied — choose another layer and Paste appearance."); }, separator: true },
+      { label: "Paste appearance", disabled: !appearanceClipboard, run: () => { if (!appearanceClipboard || !selection.element.isConnected) return; applyAppearance(selection.element as HTMLElement | SVGElement, appearanceClipboard); commit(); setNotice("Appearance applied"); } },
+      { label: lockedAncestor(selection.element) ? lockedAncestor(selection.element) === selection.element ? "Unlock layer" : "Unlock parent layer" : "Lock layer", run: () => { toggleLayerLock(selection.element); setLayerHover(null); commit(); } },
+      { label: isLayerHidden(selection.element) ? "Show layer" : "Hide layer", run: () => { toggleLayerVisibility(selection.element); setLayerHover(null); commit(); }, separator: true },
+      { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0, separator: true },
+      { label: "Move later", run: () => reorderSelection("later"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
+      { label: "Move to first", run: () => reorderSelection("first"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0 },
+      { label: "Move to last", run: () => reorderSelection("last"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
+    ] : []),
+    { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection, separator: true },
+    ...(selection.kind === "element" ? [{ label: "Select parent", shortcut: "Esc", run: selectParent }] : []),
+    { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true, disabled: selection.kind === "element" && !!lockedAncestor(selection.element) },
+  ];
+  const searchActions: SelectionAction[] = [
+    { label: "Undo", shortcut: "⌘/Ctrl Z", disabled: !doc.canUndo, run: () => travel("undo") },
+    { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
+    ...selectionActions,
+    { label: "Edit CSS", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
+    { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorTab("design"); } },
+    { label: "Fit all frames", shortcut: "⇧ 1", disabled: !artboards.length, run: zoomToFit },
+    { label: "Zoom to 100%", shortcut: "⇧ 0", run: () => setZoom(1) },
+    { label: uiHidden ? "Show interface" : "Hide interface", shortcut: "⌘/Ctrl \\", run: () => setUiHidden(value => !value) },
+    ...([{ id: "move", label: "Move tool", shortcut: "V" }, { id: "frame", label: "Frame tool", shortcut: "F" }, { id: "rect", label: "Rectangle tool", shortcut: "R" }, { id: "text", label: "Text tool", shortcut: "T" }, { id: "hand", label: "Hand tool", shortcut: "H" }] as const).map(item => ({ label: item.label, shortcut: item.shortcut, run: () => setTool(item.id) })),
+  ];
 
   return (
     <div className={`app${uiHidden ? " ui-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
@@ -503,23 +535,10 @@ export function App() {
         <button title="Fit selection (Shift+2)" disabled={selection.kind === "none"} onClick={zoomToSelection}>Fit selection</button>
       </div>
       {notice && <div className="toast" role="status">{notice}</div>}
-      {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
-        { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
-        ...(selection.kind === "element" ? [
-          { label: "Copy appearance", run: () => { setAppearanceClipboard(captureAppearance(selection.element)); setNotice("Appearance copied — choose another layer and Paste appearance."); }, separator: true },
-          { label: "Paste appearance", disabled: !appearanceClipboard, run: () => { if (!appearanceClipboard || !selection.element.isConnected) return; applyAppearance(selection.element as HTMLElement | SVGElement, appearanceClipboard); commit(); setNotice("Appearance applied"); } },
-          { label: lockedAncestor(selection.element) ? lockedAncestor(selection.element) === selection.element ? "Unlock layer" : "Unlock parent layer" : "Lock layer", run: () => { toggleLayerLock(selection.element); setLayerHover(null); commit(); } },
-          { label: isLayerHidden(selection.element) ? "Show layer" : "Hide layer", run: () => { toggleLayerVisibility(selection.element); setLayerHover(null); commit(); }, separator: true },
-          { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0, separator: true },
-          { label: "Move later", run: () => reorderSelection("later"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
-          { label: "Move to first", run: () => reorderSelection("first"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0 },
-          { label: "Move to last", run: () => reorderSelection("last"), disabled: !!lockedAncestor(selection.element) || siblingIndex >= siblingElements.length - 1 },
-        ] : []),
-        { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection, separator: true },
-        ...(selection.kind === "element" ? [{ label: "Select parent", shortcut: "Esc", run: selectParent }] : []),
-        { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true, disabled: selection.kind === "element" && !!lockedAncestor(selection.element) },
-      ]} />}
+      {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={selectionActions} />}
+      {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}
       <Toolbar tool={tool} onToolChange={setTool}>
+        <button className="tool" aria-label="Find an action" title="Find an action (⌘/Ctrl+K)" onClick={() => setActionSearchOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg></button>
         <ImportButton busy={importing} error={importError} onImport={importSite} />
       </Toolbar>
     </div>

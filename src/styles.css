@@ -978,3 +978,17 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .gradient-stop-track input::-moz-range-track { height: 28px; background: transparent; }
 .gradient-stop-track input::-moz-range-thumb { width: 8px; height: 28px; border: 2px solid white; border-radius: 3px; background: var(--stop-color); box-shadow: 0 0 0 1px var(--accent); }
 .gradient-stop-track input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+.action-search { position: fixed; top: min(16vh, 120px); margin: 0 auto; padding: 0; width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - min(16vh, 120px) - 16px); border: 1px solid var(--divider); border-radius: 10px; background: var(--panel); color: var(--text); box-shadow: 0 16px 56px #0003; }
+.action-search::backdrop { background: #0002; }
+.action-search-content { padding: 12px; }
+.action-search-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+.action-search-heading button { font-size: 10px; color: var(--text-secondary); padding: 4px 6px; border-radius: 4px; background: var(--hover); }
+.action-search-input { width: 100%; height: 32px; padding: 0 8px; font-size: 12px; border: 1px solid var(--divider); border-radius: 5px; background: var(--field); }
+.action-search-results { max-height: min(340px, 45vh); overflow-y: auto; margin-top: 8px; }
+.action-search-results button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 30px; padding: 6px 8px; border-radius: 4px; text-align: left; font-size: 11px; }
+.action-search-results button[aria-selected="true"] { background: var(--row-selected); }
+.action-search-results button:disabled { opacity: .4; cursor: default; }
+.action-search-results button.danger { color: var(--danger); }
+.action-search-results kbd { color: var(--text-secondary); font-size: 10px; font-family: inherit; }
+.action-search-empty { padding: 16px 8px; font-size: 12px; color: var(--text-secondary); }
+.action-search-footer { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--divider); font-size: 10px; color: var(--text-secondary); }

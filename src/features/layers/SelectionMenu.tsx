@@ -2,9 +2,9 @@ import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 export type MenuAnchor = { x: number; y: number; returnFocus: HTMLElement };
-type Action = { label: string; shortcut?: string; run: () => void; danger?: boolean; disabled?: boolean; separator?: boolean };
+export type SelectionAction = { label: string; shortcut?: string; run: () => void; danger?: boolean; disabled?: boolean; separator?: boolean };
 
-export function SelectionMenu({ anchor, actions, onClose }: { anchor: MenuAnchor; actions: Action[]; onClose: () => void }) {
+export function SelectionMenu({ anchor, actions, onClose }: { anchor: MenuAnchor; actions: SelectionAction[]; onClose: () => void }) {
   const menu = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = menu.current!;
