@@ -156,3 +156,9 @@ inconclusive. No visible decoration. See topics/text-case.md.
 Text-trim pass: child8:3 Standard trim/No truncation restored,100 ×30 Hug; Frame3
 80 ×50 Hug verified, original padding/gap10, center, clip off, no Fill/Stroke.
 Parent selected,215% zoom, editor closed. See topics/text-trim.md.
+
+Constraints-resize pass: Frame3 restored80 ×50. Child8:3 back in flow at-10/10,
+100 Fixed/min100 ×30 Hug/Auto height, original font and white Fill. IMPORTANT:
+original Fill sizing NOT restored; several popup actions left Fixed. Restore Fill
+before any case assuming baseline. Child selected,215%, constraints hidden.
+See topics/constraints-resize.md and evidence/constraints-resize/12-final-fixed.txt.
