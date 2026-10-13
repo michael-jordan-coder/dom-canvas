@@ -1,0 +1,126 @@
+The following is a diff from the previous accessibility tree for Window: "Untitled" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 1710, 1715-1824
+~			1574 HTML content Untitled – Figma, URL: figma.com/design/4OajwOr5ltNCZ5z0cPwrlO/Untitled?node-id=8-2&p=f&viewport=161%2C456%2C1&t=nYu4JS7A9QSQP0WD-0
+~						1578 container Figma Design, 2 items selected
+~											1706 row (selected) Frame 1
++									1715 container
++										1716 container
++											1717 pop up button Frame, Frame Dimension Presets
++											1718 checkbox Toggle ready for dev status, Value: 0
++											1719 text Toggle ready for dev status
++											1720 container Create component options
++												1721 button Create component
++												1722 pop up button Create component options
++											1723 checkbox Use as mask, Value: 0
++											1724 text Use as mask
++											1725 button Wrap in new section
++											1726 heading Position, Value: 2
++												1727 text Position
++											1728 container Alignment
++												1729 text Alignment
++												1730 button Align left
++													1731 image
++												1732 button Align horizontal centers
++													1733 image
++												1734 button Align right
++													1735 image
++												1736 button Align top
++													1737 image
++												1738 button Align vertical centers
++													1739 image
++												1740 button Align bottom
++													1741 image
++												1742 button More actions
++											1743 container Position
++												1744 text Position
++												1745 stepper (settable, float) Description: X-position, Value: 0, Details: Mixed
++												1746 stepper (settable, float) Description: Y-position, Value: -19
++											1747 container Rotation
++												1748 text Rotation
++												1749 stepper (settable, float) Description: Rotation, Value: 0, Details: 0°
++												1750 button Rotate 90˚ right
++													1751 image
++												1752 button Flip horizontal
++													1753 image
++												1754 button Flip vertical
++													1755 image
++											1756 heading Layout, Value: 2
++												1757 text Layout
++											1758 button Resize to fit
++											1759 checkbox Toggle auto layout, Value: 0
++											1760 text Toggle auto layout
++											1761 container Flow
++												1762 text Flow
++												1763 Layout
++													1764 text Layout
++													1765 radio button Freeform, Value: 1
++													1766 radio button Vertical, Value: 0
++													1767 radio button Horizontal, Value: 0
++													1768 radio button Grid, Value: 0
++											1769 container Dimensions
++												1770 text Dimensions
++												1771 container Width
++													1772 text W
++													1773 text field (settable) Description: Width, Value: 150
++												1774 container Height
++													1775 text H
++													1776 text field (settable) Description: Height, Value: 125
++												1777 checkbox Lock aspect ratio, Value: 0
++												1778 text Lock aspect ratio
++											1779 container Spacing
++												1780 text Spacing
++												1781 container Horizontal spacing
++													1782 text field (settable) Horizontal spacing, Value: 75
++											1783 checkbox Clip content, Value: 1
++											1784 image
++											1785 image
++											1786 text Clip content
++											1787 heading Appearance, Value: 2
++												1788 text Appearance
++											1789 checkbox Hide, Value: 0
++											1790 text Hide
++											1791 pop up button Apply blend mode
++											1792 container
++												1793 image
++												1794 text field (settable) 100%
++											1795 container
++												1796 image
++												1797 text field (settable) 0
++											1798 pop up button Individual corners
++											1799 heading Fill, Value: 2
++												1800 text Fill
++											1801 pop up button Fill, Apply styles and variables
++											1802 button Add fill
++											1803 table
++												1804 row Solid color hex: FFFFFF Color FFFFFF 100 % Toggle visibility Remove
++													1805 cell
++														1806 container
++															1807 button Solid color hex: FFFFFF
++															1808 text Color
++															1809 combo box (settable) Description: Color, Value: FFFFFF
++															1810 text field (settable) %, Value: 100
++															1811 text %
++													1812 cell
++														1813 checkbox Toggle visibility, Value: 1
++														1814 text Toggle visibility
++													1815 cell
++														1816 button Remove
++											1817 button Stroke
++												1818 heading Stroke, Value: 2
++													1819 text Stroke
++											1820 pop up button Stroke, Apply styles and variables
++											1821 button Add stroke
++											1822 container
++												1823 button Effects
++													1824 heading Effects, Value: 2
++														1825 text Effects
++												1826 pop up button Effects, Apply styles
++												1827 button Add effect
++											1828 button Layout guide
++												1829 heading Layout guide, Value: 2
++													1830 text Layout guide
++											1831 pop up button Layout guide, Apply styles
++											1832 button Add layout guide
++											1833 button Export
++											1834 button Add export settings
+The focused UI element is 1578 container Figma Design, 2 items selected

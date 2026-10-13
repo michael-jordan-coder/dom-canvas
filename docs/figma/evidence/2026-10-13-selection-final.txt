@@ -1,0 +1,6 @@
+						20 container Figma Design, 2 items selected
+											68 row (selected) Frame 2
+											72 row (selected) Frame 1
+												130 stepper (settable, float) Description: X-position, Value: 0, Details: Mixed
+												131 stepper (settable, float) Description: Y-position, Value: -19
+The focused UI element is 20 container Figma Design, 2 items selected

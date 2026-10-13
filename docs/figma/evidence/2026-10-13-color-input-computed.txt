@@ -1,0 +1,101 @@
+802 row CSS property name: appearance CSS property value: auto
+808 row CSS property name: background-attachment CSS property value: scroll
+814 row CSS property name: background-clip CSS property value: border-box
+820 row CSS property name: background-color CSS property value: rgba(0, 0, 0, 0)
+826 row CSS property name: background-image CSS property value: none
+832 row CSS property name: background-origin CSS property value: padding-box
+838 row CSS property name: background-position-x CSS property value: 0%
+844 row CSS property name: background-position-y CSS property value: 0%
+850 row CSS property name: background-repeat CSS property value: repeat
+856 row CSS property name: background-size CSS property value: auto
+862 row CSS property name: border-bottom-color CSS property value: rgb(255, 255, 255)
+868 row CSS property name: border-bottom-left-radius CSS property value: 5px
+874 row CSS property name: border-bottom-right-radius CSS property value: 5px
+880 row CSS property name: border-bottom-style CSS property value: none
+886 row CSS property name: border-bottom-width CSS property value: 0px
+892 row CSS property name: border-image-outset CSS property value: 0
+898 row CSS property name: border-image-repeat CSS property value: stretch
+904 row CSS property name: border-image-slice CSS property value: 100%
+910 row CSS property name: border-image-source CSS property value: none
+916 row CSS property name: border-image-width CSS property value: 1
+922 row CSS property name: border-left-color CSS property value: rgb(255, 255, 255)
+928 row CSS property name: border-left-style CSS property value: none
+934 row CSS property name: border-left-width CSS property value: 0px
+940 row CSS property name: border-right-color CSS property value: rgb(255, 255, 255)
+946 row CSS property name: border-right-style CSS property value: none
+952 row CSS property name: border-right-width CSS property value: 0px
+958 row CSS property name: border-top-color CSS property value: rgb(255, 255, 255)
+964 row CSS property name: border-top-left-radius CSS property value: 5px
+970 row CSS property name: border-top-right-radius CSS property value: 5px
+976 row CSS property name: border-top-style CSS property value: none
+982 row CSS property name: border-top-width CSS property value: 0px
+988 row CSS property name: box-sizing CSS property value: border-box
+994 row CSS property name: color CSS property value: rgb(255, 255, 255)
+1000 row CSS property name: color-scheme CSS property value: dark
+1006 row CSS property name: cursor CSS property value: default
+1012 row CSS property name: display CSS property value: block
+1018 row CSS property name: fill CSS property value: rgb(255, 255, 255)
+1024 row CSS property name: flex-basis CSS property value: 0%
+1030 row CSS property name: flex-grow CSS property value: 1
+1036 row CSS property name: flex-shrink CSS property value: 1
+1042 row CSS property name: font-family CSS property value: Inter, ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, SFProLocalRange
+1070 row CSS property name: font-feature-settings CSS property value: "calt", "liga"
+1078 row CSS property name: font-kerning CSS property value: auto
+1084 row CSS property name: font-language-override CSS property value: normal
+1090 row CSS property name: font-optical-sizing CSS property value: auto
+1096 row CSS property name: font-size CSS property value: 11px
+1102 row CSS property name: font-size-adjust CSS property value: none
+1108 row CSS property name: font-stretch CSS property value: 100%
+1114 row CSS property name: font-style CSS property value: normal
+1120 row CSS property name: font-variant-alternates CSS property value: normal
+1126 row CSS property name: font-variant-caps CSS property value: normal
+1132 row CSS property name: font-variant-east-asian CSS property value: normal
+1138 row CSS property name: font-variant-emoji CSS property value: normal
+1144 row CSS property name: font-variant-ligatures CSS property value: normal
+1150 row CSS property name: font-variant-numeric CSS property value: normal
+1156 row CSS property name: font-variant-position CSS property value: normal
+1162 row CSS property name: font-variation-settings CSS property value: normal
+1168 row CSS property name: font-weight CSS property value: 450
+1174 row CSS property name: height CSS property value: 24px
+1180 row CSS property name: letter-spacing CSS property value: 0.05504px
+1186 row CSS property name: line-height CSS property value: 16px
+1192 row CSS property name: margin-bottom CSS property value: 0px
+1198 row CSS property name: margin-left CSS property value: 0px
+1204 row CSS property name: margin-right CSS property value: 0px
+1210 row CSS property name: margin-top CSS property value: 0px
+1216 row CSS property name: min-width CSS property value: 0px
+1222 row CSS property name: outline-color CSS property value: rgb(255, 255, 255)
+1228 row CSS property name: outline-offset CSS property value: -1px
+1234 row CSS property name: outline-style CSS property value: none
+1240 row CSS property name: outline-width CSS property value: 3px
+1246 row CSS property name: overflow-clip-margin CSS property value: 0px
+1252 row CSS property name: overflow-x CSS property value: clip
+1258 row CSS property name: overflow-y CSS property value: clip
+1264 row CSS property name: padding-block-end CSS property value: 0px
+1270 row CSS property name: padding-block-start CSS property value: 0px
+1276 row CSS property name: padding-bottom CSS property value: 0px
+1282 row CSS property name: padding-inline-end CSS property value: 0px
+1288 row CSS property name: padding-inline-start CSS property value: 0px
+1294 row CSS property name: padding-left CSS property value: 0px
+1300 row CSS property name: padding-right CSS property value: 0px
+1306 row CSS property name: padding-top CSS property value: 0px
+1312 row CSS property name: pointer-events CSS property value: auto
+1318 row CSS property name: text-align CSS property value: start
+1324 row CSS property name: text-decoration-color CSS property value: rgb(255, 255, 255)
+1330 row CSS property name: text-decoration-line CSS property value: none
+1336 row CSS property name: text-decoration-style CSS property value: solid
+1342 row CSS property name: text-decoration-thickness CSS property value: auto
+1348 row CSS property name: text-indent CSS property value: 0px
+1354 row CSS property name: text-overflow CSS property value: ellipsis
+1360 row CSS property name: text-rendering CSS property value: auto
+1366 row CSS property name: text-shadow CSS property value: none
+1372 row CSS property name: text-transform CSS property value: none
+1378 row CSS property name: user-select CSS property value: none
+1384 row CSS property name: vertical-align CSS property value: baseline
+1390 row CSS property name: width CSS property value: 105px
+1396 row CSS property name: word-spacing CSS property value: 0px
+1402 row CSS property name: -webkit-font-smoothing CSS property value: antialiased
+1408 row CSS property name: -webkit-rtl-ordering CSS property value: logical
+1414 row CSS property name: -webkit-tap-highlight-color CSS property value: rgba(0, 0, 0, 0)
+1420 row CSS property name: -webkit-border-image CSS property value: none
+1427 text Rendered Fonts Family name :  Inter PostScript name :  Inter-Regular_wght1C20000 Font origin :  Network resource (6 glyphs)

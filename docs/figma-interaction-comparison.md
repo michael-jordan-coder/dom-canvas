@@ -1,5 +1,9 @@
 # Figma interaction comparison
 
+This is the initial investigation log. The maintained research library now starts at
+[docs/figma/README.md](figma/README.md), including successful browser access,
+DevTools measurements and subsequent frame-selection experiments.
+
 ## Working rule
 
 Before changing a product interaction, inspect the corresponding interaction in

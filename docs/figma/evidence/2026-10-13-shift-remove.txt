@@ -1,0 +1,2 @@
+There has been no change in the accessibility tree for Window: "Untitled".
+The focused UI element is 1578 container Figma Design, 2 items selected
