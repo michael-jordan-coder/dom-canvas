@@ -15,6 +15,7 @@ import { ElementCssEditor, type ElementCssDraft } from "@/features/inspector/Ele
 import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
+import { SelectionMenu, type MenuAnchor } from "@/features/layers/SelectionMenu";
 
 const newId = () => `ab-${crypto.randomUUID().slice(0, 8)}`;
 
@@ -35,6 +36,8 @@ export function App() {
   const [tool, setTool] = useState<Tool>("move");
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
+  const [selectionMenu, setSelectionMenu] = useState<MenuAnchor | null>(null);
+  const closeSelectionMenu = useCallback(() => setSelectionMenu(null), []);
   const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
   const [cssScope, setCssScope] = useState<"element" | "frame">("element");
   const elementCssDrafts = useRef(new WeakMap<Element, ElementCssDraft>());
@@ -394,6 +397,7 @@ export function App() {
           hosts={hostsRef.current}
           selection={selection}
           onSelect={revealSelection}
+          onContextMenu={(next, e) => { e.preventDefault(); setSelection(next); setLayerHover(null); setSelectionMenu({ x: e.clientX, y: e.clientY, returnFocus: e.currentTarget }); }}
           onHover={setLayerHover}
           onRenameArtboard={(id, name) => commitArtboard(id, { name })}
           onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}
@@ -415,6 +419,7 @@ export function App() {
           <button id="css-tab" role="tab" tabIndex={inspectorTab === "css" ? 0 : -1} aria-selected={inspectorTab === "css"} aria-controls="inspector-content" onClick={() => { if (activeArtboard) pendingFocus.current = activeArtboard.id; setInspectorTab("css"); }}>CSS{activeArtboard && (cssDrafts[activeArtboard.id] !== undefined || hasElementCssDraft) && <span className="draft-dot" aria-label="Draft pending" />}</button>
         </div>
           <button className="copy-control" onClick={copyCode} disabled={!activeArtboard} title="Copy frame HTML and CSS" aria-label={copied ? "Copied" : "Copy frame"}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="8" rx="1.5"/><path d="M9.5 3H4A1.5 1.5 0 0 0 2.5 4.5V10"/></svg></button>
+          <button className="inspector-icon" disabled={selection.kind === "none"} aria-label="Selection actions" aria-haspopup="menu" aria-expanded={!!selectionMenu} onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setSelectionMenu(selectionMenu ? null : { x: r.right - 208, y: r.bottom + 4, returnFocus: e.currentTarget }); }}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r=".75"/><circle cx="8" cy="8" r=".75"/><circle cx="13" cy="8" r=".75"/></svg></button>
         </div>
         {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
         {inspectorTab === "design" && activeArtboard && (cssDrafts[activeArtboard.id] !== undefined || hasElementCssDraft) && <div className="draft-notice">{hasElementCssDraft ? "Element CSS draft kept. Open CSS to apply or discard." : "Frame CSS draft kept. Open CSS to preview or apply."}</div>}
@@ -439,6 +444,12 @@ export function App() {
         <button title="Fit selection (Shift+2)" disabled={selection.kind === "none"} onClick={zoomToSelection}>Fit selection</button>
       </div>
       {notice && <div className="toast" role="status">{notice}</div>}
+      {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
+        { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
+        { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection },
+        ...(selection.kind === "element" ? [{ label: "Select parent", shortcut: "Esc", run: selectParent }] : []),
+        { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true },
+      ]} />}
       <Toolbar tool={tool} onToolChange={setTool}>
         <ImportButton busy={importing} error={importError} onImport={importSite} />
       </Toolbar>

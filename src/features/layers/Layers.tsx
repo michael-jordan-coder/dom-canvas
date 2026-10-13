@@ -7,6 +7,7 @@ type Props = {
   hosts: Map<string, HTMLDivElement>;
   selection: Selection;
   onSelect: (selection: Selection) => void;
+  onContextMenu: (selection: Selection, event: MouseEvent<HTMLElement>) => void;
   onHover: (element: Element | null) => void;
   onRenameArtboard: (id: string, name: string) => void;
   onRenameElement: (element: Element, name: string) => void;
@@ -110,6 +111,7 @@ export function Layers(props: Props) {
           className={`layer${isSelected ? " selected" : within ? " within" : ""}`}
           style={{ paddingLeft: 8 + depth * INDENT }}
           onClick={() => onSelect({ kind: "element", artboardId, element: el })}
+          onContextMenu={(e) => props.onContextMenu({ kind: "element", artboardId, element: el }, e)}
           onDoubleClick={() => setRenaming(el)}
           onMouseEnter={() => onHover(el)}
         >
@@ -153,6 +155,7 @@ export function Layers(props: Props) {
               className={`layer artboard-row${isSelected ? " selected" : ""}`}
               style={{ paddingLeft: 8 }}
               onClick={() => onSelect({ kind: "artboard", artboardId: ab.id })}
+              onContextMenu={(e) => props.onContextMenu({ kind: "artboard", artboardId: ab.id }, e)}
               onDoubleClick={() => setRenaming(ab.id)}
               onMouseEnter={() => onHover(hosts.get(ab.id) ?? null)}
             >

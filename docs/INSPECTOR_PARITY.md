@@ -116,3 +116,9 @@ Browser checks on port 5181: blue at 1% alpha rendered rgba(37,99,235,.01), Canc
 Repeated arrow keydowns share a history group until release, direction/target change, another edit, Undo/Redo or blur. Separate key presses remain separate undo steps. Four Node tests cover a 120-update group, separate edits, branching/group boundaries and bounded history (`node --test tests/history.test.mjs`, Node 24).
 
 Browser check on port 5181: two Right presses moved frame X from 80 to 82; Undo returned 81 then 80 with history empty. The native held-key call emitted only one movement, so physical auto-repeat integration remains a manual check; repeated snapshot grouping passed the automated test. Measured rendered inspector width 241px and field heights 24px. Screenshot: /tmp/dom-canvas-compact-inspector-current.png.
+
+## Selection actions menu
+
+Added a 24px inspector header trigger and layer right-click entry point for Duplicate, Zoom to selection, Select parent and Delete. The 208px menu uses a portal, viewport clamping, first-item focus, arrow/Home/End navigation and Escape/Tab dismissal with focus restoration. Outside clicks, resize and window blur dismiss it. Right-click explicitly selects its target before exposing actions.
+
+Browser check on port 5181: right-clicking flex-qa selected it and focused Duplicate. Enter created a second layer; Undo returned to one. End focused Delete; Enter removed the selected layer and Undo restored it. Escape closed the menu and returned focus to Selection actions. Screenshot: /tmp/dom-canvas-selection-menu.png. Build passed.
