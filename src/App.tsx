@@ -49,6 +49,7 @@ export function App() {
   const [layerHover, setLayerHover] = useState<Element | null>(null);
   const [version, setVersion] = useState(0);
   const pendingSelection = useRef<{ artboardId: string; path: number[] | null } | null>(null);
+  const snapshotSelections = useRef(new WeakMap<Artboard[], { artboardId: string; path: number[] | null }>());
   const selectionAddress = useRef<{ element: Element; artboardId: string; path: number[] } | null>(null);
 
   const changeCssDraft = (id: string, value: string | null) => {
@@ -165,15 +166,14 @@ export function App() {
   // by path once the artboards have re-rendered.
   useLayoutEffect(() => {
     const pending = pendingSelection.current;
-    if (!pending) return;
-    pendingSelection.current = null;
-    const root = hostsRef.current.get(pending.artboardId)?.shadowRoot;
-    if (!root) return setSelection({ kind: "none" });
-    const element = pending.path ? resolvePath(root, pending.path) : null;
-    setSelection(element ? { kind: "element", artboardId: pending.artboardId, element } : { kind: "artboard", artboardId: pending.artboardId });
-  }, [artboards]);
-
-  useLayoutEffect(() => {
+    if (pending) {
+      pendingSelection.current = null;
+      const root = hostsRef.current.get(pending.artboardId)?.shadowRoot;
+      if (!root) return setSelection({ kind: "none" });
+      const element = pending.path ? resolvePath(root, pending.path) : null;
+      setSelection(element ? { kind: "element", artboardId: pending.artboardId, element } : { kind: "artboard", artboardId: pending.artboardId });
+      return;
+    }
     if (selection.kind !== "element") { selectionAddress.current = null; return; }
     if (selection.element.isConnected) {
       selectionAddress.current = { element: selection.element, artboardId: selection.artboardId, path: pathOf(selection.element) };
@@ -192,7 +192,9 @@ export function App() {
         : selection.kind === "artboard"
           ? { artboardId: selection.artboardId, path: null }
           : null;
+    if (pendingSelection.current) snapshotSelections.current.set(doc.latest.current, pendingSelection.current);
     const moved = direction === "undo" ? doc.undo() : doc.redo();
+    if (moved) pendingSelection.current = snapshotSelections.current.get(doc.latest.current) ?? pendingSelection.current;
     if (!moved) pendingSelection.current = null;
     bump();
   }, [doc, selection, bump]);
@@ -275,6 +277,20 @@ export function App() {
       commit();
     }
   }, [selection, artboards, commit]);
+
+  const siblingElements = selection.kind === "element" ? Array.from(selection.element.parentNode?.children ?? []).filter(el => el.tagName !== "STYLE") : [];
+  const siblingIndex = selection.kind === "element" ? siblingElements.indexOf(selection.element) : -1;
+  const reorderSelection = (destination: "earlier" | "later" | "first" | "last") => {
+    if (selection.kind !== "element") return;
+    const el = selection.element;
+    const index = destination === "first" ? 0 : destination === "last" ? siblingElements.length - 1 : siblingIndex + (destination === "earlier" ? -1 : 1);
+    const target = siblingElements[index];
+    if (!target || target === el) return;
+    snapshotSelections.current.set(doc.latest.current, { artboardId: selection.artboardId, path: pathOf(el) });
+    if (index < siblingIndex) target.before(el); else target.after(el);
+    commit();
+    snapshotSelections.current.set(doc.latest.current, { artboardId: selection.artboardId, path: pathOf(el) });
+  };
 
   const nudgeGroup = useRef<{ key: string; target: Element | string; token: symbol } | null>(null);
   useEffect(() => {
@@ -446,7 +462,13 @@ export function App() {
       {notice && <div className="toast" role="status">{notice}</div>}
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
         { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
-        { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection },
+        ...(selection.kind === "element" ? [
+          { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: siblingIndex <= 0, separator: true },
+          { label: "Move later", run: () => reorderSelection("later"), disabled: siblingIndex >= siblingElements.length - 1 },
+          { label: "Move to first", run: () => reorderSelection("first"), disabled: siblingIndex <= 0 },
+          { label: "Move to last", run: () => reorderSelection("last"), disabled: siblingIndex >= siblingElements.length - 1 },
+        ] : []),
+        { label: "Zoom to selection", shortcut: "⇧ 2", run: zoomToSelection, separator: true },
         ...(selection.kind === "element" ? [{ label: "Select parent", shortcut: "Esc", run: selectParent }] : []),
         { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true },
       ]} />}

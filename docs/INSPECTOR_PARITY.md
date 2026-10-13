@@ -122,3 +122,9 @@ Browser check on port 5181: two Right presses moved frame X from 80 to 82; Undo 
 Added a 24px inspector header trigger and layer right-click entry point for Duplicate, Zoom to selection, Select parent and Delete. The 208px menu uses a portal, viewport clamping, first-item focus, arrow/Home/End navigation and Escape/Tab dismissal with focus restoration. Outside clicks, resize and window blur dismiss it. Right-click explicitly selects its target before exposing actions.
 
 Browser check on port 5181: right-clicking flex-qa selected it and focused Duplicate. Enter created a second layer; Undo returned to one. End focused Delete; Enter removed the selected layer and Undo restored it. Escape closed the menu and returned focus to Selection actions. Screenshot: /tmp/dom-canvas-selection-menu.png. Build passed.
+
+### Sibling ordering
+
+Element actions now include Move earlier/later and Move to first/last. They reorder the actual sibling DOM nodes without changing parent, inline styles or CSS stacking values. Boundary commands are disabled; menu keyboard navigation skips disabled items. Document snapshot addresses preserve selection across reordering and history traversal. Combined the two selection restoration effects after browser QA exposed one overriding the other.
+
+Verified on port 5181: moving flex-qa to first updated layer order; Undo restored its second position and kept flex-qa selected, Redo restored first position with the same selection. Earlier/first were disabled at the boundary and ArrowDown skipped to Move later. Move to last produced matching DOM and screen order (grid, SVG, transformed box, flex); Undo restored the fixtures. Screenshot: /tmp/dom-canvas-layer-order.png. CSS order/z-index can override the visual consequences of DOM ordering, as documented in README.

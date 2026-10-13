@@ -58,6 +58,7 @@ Open http://localhost:5180.
 - Canvas controls expose zoom, Fit all and Fit selection. Selecting an offscreen layer reveals its frame.
 - The Layers tree supports arrow-key navigation, Home/End, Enter/Space selection and F2 renaming. Arrow keys in the tree do not move canvas objects.
 - Right-click a layer or open the inspector’s Selection actions menu to duplicate, delete, zoom to selection or select its parent. Arrow keys and Home/End navigate the menu; Escape returns focus to its trigger. Duplicate and Delete support Undo.
+- Element actions also move a layer earlier/later or first/last among its siblings. These change HTML order, so normal flow, Flex/Grid and order-dependent selectors update naturally; explicit CSS `order` and `z-index` still apply. Undo/Redo restores both order and selection.
 - Copy frame exports the selected frame with applied CSS. Pending CSS drafts are not exported. Save status reports successful local storage writes or storage failures.
 
 ## Editing behavior
