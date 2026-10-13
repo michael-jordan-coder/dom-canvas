@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeProject, decodeProject, isProjectClipboard } from '../src/features/document/projectFile.ts';
+import { encodeProject, decodeProject, isProjectClipboard, documentName, projectFilename } from '../src/features/document/projectFile.ts';
 const frame = { id: 'a', name: 'Example', x: -30, y: 12, width: 400, html: '<div>Hello</div>', css: ':host {color: red}', fonts: '@font-face{}', height: 300, aspectRatio: 4 / 3, backgroundColor: 'rgba(124, 58, 237, 0.5)', clipContent: false };
 const camera = { x: 40, y: 25, z: 1.25 };
 test('project clipboard detection routes malformed project JSON to validation, leaving ordinary markup alone', () => {
@@ -21,4 +21,20 @@ test('invalid format, dimensions and camera are rejected before loading', () => 
 test('empty documents are valid and unknown frame properties are discarded', () => {
   assert.deepEqual(decodeProject(encodeProject([],camera)).artboards, []);
   assert.equal('untrusted' in decodeProject(encodeProject([{...frame,untrusted:'extra'}],camera)).artboards[0],false);
+});
+
+test('document names round trip while older files remain compatible', () => {
+  assert.equal(decodeProject(encodeProject([frame], camera, '  קנבס — Design  ')).name, 'קנבס — Design');
+  const legacy = JSON.parse(encodeProject([frame], camera));
+  delete legacy.name;
+  assert.equal(decodeProject(JSON.stringify(legacy)).name, 'Untitled');
+  assert.throws(() => decodeProject(JSON.stringify({ ...legacy, name: 42 })));
+});
+
+test('names normalize blanks and controls and produce safe Unicode filenames', () => {
+  assert.equal(documentName(' \n '), 'Untitled');
+  assert.equal(documentName('One\nTwo'), 'One Two');
+  assert.equal(documentName('a'.repeat(150)).length, 120);
+  assert.equal(projectFilename('קנבס / Landing: v2'), 'קנבס - Landing- v2.domcanvas.json');
+  assert.equal(projectFilename('...'), 'Untitled.domcanvas.json');
 });

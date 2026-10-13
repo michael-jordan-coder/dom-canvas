@@ -11,8 +11,9 @@ import { ZoomControl } from "@/features/canvas/ZoomControl";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
+import { DocumentName } from "@/features/document/DocumentTitle";
 import { FileControls } from "@/features/document/FileControls";
-import { decodeProject, encodeProject, inertProjectHtml, isProjectClipboard, type ProjectFile } from "@/features/document/projectFile";
+import { projectFilename, decodeProject, encodeProject, inertProjectHtml, isProjectClipboard, type ProjectFile } from "@/features/document/projectFile";
 import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
@@ -37,6 +38,8 @@ export function App() {
   const hostsRef = useRef(new Map<string, HTMLDivElement>());
   const doc = useDocument(hostsRef.current, sampleDocument);
   const { artboards } = doc;
+
+  useEffect(() => { document.title = `${doc.name} — DOM Canvas`; }, [doc.name]);
 
   // Start offset so the first artboard clears the floating layers panel.
   const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
@@ -90,8 +93,8 @@ export function App() {
     bump();
   }, [bump]);
 
-  const commit = useCallback((fn?: (list: Artboard[]) => Artboard[], group?: symbol) => {
-    doc.commit(fn, group);
+  const commit = useCallback((fn?: (list: Artboard[]) => Artboard[], group?: symbol, name?: string) => {
+    doc.commit(fn, group, name);
     bump();
   }, [doc, bump]);
 
@@ -105,9 +108,9 @@ export function App() {
 
   const saveProject = () => {
     const snapshot = artboards.map(ab => { const root = hostsRef.current.get(ab.id)?.shadowRoot; return root ? { ...ab, html: serializeRoot(root) } : ab; });
-    const url = URL.createObjectURL(new Blob([encodeProject(snapshot, camera)], { type: "application/json" }));
+    const url = URL.createObjectURL(new Blob([encodeProject(snapshot, camera, doc.name)], { type: "application/json" }));
     const link = document.createElement("a");
-    link.href = url; link.download = "Untitled.domcanvas.json"; link.click();
+    link.href = url; link.download = projectFilename(doc.name); link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice("Canvas file exported — applied styles only. CSS drafts remain in the editor.");
   };
@@ -115,7 +118,7 @@ export function App() {
     const loaded = project.artboards.map(ab => ({ ...ab, id: newId(), html: inertProjectHtml(ab.html) }));
     pendingSelection.current = null; pendingFocus.current = null;
     setSelectionMenu(null); setCssPreview(null);
-    commit(() => loaded);
+    commit(() => loaded, undefined, project.name ?? "Untitled");
     setCamera(project.camera);
     setSelection(loaded.length ? { kind: "artboard", artboardId: loaded[0].id } : { kind: "none" });
     setNotice(`Opened ${loaded.length} ${loaded.length === 1 ? "frame" : "frames"}. Undo restores the previous document.`);
@@ -475,7 +478,7 @@ export function App() {
       <aside className="panel left">
         <div className="panel-top">
           <div className="file-name">
-            Untitled
+            <DocumentName value={doc.name} onRename={name => commit(undefined, undefined, name)} />
             <small role="status" className={doc.saveStatus.startsWith("Not saved") ? "save-error" : ""}>{doc.saveStatus}</small>
           </div>
           <FileControls onSave={saveProject} onOpen={openProject} onError={setNotice} />
