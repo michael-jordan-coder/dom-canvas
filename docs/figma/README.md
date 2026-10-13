@@ -9,6 +9,8 @@
 - [Research plan and coverage](RESEARCH_PLAN.md): scope, open work, completion criteria.
 - [Method](METHOD.md): how to reproduce and qualify each observation.
 - [Environment and fixtures](ENVIRONMENT.md): approved test file, node IDs, access.
+- **[Design panel state map](topics/design-panel.md)**: primary track; context,
+  sizing dependencies, shared properties and Undo transitions.
 - [Selection](topics/selection.md): marquee, multiple frames, Shift.
 - [Text](topics/text.md): click creation, drawn boxes, sizing modes.
 - [Inspector](topics/inspector.md): measured control density and panel structure.

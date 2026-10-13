@@ -56,8 +56,12 @@ implementation and local verification against these observations.
 
 ## Next experiments
 
-1. Resolve Shift removal on a selected frame: body, label and Layers row separately.
-2. Marquee inside frames and nested containers, partial intersections, both directions.
-3. Text Auto height conversion and overflow, empty-text cancellation, text outside frames.
-4. Shared resize bounds versus individual dimensions; modifier behavior.
-5. Numeric fields: focus, selection, arrows, scrub, expressions, invalid values, Undo.
+User reprioritized the **holistic Design panel** above canvas selection research.
+The first [state/dependency map](topics/design-panel.md) now records freeform versus
+auto-layout frames, text resizing modes, shared widths and transactional Undo.
+
+1. Design panel in parent/child contexts: Fill, Hug, Fixed, absolute position, min/max.
+2. Numeric field lifecycle: focus, blur, Enter/Escape, arrows, scrub, expressions, errors.
+3. Appearance editors and dependent state: fill/stroke/effects, preview/cancel, opacity.
+4. Mixed-type selections and per-field support; panel-to-canvas synchronization.
+5. Resume nested selection and group resize research after panel foundations.
