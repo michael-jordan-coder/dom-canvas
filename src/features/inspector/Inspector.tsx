@@ -143,6 +143,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const resetGroup = (props: string[]) => props.some((prop) => styled.style.getPropertyValue(prop)) ? () => reset(props) : undefined;
   const resetProperty = (prop: string) => resetGroup([prop]);
   const property = (label: string, prop: string, prefix?: ReactNode, length = true) => <Field label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={resetProperty(prop)} />;
+  const hasLayoutBox = element.getClientRects().length > 0;
   const geometry = frameGeometry(element);
   const moveTo = (x: number, y: number) => {
     const current = getTranslate(styled);
@@ -166,7 +167,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     const mode = sizeMode(styled, axis);
     const main = isFlexMainAxis(element, axis);
     const measured = getLayoutSize(element)[axis];
-    const value = mode === "custom" ? styled.style.getPropertyValue(axis) : String(measured);
+    const value = !hasLayoutBox ? read(axis) : mode === "custom" ? styled.style.getPropertyValue(axis) : String(measured);
     return <Field prefix={axis === "width" ? "W" : "H"} label={label} value={value}
       onReset={resetGroup(sizingProperties(element, axis))}
       onCommit={(v) => {
@@ -209,7 +210,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <Section preferenceKey="layout" title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
-      <div className="sizing-row"><Row>{sizeField("width")}{sizeField("height")}</Row><button className="inspector-icon" title="Lock aspect ratio" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
+      <div className="sizing-row"><Row>{sizeField("width")}{sizeField("height")}</Row><button className="inspector-icon" title="Lock aspect ratio" aria-label="Lock aspect ratio" disabled={!hasLayoutBox && read("aspect-ratio") === "auto"} aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
         if (read("aspect-ratio") !== "auto") { set("aspect-ratio", "auto"); return; }
         const { width: w, height: h } = getLayoutSize(element);
         setSize(styled, { width: w, height: h });
@@ -332,7 +333,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
       {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
       <div className="property-subheading"><span>Visual position in frame</span></div>
-      <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row>
+      {hasLayoutBox ? <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(n, geometry.y); }} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; moveTo(geometry.x, n); }} /></Row> : <p className="property-note">Show the layer to edit its visual position.</p>}
       <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
       <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
       {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}

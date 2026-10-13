@@ -19,6 +19,7 @@ import { CssEditor } from "@/features/inspector/CssEditor";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
 import { SelectionMenu, type MenuAnchor } from "@/features/layers/SelectionMenu";
+import { isLayerHidden, toggleLayerVisibility } from "@/features/layers/visibility";
 
 const newId = () => `ab-${crypto.randomUUID().slice(0, 8)}`;
 
@@ -448,6 +449,7 @@ export function App() {
           onHover={setLayerHover}
           onRenameArtboard={(id, name) => commitArtboard(id, { name })}
           onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}
+          onToggleVisibility={(el) => { toggleLayerVisibility(el); setLayerHover(null); commit(); }}
           version={version}
         />
       </aside>
@@ -494,6 +496,7 @@ export function App() {
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
         { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
         ...(selection.kind === "element" ? [
+          { label: isLayerHidden(selection.element) ? "Show layer" : "Hide layer", run: () => { toggleLayerVisibility(selection.element); setLayerHover(null); commit(); }, separator: true },
           { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: siblingIndex <= 0, separator: true },
           { label: "Move later", run: () => reorderSelection("later"), disabled: siblingIndex >= siblingElements.length - 1 },
           { label: "Move to first", run: () => reorderSelection("first"), disabled: siblingIndex <= 0 },

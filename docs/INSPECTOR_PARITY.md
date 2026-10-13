@@ -236,3 +236,11 @@ Browser QA on port 5181: the solid-color fixture had no image-sizing or remove-l
 Added a compact Fill section to frame selection using the shared color/alpha picker and transaction system. Optional backgroundColor is rendered on the frame host, persisted with history/local files, validated as a string by project decoding, and serialized as a browser-normalized :host color rule when copying code. Picker cancellation explicitly restores an absent override. Reset removes the override. The imported stylesheet still controls images and other properties; opaque child content may cover the frame background.
 
 QA found the app's outer .artboard background:white rule overriding imported shadow :host backgrounds. Removed this redundant rule; the internal frame base stylesheet still supplies white by default. Browser QA on port5181: imported blue background appeared, yellow override applied, Reset restored blue, and picker Cancel restored both an existing yellow override and an absent override. Alpha50 computed0.5 and Undo restored opacity. Copied/pasted HTML reproduced yellow. Reload retained yellow. Project-file roundtrip/validation tests (four) and build passed. Screenshot: /tmp/dom-canvas-frame-fill.png.
+
+## Element visibility
+
+Added compact row eye buttons and Hide/Show layer menu actions. Hiding uses display:none!important and saves the previous inline display/priority in serialized metadata. Showing restores it; imported hidden CSS can be overridden with revert/block. Hidden rows stay accessible and dimmed, and their eye remains visible. Frames and locking are outside this change.
+
+Canvas selection/hover measurement now suppresses outlines for elements with no layout boxes, including observer refreshes. Hidden HTML layers show CSS dimensions and a position explanation instead of misleading zero-size coordinates; ratio locking that needs measurement is disabled.
+
+Browser QA on port5181: flex!important hid with no client rectangles and showed with the original priority. Undo restored hidden then visible states. An imported display:none paragraph showed through the selection menu and Undo restored it. After reload, the hidden flex layer still restored correctly. Final hidden selection had no outline or X field. Screenshot: /tmp/dom-canvas-layer-visibility.png. Build and diff check passed.

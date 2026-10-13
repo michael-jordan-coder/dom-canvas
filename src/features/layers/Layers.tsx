@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type KeyboardEvent } from "react";
 import type { Artboard, Selection } from "@/features/canvas/types";
+import { isLayerHidden } from "./visibility";
 import { ChevronIcon, FrameIcon, ImageIcon, RectIcon, TextIcon, VectorIcon } from "@/design-system/icons";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
   onHover: (element: Element | null) => void;
   onRenameArtboard: (id: string, name: string) => void;
   onRenameElement: (element: Element, name: string) => void;
+  onToggleVisibility: (element: Element) => void;
   version: number;
 };
 
@@ -118,6 +120,7 @@ export function Layers(props: Props) {
 
   const renderNode = (el: Element, depth: number, artboardId: string, within: boolean) => {
     const isSelected = el === selectedEl;
+    const hidden = isLayerHidden(el);
     const children = Array.from(el.children).filter(child => !needle || visible.has(child));
     const open = needle ? !searchCollapsed.has(el) : expanded.has(el);
     const Icon = layerIcon(el);
@@ -133,7 +136,7 @@ export function Layers(props: Props) {
           aria-expanded={children.length ? open : undefined}
           aria-level={depth + 1}
           onKeyDown={(e) => { if (e.key === "F2") { e.preventDefault(); e.stopPropagation(); setRenaming(el); } }}
-          className={`layer${isSelected ? " selected" : within ? " within" : ""}`}
+          className={`layer${isSelected ? " selected" : within ? " within" : ""}${hidden ? " layer-hidden" : ""}`}
           style={{ paddingLeft: 8 + depth * INDENT }}
           onClick={() => onSelect({ kind: "element", artboardId, element: el })}
           onContextMenu={(e) => props.onContextMenu({ kind: "element", artboardId, element: el }, e)}
@@ -152,6 +155,9 @@ export function Layers(props: Props) {
           ) : (
             <span className="name">{layerName(el)}</span>
           )}
+          <button className="layer-visibility" aria-label={`${hidden ? "Show" : "Hide"} ${layerName(el)}`} title={hidden ? "Show layer" : "Hide layer"} onClick={(e) => { e.stopPropagation(); props.onToggleVisibility(el); }} onDoubleClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M1.5 8s2-4 6.5-4 6.5 4 6.5 4-2 4-6.5 4-6.5-4-6.5-4Z"/><circle cx="8" cy="8" r="2"/>{hidden && <path d="m2 2 12 12"/>}</svg>
+          </button>
         </div>
         {open && children.map((child) => renderNode(child, depth + 1, artboardId, within || isSelected))}
       </div>

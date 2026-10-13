@@ -426,8 +426,8 @@ export function Canvas(props: Props) {
     const canvas = canvasRef.current!;
     const selectedEl = selectedElement(selection, hosts);
     setRects({
-      selected: selectedEl ? selectionOutline(selectedEl, canvas) : null,
-      hover: hoverTarget && hoverTarget.isConnected && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
+      selected: selectedEl?.getClientRects().length ? selectionOutline(selectedEl, canvas) : null,
+      hover: hoverTarget && hoverTarget.isConnected && hoverTarget.getClientRects().length && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
     });
   }, [camera, version, selection, hoverTarget, hosts, artboards, cssPreview]);
   useLayoutEffect(() => {
@@ -439,7 +439,7 @@ export function Canvas(props: Props) {
       cancelAnimationFrame(scheduled);
       scheduled = requestAnimationFrame(() => {
         if (!element.isConnected) return;
-        const next = selectionOutline(element, canvas);
+        const next = element.getClientRects().length ? selectionOutline(element, canvas) : null;
         setRects((current) => JSON.stringify(current.selected) === JSON.stringify(next) ? current : { ...current, selected: next });
       });
     };
