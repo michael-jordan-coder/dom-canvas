@@ -55,7 +55,7 @@ Browser evidence on isolated port 5181: Grid bottom-right placed a 40px child at
 
 ## Remaining limitations
 
-- Pointer resize handles remain axis-aligned for rotated content; full rotated resize behavior is not implemented.
+- Affine 2D resize is implemented and verified below. Perspective/3D and fragmented inline boxes retain the axis-aligned fallback.
 - Transform-aware movement is verified for 2D transforms, not perspective/3D projections.
 - Vector path point editing and visual editing of SVG paint-server gradients are not implemented; authored data is retained.
 
@@ -88,3 +88,9 @@ Element drafts retain their starting inline source. If Design changes that sourc
 Direction icons and both gap fields now sit beside the alignment grid. Distribution, stretch/baseline alignment, reverse order, wrap and reading direction are grouped under Layout options. Active RTL/reverse/wrap states remain summarized when collapsed. Grid has its own Grid layout heading and cell-alignment label. All controls retain accessible names.
 
 Browser check on port 5181: opened Layout options on the existing RTL/column-reverse/wrap-reverse fixture; changed it to LTR/nowrap/normal order, closed options, selected Horizontal, set column gap 20 and middle-center alignment. Computed styles were row, 20px, center/center; panel had no horizontal overflow. Screenshot: /tmp/dom-canvas-compact-autolayout.png.
+
+## Transform-aware selection and resize
+
+Selection outlines and handles follow the local 2D basis, including nested rotation, nonuniform scale and canvas zoom. Dimensions report local border-box size. Resize projects screen movement onto that basis and compensates translation using the actual post-layout opposite anchor, accounting for transform-origin and constraints. Handle cursors follow their screen direction.
+
+Verified on isolated port 5181 with parent rotate(-12deg) scale(.9) and child rotate(30deg) scale(1.1,.8), center origin and a 4px border: SE drag by (60,30) screen pixels resized 180x120 to 195.359x123.18, moved the dragged corner by approximately (60.011,30.013), and kept NW within 0.016px. One Undo restored 180x120 and removed inline overrides. With ratio lock, NW resize produced 193.156x128.766 while SE moved only 0.027px. Ordinary untransformed east-edge resize retained height 100 and exactly retained the west edge. Screenshot: /tmp/dom-canvas-rotated-resize.png.

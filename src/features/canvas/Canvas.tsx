@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
-import { getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
+import { affineBorderBox, inverseLinearDelta, getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
 import { elementRectInCanvas, normalizeRect, zoomAround, type Bounds, type Point, type Rect } from "./geometry";
 import type { Artboard, Camera, Selection, Tool } from "./types";
 
@@ -28,7 +28,7 @@ const HANDLES: Handle[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 
 type ResizeTarget =
   | { kind: "artboard"; id: string; x: number; y: number; w: number; h: number }
-  | { kind: "element"; element: Styled; w: number; h: number; tx: number; ty: number };
+  | { kind: "element"; element: Styled; w: number; h: number; tx: number; ty: number; matrix?: DOMMatrix; anchor?: Point; anchorX: number; anchorY: number };
 
 type Drag =
   | { kind: "pan"; startX: number; startY: number; camera: Camera }
@@ -248,7 +248,10 @@ export function Canvas(props: Props) {
       const el = selection.element;
       const r = el.getBoundingClientRect();
       const t = getTranslate(el);
-      target = { kind: "element", element: el, w: r.width / camera.z, h: r.height / camera.z, tx: t.x, ty: t.y };
+      const box = affineBorderBox(el);
+      const anchorX = handle.includes("w") ? 1 : handle.includes("e") ? 0 : 0.5;
+      const anchorY = handle.includes("n") ? 1 : handle.includes("s") ? 0 : 0.5;
+      target = { kind: "element", element: el, w: box?.size.width ?? r.width / camera.z, h: box?.size.height ?? r.height / camera.z, tx: t.x, ty: t.y, matrix: box?.matrix, anchor: box?.point(anchorX, anchorY), anchorX, anchorY };
     }
     if (target) dragRef.current = { kind: "resize", handle, startX: e.clientX, startY: e.clientY, target, moved: false };
   };
@@ -288,9 +291,10 @@ export function Canvas(props: Props) {
       onChange();
     } else {
       const { handle, target } = drag;
+      const delta = target.kind === "element" && target.matrix ? inverseLinearDelta(target.matrix, screenDx, screenDy) : { x: dx, y: dy };
       const grow = (start: number, delta: number, fromStart: boolean) => Math.max(1, fromStart ? start - delta : start + delta);
-      let w = handle.includes("e") ? grow(target.w, dx, false) : handle.includes("w") ? grow(target.w, dx, true) : target.w;
-      let h = handle.includes("s") ? grow(target.h, dy, false) : handle.includes("n") ? grow(target.h, dy, true) : target.h;
+      let w = handle.includes("e") ? grow(target.w, delta.x, false) : handle.includes("w") ? grow(target.w, delta.x, true) : target.w;
+      let h = handle.includes("s") ? grow(target.h, delta.y, false) : handle.includes("n") ? grow(target.h, delta.y, true) : target.h;
       const locked = e.shiftKey || (target.kind === "element" ? getComputedStyle(target.element).aspectRatio !== "auto" : !!artboards.find((ab) => ab.id === target.id)?.aspectRatio);
       if (locked && target.h > 0) {
         const ratio = target.w / target.h;
@@ -314,7 +318,13 @@ export function Canvas(props: Props) {
           width: locked || handle.includes("e") || handle.includes("w") ? w : undefined,
           height: locked || handle.includes("n") || handle.includes("s") ? h : undefined,
         });
-        setTranslate(target.element, target.tx + shiftX, target.ty + shiftY);
+        const resized = target.anchor ? affineBorderBox(target.element) : null;
+        if (resized && target.anchor) {
+          const currentAnchor = resized.point(target.anchorX, target.anchorY);
+          const correction = screenDeltaToLocal(target.element, target.anchor.x - currentAnchor.x, target.anchor.y - currentAnchor.y);
+          const current = getTranslate(target.element);
+          setTranslate(target.element, current.x + correction.x, current.y + correction.y);
+        } else setTranslate(target.element, target.tx + shiftX, target.ty + shiftY);
         onChange();
       }
     }
@@ -360,12 +370,12 @@ export function Canvas(props: Props) {
   // Rects are measured after commit so the overlay tracks the world transform
   // that is actually on screen, not the one from the previous render.
   const hoverTarget = externalHover ?? hovered;
-  const [rects, setRects] = useState<{ selected: Rect | null; hover: Rect | null }>({ selected: null, hover: null });
+  const [rects, setRects] = useState<{ selected: OutlineRect | null; hover: Rect | null }>({ selected: null, hover: null });
   useLayoutEffect(() => {
     const canvas = canvasRef.current!;
     const selectedEl = selectedElement(selection, hosts);
     setRects({
-      selected: selectedEl ? elementRectInCanvas(selectedEl, canvas) : null,
+      selected: selectedEl ? selectionOutline(selectedEl, canvas) : null,
       hover: hoverTarget && hoverTarget.isConnected && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
     });
   }, [camera, version, selection, hoverTarget, hosts, artboards, cssPreview]);
@@ -378,8 +388,8 @@ export function Canvas(props: Props) {
       cancelAnimationFrame(scheduled);
       scheduled = requestAnimationFrame(() => {
         if (!element.isConnected) return;
-        const next = elementRectInCanvas(element, canvas);
-        setRects((current) => current.selected && (Object.keys(next) as (keyof Rect)[]).every((key) => Math.abs(next[key] - current.selected![key]) < 0.01) ? current : { ...current, selected: next });
+        const next = selectionOutline(element, canvas);
+        setRects((current) => JSON.stringify(current.selected) === JSON.stringify(next) ? current : { ...current, selected: next });
       });
     };
     const resize = new ResizeObserver(refresh);
@@ -419,13 +429,13 @@ export function Canvas(props: Props) {
       <div className="overlay" data-version={version}>
         {hoverRect && <div className="outline hover" style={rectStyle(hoverRect)} />}
         {selectedRect && (
-          <div className={`outline selected ${selection.kind === "artboard" ? "frame-selection" : "element-selection"}`} style={rectStyle(selectedRect)}>
+          <div className={`outline selected ${selection.kind === "artboard" ? "frame-selection" : "element-selection"}`} style={{ ...rectStyle(selectedRect), transform: selectedRect.transform, transformOrigin: "0 0" }}>
             <div className="selection-caption">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? selection.element.tagName.toLowerCase() : ""}</div>
             {canResize && HANDLES.map((h) => (
-              <span key={h} className={`handle ${h}`} onPointerDown={startResize(h)} />
+              <span key={h} className={`handle ${h}`} style={{ cursor: resizeCursor(h, selectedRect.transform) }} onPointerDown={startResize(h)} />
             ))}
             <div className="size-pill">
-              {Math.round(selectedRect.width / camera.z)} × {Math.round(selectedRect.height / camera.z)}
+              {Math.round(selectedRect.layoutWidth ?? selectedRect.width / camera.z)} × {Math.round(selectedRect.layoutHeight ?? selectedRect.height / camera.z)}
             </div>
           </div>
         )}
@@ -439,6 +449,25 @@ export function Canvas(props: Props) {
       )}
     </div>
   );
+}
+
+type OutlineRect = Rect & { transform?: string; layoutWidth?: number; layoutHeight?: number };
+function selectionOutline(element: Element, canvas: HTMLElement): OutlineRect {
+  const box = affineBorderBox(element);
+  if (!box) return elementRectInCanvas(element, canvas);
+  const bounds = canvas.getBoundingClientRect();
+  const sx = Math.hypot(box.matrix.a, box.matrix.b);
+  const sy = Math.hypot(box.matrix.c, box.matrix.d);
+  return { left: box.origin.x - bounds.left, top: box.origin.y - bounds.top, width: box.size.width * sx, height: box.size.height * sy,
+    transform: `matrix(${box.matrix.a / sx},${box.matrix.b / sx},${box.matrix.c / sy},${box.matrix.d / sy},0,0)`, layoutWidth: box.size.width, layoutHeight: box.size.height };
+}
+
+function resizeCursor(handle: Handle, transform?: string) {
+  const matrix = transform ? new DOMMatrix(transform) : new DOMMatrix();
+  const x = handle.includes("e") ? 1 : handle.includes("w") ? -1 : 0;
+  const y = handle.includes("s") ? 1 : handle.includes("n") ? -1 : 0;
+  const angle = Math.atan2(matrix.b * x + matrix.d * y, matrix.a * x + matrix.c * y) * 180 / Math.PI;
+  return ["ew-resize", "nwse-resize", "ns-resize", "nesw-resize"][((Math.round(angle / 45) % 4) + 4) % 4];
 }
 
 function rectStyle(r: Rect) {
