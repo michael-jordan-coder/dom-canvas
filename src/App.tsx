@@ -10,7 +10,7 @@ import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types"
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
 import { FileControls } from "@/features/document/FileControls";
-import { encodeProject, inertProjectHtml, type ProjectFile } from "@/features/document/projectFile";
+import { decodeProject, encodeProject, inertProjectHtml, isProjectClipboard, type ProjectFile } from "@/features/document/projectFile";
 import { ImportButton } from "@/features/import/ImportButton";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
@@ -104,15 +104,15 @@ export function App() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice("Canvas file exported — applied styles only. CSS drafts remain in the editor.");
   };
-  const openProject = (project: ProjectFile) => {
+  const openProject = useCallback((project: ProjectFile) => {
     const loaded = project.artboards.map(ab => ({ ...ab, id: newId(), html: inertProjectHtml(ab.html) }));
     pendingSelection.current = null; pendingFocus.current = null;
     setSelectionMenu(null); setCssPreview(null);
     commit(() => loaded);
     setCamera(project.camera);
     setSelection(loaded.length ? { kind: "artboard", artboardId: loaded[0].id } : { kind: "none" });
-    setNotice(`Opened ${loaded.length} frames. Undo restores the previous document.`);
-  };
+    setNotice(`Opened ${loaded.length} ${loaded.length === 1 ? "frame" : "frames"}. Undo restores the previous document.`);
+  }, [commit]);
 
   const addArtboard = useCallback((content: Pick<Artboard, "html" | "css" | "fonts"> & Partial<Pick<Artboard, "name" | "width">>) => {
     const id = newId();
@@ -164,6 +164,12 @@ export function App() {
       if (isTyping(e)) return;
       const plain = e.clipboardData?.getData("text/plain") ?? "";
       const rich = e.clipboardData?.getData("text/html") ?? "";
+      if (isProjectClipboard(plain)) {
+        e.preventDefault();
+        try { openProject(decodeProject(plain)); }
+        catch (error) { setNotice(error instanceof Error ? error.message : "Could not open this canvas document."); }
+        return;
+      }
       if (isUrl(plain)) {
         e.preventDefault();
         void importSite(plain.trim());
@@ -181,7 +187,7 @@ export function App() {
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [addArtboard, artboards, commitArtboard, importSite, selection]);
+  }, [addArtboard, artboards, commitArtboard, importSite, selection, openProject]);
 
   // Snapshot restores replace the DOM, so the selected element is re-found
   // by path once the artboards have re-rendered.
@@ -215,6 +221,7 @@ export function App() {
           : null;
     if (pendingSelection.current) snapshotSelections.current.set(doc.latest.current, pendingSelection.current);
     const moved = direction === "undo" ? doc.undo() : doc.redo();
+    if (moved) setNotice(null);
     if (moved) pendingSelection.current = snapshotSelections.current.get(doc.latest.current) ?? pendingSelection.current;
     if (!moved) pendingSelection.current = null;
     bump();

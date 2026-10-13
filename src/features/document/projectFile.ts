@@ -8,6 +8,10 @@ export function encodeProject(artboards: Artboard[], camera: Camera) {
   return JSON.stringify({ format: "dom-canvas", version: 1, artboards, camera } satisfies ProjectFile, null, 2);
 }
 
+export function isProjectClipboard(source: string) {
+  return source.trimStart().startsWith("{") && /"format"\s*:\s*"dom-canvas"/.test(source);
+}
+
 export function decodeProject(source: string): ProjectFile {
   let data;
   try { data = JSON.parse(source); } catch { throw new Error("This file is not valid JSON."); }

@@ -26,6 +26,7 @@ Open http://localhost:5180.
 - CSS drafts preview live without entering history. Apply CSS (Cmd/Ctrl+Enter) saves one undo step; Discard restores the saved stylesheet. Drafts are kept per frame while switching tabs and selections during the current session. Refreshing the page discards unapplied drafts. Inline styles from Design may override stylesheet rules; invalid CSS is ignored by the browser.
 - The document and camera are saved to localStorage automatically.
 - Save canvas file (download icon above Layers) exports all frames, applied HTML/CSS, font CSS and camera to `.domcanvas.json`. Open canvas file replaces the document; Undo restores its previous content. Unapplied CSS drafts and undo history are not included. External images/fonts remain URL references, so the file is not an offline asset bundle. Imported executable markup is removed.
+- Pasting the text of a DOM Canvas JSON file onto the canvas also opens it. Invalid project data is rejected without changing the document; ordinary HTML/CSS paste keeps its existing behavior.
 
 | Shortcut | Action |
 | --- | --- |
