@@ -1,9 +1,10 @@
+import { makeSelection, selectionItems, sameItem, toggleSelection } from "./selection";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
 import { lockedAncestor } from "@/features/layers/locking";
 import { affineBorderBox, inverseLinearDelta, getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
 import { elementRectInCanvas, normalizeRect, zoomAround, type Bounds, type Point, type Rect } from "./geometry";
-import type { Artboard, Camera, Selection, Tool } from "./types";
+import type { Artboard, Camera, Selection, SelectionItem, Tool } from "./types";
 
 type Props = {
   surfaceRef: RefObject<HTMLDivElement | null>;
@@ -32,7 +33,11 @@ type ResizeTarget =
   | { kind: "artboard"; id: string; x: number; y: number; w: number; h: number }
   | { kind: "element"; element: Styled; w: number; h: number; tx: number; ty: number; matrix?: DOMMatrix; anchor?: Point; anchorX: number; anchorY: number };
 
+type GroupOrigin = { item: SelectionItem; x: number; y: number; style?: string | null };
 type Drag =
+  | { kind: "text"; artboardId: string; start: Point; target: HTMLElement | null }
+  | { kind: "marquee"; start: Point; initial: Selection; additive: boolean; scope?: string; click?: SelectionItem; moved?: boolean }
+  | { kind: "group"; startX: number; startY: number; origins: GroupOrigin[]; moved: boolean }
   | { kind: "pan"; startX: number; startY: number; camera: Camera }
   | { kind: "artboard"; id: string; startX: number; startY: number; originX: number; originY: number; moved: boolean }
   | { kind: "element"; element: Styled; startX: number; startY: number; originX: number; originY: number; moved: boolean }
@@ -63,6 +68,8 @@ export function Canvas(props: Props) {
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [panning, setPanning] = useState(false);
   const [hovered, setHovered] = useState<Element | null>(null);
+  const [marquee, setMarquee] = useState<Rect | null>(null);
+  const [multipleRects, setMultipleRects] = useState<Rect[]>([]);
   const [drawPreview, setDrawPreview] = useState<Rect | null>(null);
   const [editing, setEditing] = useState<HTMLElement | null>(null);
   const handMode = tool === "hand" || spaceHeld;
@@ -75,6 +82,8 @@ export function Canvas(props: Props) {
     restoreDrag.current = null;
     restore?.();
     if (drag.kind === "pan") onCameraChange(drag.camera);
+    if (drag.kind === "marquee") onSelect(drag.initial);
+    setMarquee(null);
     const id = pointerId.current;
     pointerId.current = null;
     if (id !== null && canvasRef.current?.hasPointerCapture(id)) canvasRef.current.releasePointerCapture(id);
@@ -148,7 +157,7 @@ export function Canvas(props: Props) {
   const startEditing = useCallback((el: HTMLElement, isNew: boolean) => {
     el.contentEditable = "plaintext-only";
     if (el.contentEditable !== "plaintext-only") el.contentEditable = "true";
-    el.focus();
+    el.focus({ preventScroll: true });
     const range = document.createRange();
     range.selectNodeContents(el);
     const sel = window.getSelection();
@@ -185,7 +194,7 @@ export function Canvas(props: Props) {
 
   const artboardAt = (hit: Hit) => (hit.kind === "artboard" || hit.kind === "element" ? hit.id : null);
 
-  const createText = (artboardId: string, world: Point) => {
+  const createText = (artboardId: string, world: Point, width?: number) => {
     const ab = artboards.find((a) => a.id === artboardId);
     const root = hosts.get(artboardId)?.shadowRoot;
     if (!ab || !root) return;
@@ -194,7 +203,7 @@ export function Canvas(props: Props) {
     el.setAttribute(
       "style",
       `position:absolute;left:${Math.round(world.x - ab.x)}px;top:${Math.round(world.y - ab.y)}px;margin:0;` +
-        "font:400 16px/1.4 Inter, system-ui, sans-serif;color:#000000;white-space:pre",
+        `font:400 16px/1.4 Inter, system-ui, sans-serif;color:#000000;${width === undefined ? "white-space:pre" : `width:${Math.max(1, Math.round(width))}px;white-space:pre-wrap;overflow-wrap:break-word`}`,
     );
     root.append(el);
     onSelect({ kind: "element", artboardId, element: el });
@@ -236,8 +245,10 @@ export function Canvas(props: Props) {
 
     if (tool === "text") {
       const id = artboardAt(hit);
-      if (id) createText(id, toWorld(e.clientX, e.clientY));
-      onToolChange("move");
+      if (id) {
+        const target = hit.kind === "element" && hit.element instanceof HTMLElement && isTextEditable(hit.element) && !lockedAncestor(hit.element) ? hit.element : null;
+        dragRef.current = { kind: "text", artboardId: id, start: toWorld(e.clientX, e.clientY), target };
+      }
       return;
     }
 
@@ -249,12 +260,38 @@ export function Canvas(props: Props) {
 
     if (hit.kind === "locked") { e.preventDefault(); return; }
     if (hit.kind === "empty") {
-      dragRef.current = { kind: "pan", startX: e.clientX, startY: e.clientY, camera };
-      setPanning(true);
-      onSelect({ kind: "none" });
+      dragRef.current = { kind: "marquee", start: { x: e.clientX, y: e.clientY }, initial: selection, additive: e.shiftKey };
+      if (!e.shiftKey) onSelect({ kind: "none" });
       return;
     }
+    const clicked: SelectionItem = hit.kind === "element" && !e.metaKey && !e.ctrlKey
+      ? { kind: "element", artboardId: hit.id, element: hit.element }
+      : { kind: "artboard", artboardId: hit.id };
+    if (e.shiftKey) { onSelect(toggleSelection(selection, clicked)); return; }
+    if (selection.kind === "multiple" && selection.items.some(item => sameItem(item, clicked) || (item.kind === "element" && clicked.kind === "element" && item.element.contains(clicked.element)))) {
+      const origins: GroupOrigin[] = selection.items.flatMap<GroupOrigin>(item => {
+        if (item.kind === "element") {
+          if (lockedAncestor(item.element)) return [];
+          const origin = getTranslate(item.element as Styled);
+          return [{ item, x: origin.x, y: origin.y, style: item.element.getAttribute("style") }];
+        }
+        const ab = artboards.find(ab => ab.id === item.artboardId);
+        return ab ? [{ item, x: ab.x, y: ab.y }] : [];
+      });
+      restoreDrag.current = () => {
+        for (const origin of origins) {
+          if (origin.item.kind === "artboard") onUpdateArtboard(origin.item.artboardId, { x: origin.x, y: origin.y });
+          else if (origin.style == null) origin.item.element.removeAttribute("style"); else origin.item.element.setAttribute("style", origin.style);
+        }
+        onChange();
+      };
+      dragRef.current = { kind: "group", startX: e.clientX, startY: e.clientY, origins, moved: false }; return;
+    }
 
+    if (hit.kind === "artboard" && !e.metaKey && !e.ctrlKey) {
+      dragRef.current = { kind: "marquee", start: { x: e.clientX, y: e.clientY }, initial: selection, additive: false, scope: hit.id, click: clicked };
+      return;
+    }
     if (hit.kind === "artboard" || hit.kind === "label") {
       const ab = artboards.find((a) => a.id === hit.id)!;
       onSelect({ kind: "artboard", artboardId: hit.id });
@@ -320,7 +357,30 @@ export function Canvas(props: Props) {
       return;
     }
 
-    if (drag.kind === "draw") {
+    if (drag.kind === "marquee") {
+      const bounds = normalizeRect(drag.start, { x: e.clientX, y: e.clientY });
+      const canvas = canvasRef.current!.getBoundingClientRect();
+      setMarquee({ left: bounds.x - canvas.left, top: bounds.y - canvas.top, width: bounds.width, height: bounds.height });
+      if (bounds.width < DRAG_THRESHOLD && bounds.height < DRAG_THRESHOLD) return;
+      drag.moved = true;
+      const contained = (element: Element) => {
+        const r = element.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.left >= bounds.x && r.top >= bounds.y && r.right <= bounds.x + bounds.width && r.bottom <= bounds.y + bounds.height;
+      };
+      const found: SelectionItem[] = [];
+      for (const ab of artboards) {
+        if (drag.scope && ab.id !== drag.scope) continue;
+        const host = hosts.get(ab.id);
+        if (!host) continue;
+        if (!drag.scope && contained(host)) { found.push({ kind: "artboard", artboardId: ab.id }); continue; }
+        for (const element of Array.from(host.shadowRoot?.querySelectorAll("*") ?? [])) {
+          if (element.matches("style,script,link,meta,title,defs,clipPath,mask") || lockedAncestor(element) || getComputedStyle(element).visibility === "hidden") continue;
+          if (contained(element)) found.push({ kind: "element", artboardId: ab.id, element });
+        }
+      }
+      onSelect(makeSelection([...(drag.additive ? selectionItems(drag.initial) : []), ...found])); return;
+    }
+    if (drag.kind === "draw" || drag.kind === "text") {
       const bounds = normalizeRect(drag.start, toWorld(e.clientX, e.clientY));
       setDrawPreview({ left: bounds.x * camera.z + camera.x, top: bounds.y * camera.z + camera.y, width: bounds.width * camera.z, height: bounds.height * camera.z });
       return;
@@ -338,7 +398,16 @@ export function Canvas(props: Props) {
     const dx = screenDx / camera.z;
     const dy = screenDy / camera.z;
 
-    if (drag.kind === "artboard") {
+    if (drag.kind === "group") {
+      for (const origin of drag.origins) {
+        if (origin.item.kind === "artboard") onUpdateArtboard(origin.item.artboardId, { x: origin.x + dx, y: origin.y + dy });
+        else {
+          const delta = screenDeltaToLocal(origin.item.element, screenDx, screenDy);
+          setTranslate(origin.item.element as Styled, origin.x + delta.x, origin.y + delta.y);
+        }
+      }
+      onChange();
+    } else if (drag.kind === "artboard") {
       onUpdateArtboard(drag.id, { x: Math.round(drag.originX + dx), y: Math.round(drag.originY + dy) });
     } else if (drag.kind === "element") {
       const delta = screenDeltaToLocal(drag.element, screenDx, screenDy);
@@ -395,7 +464,18 @@ export function Canvas(props: Props) {
     if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     setPanning(false);
     setDrawPreview(null);
+    setMarquee(null);
     if (!drag) return;
+    if (drag.kind === "marquee") { if (!drag.moved && drag.click) onSelect(drag.click); return; }
+    if (drag.kind === "text") {
+      const bounds = normalizeRect(drag.start, toWorld(e.clientX, e.clientY));
+      const drawn = bounds.width * camera.z >= DRAG_THRESHOLD || bounds.height * camera.z >= DRAG_THRESHOLD;
+      if (!drawn && drag.target) {
+        onSelect({ kind: "element", artboardId: drag.artboardId, element: drag.target });
+        startEditing(drag.target, false);
+      } else createText(drag.artboardId, drawn ? { x: bounds.x, y: bounds.y } : drag.start, drawn ? bounds.width : undefined);
+      onToolChange("move"); return;
+    }
 
     if (drag.kind === "draw") {
       const end = toWorld(e.clientX, e.clientY);
@@ -413,7 +493,7 @@ export function Canvas(props: Props) {
       return;
     }
 
-    if ((drag.kind === "artboard" || drag.kind === "element" || drag.kind === "resize") && drag.moved) onCommit();
+    if ((drag.kind === "artboard" || drag.kind === "element" || drag.kind === "resize" || drag.kind === "group") && drag.moved) onCommit();
   };
 
   const onDoubleClick = (e: ReactMouseEvent) => {
@@ -436,6 +516,10 @@ export function Canvas(props: Props) {
   useLayoutEffect(() => {
     const canvas = canvasRef.current!;
     const selectedEl = selectedElement(selection, hosts);
+    setMultipleRects(selection.kind === "multiple" ? selection.items.flatMap(item => {
+      const element = selectedElement(item, hosts);
+      return element?.isConnected && element.getClientRects().length ? [elementRectInCanvas(element, canvas)] : [];
+    }) : []);
     setRects({
       selected: selectedEl?.getClientRects().length ? selectionOutline(selectedEl, canvas) : null,
       hover: hoverTarget && hoverTarget.isConnected && hoverTarget.getClientRects().length && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
@@ -484,9 +568,11 @@ export function Canvas(props: Props) {
       onDoubleClick={onDoubleClick}
       onPointerLeave={() => setHovered(null)}
     >
+      {marquee && <div className="selection-marquee" style={rectStyle(marquee)} />}
+      {multipleRects.map((rect, index) => <div key={index} className="outline selected multiple-outline" style={rectStyle(rect)} />)}
       <div className="world" style={{ transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.z})` }}>
         {artboards.map((ab) => (
-          <ArtboardView key={ab.id} artboard={ab} previewCss={cssPreview?.id === ab.id ? cssPreview.css : undefined} selected={ab.id === selectedArtboardId} zoom={camera.z} onMount={onHostMount} onSelect={() => onSelect({ kind: "artboard", artboardId: ab.id })} />
+          <ArtboardView key={ab.id} artboard={ab} previewCss={cssPreview?.id === ab.id ? cssPreview.css : undefined} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
         ))}
       </div>
 

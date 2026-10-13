@@ -100,7 +100,7 @@ button:disabled {
 .canvas {
   position: absolute;
   inset: 0;
-  overflow: hidden;
+  overflow: clip;
   background: var(--canvas-bg);
   outline: none;
 }
@@ -1042,3 +1042,6 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .keyboard-help dt { min-width: 0; }
 .keyboard-help dd { margin: 0; flex-shrink: 0; }
 .keyboard-help kbd { font: inherit; color: var(--text-secondary); }
+
+.selection-marquee { position: absolute; z-index: 3; pointer-events: none; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.multiple-outline { position: absolute; z-index: 2; pointer-events: none; }

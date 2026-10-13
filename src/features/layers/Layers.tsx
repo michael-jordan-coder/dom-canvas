@@ -1,3 +1,4 @@
+import { selectionItems, toggleSelection } from "@/features/canvas/selection";
 import { useEffect, useRef, useState, type MouseEvent, type KeyboardEvent } from "react";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { isLayerHidden } from "./visibility";
@@ -128,7 +129,7 @@ export function Layers(props: Props) {
   const selectedEl = selection.kind === "element" ? selection.element : null;
 
   const renderNode = (el: Element, depth: number, artboardId: string, within: boolean) => {
-    const isSelected = el === selectedEl;
+    const isSelected = selectionItems(selection).some(item => item.kind === "element" && item.element === el);
     const hidden = isLayerHidden(el);
     const lockOwner = lockedAncestor(el);
     const children = Array.from(el.children).filter(child => !needle || visible.has(child));
@@ -148,7 +149,7 @@ export function Layers(props: Props) {
           onKeyDown={(e) => { if (e.key === "F2") { e.preventDefault(); e.stopPropagation(); setRenaming(el); } }}
           className={`layer${isSelected ? " selected" : within ? " within" : ""}${hidden ? " layer-hidden" : ""}`}
           style={{ paddingLeft: 8 + depth * INDENT }}
-          onClick={() => onSelect({ kind: "element", artboardId, element: el })}
+          onClick={(e) => { const item = { kind: "element" as const, artboardId, element: el }; onSelect(e.shiftKey ? toggleSelection(selection, item) : item); }}
           onContextMenu={(e) => props.onContextMenu({ kind: "element", artboardId, element: el }, e)}
           onDoubleClick={() => setRenaming(el)}
           onMouseEnter={() => onHover(el)}
@@ -188,11 +189,11 @@ export function Layers(props: Props) {
       {query && <button aria-label="Clear layer search" onClick={() => { updateQuery(""); searchRef.current?.focus(); }}>×</button>}
     </div>
     {needle && <div className="layer-search-status" role="status">{matches.size + matchingFrames.size ? `${matches.size + matchingFrames.size} ${matches.size + matchingFrames.size === 1 ? "match" : "matches"}` : "No matching layers"}</div>}
-    <div ref={treeRef} className="panel-scroll layer-tree" role="tree" aria-label="Layers" tabIndex={0} data-version={version} onKeyDown={navigateTree} onMouseLeave={() => onHover(null)}>
+    <div ref={treeRef} className="panel-scroll layer-tree" role="tree" aria-label="Layers" aria-multiselectable="true" tabIndex={0} data-version={version} onKeyDown={navigateTree} onMouseLeave={() => onHover(null)}>
       {artboards.length === 0 && <div className="empty">Draw a frame, paste HTML or import a site to add layers.</div>}
       {artboards.map((ab) => {
         const root = hosts.get(ab.id)?.shadowRoot;
-        const isSelected = selection.kind === "artboard" && selection.artboardId === ab.id;
+        const isSelected = selectionItems(selection).some(item => item.kind === "artboard" && item.artboardId === ab.id);
         const open = needle ? !searchCollapsed.has(ab.id) : !collapsedArtboards.has(ab.id);
         const children = root ? Array.from(root.children).filter((el) => el.tagName !== "STYLE" && (!needle || visible.has(el))) : [];
         if (needle && !matchingFrames.has(ab.id) && !children.length) return null;
@@ -210,7 +211,7 @@ export function Layers(props: Props) {
               onKeyDown={(e) => { if (e.key === "F2") { e.preventDefault(); e.stopPropagation(); setRenaming(ab.id); } }}
               className={`layer artboard-row${isSelected ? " selected" : ""}`}
               style={{ paddingLeft: 8 }}
-              onClick={() => onSelect({ kind: "artboard", artboardId: ab.id })}
+              onClick={(e) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(e.shiftKey ? toggleSelection(selection, item) : item); }}
               onContextMenu={(e) => props.onContextMenu({ kind: "artboard", artboardId: ab.id }, e)}
               onDoubleClick={() => setRenaming(ab.id)}
               onMouseEnter={() => onHover(hosts.get(ab.id) ?? null)}

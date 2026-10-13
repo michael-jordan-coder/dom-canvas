@@ -21,7 +21,7 @@ type Props = {
   artboard: ArtboardData;
   previewCss?: string;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (additive: boolean) => void;
   zoom: number;
   onMount: (id: string, host: HTMLDivElement | null) => void;
 };
@@ -76,7 +76,7 @@ export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, on
         type="button"
         aria-label={`Select frame ${artboard.name}`}
         aria-pressed={selected}
-        onClick={onSelect}
+        onClick={event => { if (event.detail === 0) onSelect(event.shiftKey); }}
         className={`artboard-label${selected ? " selected" : ""}`}
         data-artboard-label={artboard.id}
         style={{

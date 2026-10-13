@@ -62,6 +62,7 @@ export function Inspector(props: Props) {
 
 function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: Props) {
   if (selection.kind === "none") return <div className="inspector-empty"><strong>Nothing selected</strong><p>Select a frame or an element to edit its properties.</p><span>⌘/Ctrl-click selects the frame.<br />Alt-click selects a parent.</span></div>;
+  if (selection.kind === "multiple") return <div className="inspector-empty"><strong>{selection.items.length} selected</strong><p>Drag to move together. Shift-click to add or remove. Use the selection menu to duplicate or delete the selection.</p></div>;
   if (selection.kind === "artboard") {
     const ab = artboards.find((item) => item.id === selection.artboardId);
     if (!ab) return null;

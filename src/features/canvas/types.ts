@@ -17,7 +17,8 @@ export type Camera = { x: number; y: number; z: number };
 
 export type Tool = "move" | "frame" | "rect" | "text" | "hand";
 
-export type Selection =
-  | { kind: "none" }
+export type SelectionItem =
   | { kind: "artboard"; artboardId: string }
   | { kind: "element"; artboardId: string; element: Element };
+
+export type Selection = { kind: "none" } | SelectionItem | { kind: "multiple"; items: SelectionItem[] };

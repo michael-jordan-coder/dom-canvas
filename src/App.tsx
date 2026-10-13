@@ -1,3 +1,4 @@
+import { makeSelection, selectionItems, sameItem } from "@/features/canvas/selection";
 import { captureAppearance, applyAppearance, type Appearance } from "@/features/inspector/appearance";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, isTyping, isInteractiveControl, isPopupControl } from "@/features/canvas/Canvas";
@@ -10,7 +11,7 @@ import { Toolbar } from "@/features/canvas/Toolbar";
 import { ZoomControl } from "@/features/canvas/ZoomControl";
 import { KeyboardHelp } from "@/features/canvas/KeyboardHelp";
 import { PanelToggle } from "@/features/canvas/PanelToggle";
-import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
+import type { Artboard, Camera, Selection, SelectionItem, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
 import { DocumentName } from "@/features/document/DocumentTitle";
@@ -68,7 +69,7 @@ export function App() {
   const [selectionMenu, setSelectionMenu] = useState<MenuAnchor | null>(null);
   const [renameRequest, setRenameRequest] = useState<{ target: Element | string } | null>(null);
   const renameSelection = useCallback(() => {
-    if (selection.kind === "none") return;
+    if (selection.kind === "none" || selection.kind === "multiple") return;
     setUiHidden(false);
     setLayersVisible(true);
     setRenameRequest({ target: selection.kind === "element" ? selection.element : selection.artboardId });
@@ -85,8 +86,8 @@ export function App() {
   const pendingFocus = useRef<string | null>(null);
   const [layerHover, setLayerHover] = useState<Element | null>(null);
   const [version, setVersion] = useState(0);
-  const pendingSelection = useRef<{ artboardId: string; path: number[] | null } | null>(null);
-  const snapshotSelections = useRef(new WeakMap<Artboard[], { artboardId: string; path: number[] | null }>());
+  const pendingSelection = useRef<{ artboardId: string; path: number[] | null }[] | null>(null);
+  const snapshotSelections = useRef(new WeakMap<Artboard[], { artboardId: string; path: number[] | null }[]>());
   const selectionAddress = useRef<{ element: Element; artboardId: string; path: number[] } | null>(null);
 
   const changeCssDraft = (id: string, value: string | null) => {
@@ -214,7 +215,7 @@ export function App() {
       e.preventDefault();
       if (pasted.kind === "document") {
         addArtboard({ html: pasted.html, css: pasted.css });
-      } else if (selection.kind !== "none") {
+      } else if (selection.kind !== "none" && selection.kind !== "multiple") {
         const ab = artboards.find((a) => a.id === selection.artboardId);
         if (ab) commitArtboard(ab.id, { css: `${ab.css}\n${scopeCss(pasted.css)}` });
       }
@@ -229,10 +230,12 @@ export function App() {
     const pending = pendingSelection.current;
     if (pending) {
       pendingSelection.current = null;
-      const root = hostsRef.current.get(pending.artboardId)?.shadowRoot;
-      if (!root) return setSelection({ kind: "none" });
-      const element = pending.path ? resolvePath(root, pending.path) : null;
-      setSelection(element ? { kind: "element", artboardId: pending.artboardId, element } : { kind: "artboard", artboardId: pending.artboardId });
+      setSelection(makeSelection(pending.flatMap<SelectionItem>(address => {
+        const root = hostsRef.current.get(address.artboardId)?.shadowRoot;
+        if (!root) return [];
+        const element = address.path ? resolvePath(root, address.path) : null;
+        return element ? [{ kind: "element", artboardId: address.artboardId, element }] : address.path ? [] : [{ kind: "artboard", artboardId: address.artboardId }];
+      })));
       return;
     }
     if (selection.kind !== "element") { selectionAddress.current = null; return; }
@@ -247,12 +250,7 @@ export function App() {
   }, [selection, version, artboards]);
 
   const travel = useCallback((direction: "undo" | "redo") => {
-    pendingSelection.current =
-      selection.kind === "element"
-        ? { artboardId: selection.artboardId, path: pathOf(selection.element) }
-        : selection.kind === "artboard"
-          ? { artboardId: selection.artboardId, path: null }
-          : null;
+    pendingSelection.current = selectionItems(selection).map(item => ({ artboardId: item.artboardId, path: item.kind === "element" ? pathOf(item.element) : null }));
     if (pendingSelection.current) snapshotSelections.current.set(doc.latest.current, pendingSelection.current);
     const moved = direction === "undo" ? doc.undo() : doc.redo();
     if (moved) setNotice(null);
@@ -288,10 +286,13 @@ export function App() {
 
   const zoomToSelection = useCallback(() => {
     if (selection.kind === "none") return zoomToFit();
-    const target = selection.kind === "element" ? selection.element : hostsRef.current.get(selection.artboardId);
-    if (!target) return;
-    const r = target.getBoundingClientRect();
-    const bounds = { x: (r.left - camera.x) / camera.z, y: (r.top - camera.y) / camera.z, width: r.width / camera.z, height: r.height / camera.z };
+    const bounds = unionBounds(selectionItems(selection).flatMap(item => {
+      const target = item.kind === "element" ? item.element : hostsRef.current.get(item.artboardId);
+      if (!target) return [];
+      const r = target.getBoundingClientRect();
+      return [{ x: (r.left - camera.x) / camera.z, y: (r.top - camera.y) / camera.z, width: r.width / camera.z, height: r.height / camera.z }];
+    }));
+    if (!bounds) return;
     setCamera(fitCamera(bounds, viewport()));
   }, [selection, camera, viewport, zoomToFit]);
 
@@ -307,12 +308,20 @@ export function App() {
     const rect = element.getBoundingClientRect();
     const area = viewport();
     if (rect.right < area.left || rect.left > area.left + area.width || rect.bottom < area.top || rect.top > area.top + area.height) {
-      pendingFocus.current = next.kind === "none" ? null : next.artboardId;
+      pendingFocus.current = next.kind === "none" || next.kind === "multiple" ? null : next.artboardId;
       bump();
     }
   }, [viewport, bump]);
 
   const deleteSelection = useCallback(() => {
+    if (selection.kind === "multiple") {
+      snapshotSelections.current.set(doc.latest.current, selection.items.map(item => ({ artboardId: item.artboardId, path: item.kind === "element" ? pathOf(item.element) : null })));
+      const items = selection.items.filter(item => item.kind === "artboard" || !lockedAncestor(item.element));
+      const frames = new Set(items.filter(item => item.kind === "artboard").map(item => item.artboardId));
+      items.forEach(item => { if (item.kind === "element") item.element.remove(); });
+      commit(list => list.filter(ab => !frames.has(ab.id)));
+      setSelection({ kind: "none" }); return;
+    }
     if (selection.kind === "element" && lockedAncestor(selection.element)) return;
     if (selection.kind === "artboard") {
       commit((list) => list.filter((ab) => ab.id !== selection.artboardId));
@@ -326,6 +335,23 @@ export function App() {
   }, [selection, commit]);
 
   const duplicateSelection = useCallback(() => {
+    if (selection.kind === "multiple") {
+      snapshotSelections.current.set(doc.latest.current, selection.items.map(item => ({ artboardId: item.artboardId, path: item.kind === "element" ? pathOf(item.element) : null })));
+      const copies: SelectionItem[] = [];
+      const frames: Artboard[] = [];
+      for (const item of selection.items) {
+        if (item.kind === "element") {
+          if (lockedAncestor(item.element)) continue;
+          const clone = item.element.cloneNode(true) as Element;
+          item.element.after(clone); copies.push({ ...item, element: clone });
+        } else {
+          const ab = artboards.find(a => a.id === item.artboardId);
+          const root = hostsRef.current.get(item.artboardId)?.shadowRoot;
+          if (ab) { const id = newId(); frames.push({ ...ab, id, name: `${ab.name} copy`, x: ab.x + 40, y: ab.y + 40, html: root ? serializeRoot(root) : ab.html }); copies.push({ kind: "artboard", artboardId: id }); }
+        }
+      }
+      commit(list => [...list, ...frames]); setSelection(makeSelection(copies)); return;
+    }
     if (selection.kind === "artboard") {
       const ab = artboards.find((a) => a.id === selection.artboardId);
       const root = hostsRef.current.get(selection.artboardId)?.shadowRoot;
@@ -350,10 +376,10 @@ export function App() {
     const index = destination === "first" ? 0 : destination === "last" ? siblingElements.length - 1 : siblingIndex + (destination === "earlier" ? -1 : 1);
     const target = siblingElements[index];
     if (!target || target === el) return;
-    snapshotSelections.current.set(doc.latest.current, { artboardId: selection.artboardId, path: pathOf(el) });
+    snapshotSelections.current.set(doc.latest.current, [{ artboardId: selection.artboardId, path: pathOf(el) }]);
     if (index < siblingIndex) target.before(el); else target.after(el);
     commit();
-    snapshotSelections.current.set(doc.latest.current, { artboardId: selection.artboardId, path: pathOf(el) });
+    snapshotSelections.current.set(doc.latest.current, [{ artboardId: selection.artboardId, path: pathOf(el) }]);
   };
 
   const nudgeGroup = useRef<{ key: string; target: Element | string; token: symbol } | null>(null);
@@ -367,9 +393,18 @@ export function App() {
   const nudge = useCallback((dx: number, dy: number, repeat: boolean, key: string) => {
     if (selection.kind === "none") return;
     if (selection.kind === "element" && lockedAncestor(selection.element)) return;
-    const target = selection.kind === "element" ? selection.element : selection.artboardId;
+    const target = selection.kind === "element" ? selection.element : selection.kind === "multiple" ? selection.items.map(item => item.artboardId).join(",") : selection.artboardId;
     if (!repeat || nudgeGroup.current?.key !== key || nudgeGroup.current.target !== target) nudgeGroup.current = { key, target, token: Symbol("keyboard nudge") };
     const group = nudgeGroup.current.token;
+    if (selection.kind === "multiple") {
+      const frames = new Set(selection.items.filter(item => item.kind === "artboard").map(item => item.artboardId));
+      for (const item of selection.items) if (item.kind === "element" && !lockedAncestor(item.element)) {
+        const el = item.element as HTMLElement | SVGElement;
+        const origin = getTranslate(el); const delta = screenDeltaToLocal(el, dx * camera.z, dy * camera.z);
+        setTranslate(el, origin.x + delta.x, origin.y + delta.y);
+      }
+      commit(list => list.map(ab => frames.has(ab.id) ? { ...ab, x: ab.x + dx, y: ab.y + dy } : ab), group); return;
+    }
     if (selection.kind === "artboard") {
       const ab = artboards.find((a) => a.id === selection.artboardId);
       if (ab) commitArtboard(ab.id, { x: ab.x + dx, y: ab.y + dy }, group);
@@ -430,7 +465,7 @@ export function App() {
 
   const [copied, setCopied] = useState(false);
   const copyCode = async () => {
-    const id = selection.kind === "none" ? undefined : selection.artboardId;
+    const id = selection.kind === "none" || selection.kind === "multiple" ? undefined : selection.artboardId;
     const ab = artboards.find((a) => a.id === id);
     const root = id ? hostsRef.current.get(id)?.shadowRoot : undefined;
     if (!ab || !root) return;
@@ -448,16 +483,16 @@ export function App() {
   };
 
   const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
-  const activeArtboard = selection.kind === "none" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
+  const activeArtboard = selection.kind === "none" || selection.kind === "multiple" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
   const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
   const inspectorScope = selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
   const inspectorActions: SelectionAction[] = [
-    { label: "Collapse Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
-    { label: "Expand Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, true) },
+    { label: "Collapse Design sections", disabled: selection.kind === "none" || selection.kind === "multiple" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
+    { label: "Expand Design sections", disabled: selection.kind === "none" || selection.kind === "multiple" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, true) },
   ];
 
   const selectionActions: SelectionAction[] = selection.kind === "none" ? [] : [
-    { label: "Rename", shortcut: "F2", run: renameSelection },
+    { label: "Rename", shortcut: "F2", disabled: selection.kind === "multiple", run: renameSelection },
     { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
     ...(selection.kind === "element" ? [
       { label: "Copy appearance", run: () => { setAppearanceClipboard(captureAppearance(selection.element)); setNotice("Appearance copied — choose another layer and Paste appearance."); }, separator: true },
@@ -533,7 +568,7 @@ export function App() {
           hosts={hostsRef.current}
           selection={selection}
           onSelect={revealSelection}
-          onContextMenu={(next, e) => { e.preventDefault(); setSelection(next); setLayerHover(null); setSelectionMenu({ x: e.clientX, y: e.clientY, returnFocus: e.currentTarget }); }}
+          onContextMenu={(next, e) => { e.preventDefault(); if (!selectionItems(next).every(item => selectionItems(selection).some(selected => sameItem(item, selected)))) setSelection(next); setLayerHover(null); setSelectionMenu({ x: e.clientX, y: e.clientY, returnFocus: e.currentTarget }); }}
           onHover={setLayerHover}
           onRenameArtboard={(id, name) => commitArtboard(id, { name })}
           onRenameElement={(el, name) => { el.setAttribute("data-name", name); commit(); }}

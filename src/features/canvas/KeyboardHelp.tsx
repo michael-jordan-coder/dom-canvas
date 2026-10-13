@@ -8,7 +8,7 @@ const groups = [
     ["Show / hide interface", "⌘/Ctrl \\"],
   ] },
   { title: "Selection", rows: [
-    ["Select frame", "⌘/Ctrl + click"], ["Select parent", "Alt + click"], ["Select parent / clear selection", "Esc"],
+    ["Select several layers or frames", "Drag empty canvas"], ["Add / remove selection", "Shift + click"], ["Pan canvas", "Space + drag / middle drag"], ["Select frame", "⌘/Ctrl + click"], ["Select parent", "Alt + click"], ["Select parent / clear selection", "Esc"],
     ["Rename", "F2"], ["Duplicate", "⌘/Ctrl D"], ["Delete", "Delete / Backspace"],
     ["Move by 1 px", "Arrow keys"], ["Move by 10 px", "Shift + arrows"],
   ] },
