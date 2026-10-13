@@ -140,3 +140,9 @@ Three Node tests cover quarter-turn equivalence, 3D axis preservation and numeri
 Section disclosures and HTML detail controls use UI preferences outside document history, scoped to frame/HTML/SVG. Local storage retains them across reloads; unavailable storage falls back to session state. The Layout section has one stable preference key across Block/Flex/Grid headings. Default-open behavior still applies until the user explicitly toggles a section.
 
 Browser QA on port 5181: opened Position and individual padding, edited rotation then undid it; both disclosures stayed open. Selecting another HTML layer and switching CSS/Design retained them. Closing HTML Position did not close the frame Position section. Reload retained closed HTML Position, open Layout options and individual padding. Screenshot: /tmp/dom-canvas-inspector-preferences.png. Build and diff check passed.
+
+## Precise canvas zoom
+
+Replaced the percent reset button with an editable spinbutton, supporting percent suffix input, validation, Enter/blur apply, Escape cancellation and keyboard increments. Uses existing 2–800% camera limits; Shift+0 remains the actual-size shortcut. Corrected Design viewport's stale 304px right inset to 257px, matching the compact panel.
+
+Browser QA on port 5181: 125% produced scale(1.25), invalid text was rejected, Escape restored the value, ArrowUp reached 135%, and 999 clamped to 800%. Fit selection centered the frame at x756, exactly the free-space midpoint in Design; CSS mode centered at x686.50003 against midpoint686.5. Screenshot: /tmp/dom-canvas-precise-zoom.png. Build and diff check passed.

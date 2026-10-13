@@ -689,7 +689,11 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .canvas-navigation { position: absolute; top: 8px; left: 257px; right: 257px; z-index: 3; display: flex; justify-content: center; align-items: center; gap: 3px; min-height: 34px; }
 .canvas-navigation button { height: 30px; padding: 0 8px; background: var(--panel); border-radius: 6px; box-shadow: 0 0 0 1px var(--divider); white-space: nowrap; }
 .canvas-navigation button:hover { background: var(--field); }
-.canvas-navigation .zoom-value { min-width: 48px; font-variant-numeric: tabular-nums; }
+.zoom-control { display: flex; align-items: center; height: 30px; padding: 0 6px; gap: 2px; border-radius: 6px; background: var(--panel); box-shadow: 0 0 0 1px var(--divider); font-variant-numeric: tabular-nums; }
+.zoom-control input { width: 44px; min-width: 0; padding: 0; border: 0; outline: none; background: transparent; color: var(--text); font: inherit; text-align: right; }
+.zoom-control span { color: var(--text-secondary); font-size: 11px; }
+.zoom-control:focus-within { box-shadow: 0 0 0 1px var(--accent); }
+.zoom-control:has([aria-invalid="true"]) { box-shadow: 0 0 0 1px #d92d20; }
 .navigation-divider { width: 5px; }
 .css-mode .canvas-navigation { right: 376px; }
 .ui-hidden .canvas-navigation { display: none; }

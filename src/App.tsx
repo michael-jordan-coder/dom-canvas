@@ -5,6 +5,7 @@ import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canv
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
 import { Toolbar } from "@/features/canvas/Toolbar";
+import { ZoomControl } from "@/features/canvas/ZoomControl";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
@@ -201,7 +202,7 @@ export function App() {
 
   const viewport = useCallback(() => {
     const inset = uiHidden ? 16 : PANEL_INSET;
-    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 396 : 304;
+    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 396 : PANEL_INSET;
     return { left: inset, top: uiHidden ? 16 : 60, width: Math.max(80, window.innerWidth - inset - rightInset), height: Math.max(80, window.innerHeight - (uiHidden ? 16 : 60) - (uiHidden ? 16 : TOOLBAR_INSET)) };
   }, [uiHidden, inspectorTab]);
 
@@ -453,7 +454,7 @@ export function App() {
 
       <div className="canvas-navigation" aria-label="Canvas navigation">
         <button aria-label="Zoom out" onClick={() => setZoom(camera.z / 1.25)}>−</button>
-        <button className="zoom-value" title="Actual size (Shift+0)" onClick={() => setZoom(1)}>{Math.round(camera.z * 100)}%</button>
+        <ZoomControl zoom={camera.z} onChange={setZoom} />
         <button aria-label="Zoom in" onClick={() => setZoom(camera.z * 1.25)}>+</button>
         <span className="navigation-divider" />
         <button title="Fit all frames (Shift+1)" disabled={!artboards.length} onClick={zoomToFit}>Fit all</button>
