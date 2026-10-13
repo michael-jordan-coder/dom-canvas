@@ -94,3 +94,9 @@ Browser check on port 5181: opened Layout options on the existing RTL/column-rev
 Selection outlines and handles follow the local 2D basis, including nested rotation, nonuniform scale and canvas zoom. Dimensions report local border-box size. Resize projects screen movement onto that basis and compensates translation using the actual post-layout opposite anchor, accounting for transform-origin and constraints. Handle cursors follow their screen direction.
 
 Verified on isolated port 5181 with parent rotate(-12deg) scale(.9) and child rotate(30deg) scale(1.1,.8), center origin and a 4px border: SE drag by (60,30) screen pixels resized 180x120 to 195.359x123.18, moved the dragged corner by approximately (60.011,30.013), and kept NW within 0.016px. One Undo restored 180x120 and removed inline overrides. With ratio lock, NW resize produced 193.156x128.766 while SE moved only 0.027px. Ordinary untransformed east-edge resize retained height 100 and exactly retained the west edge. Screenshot: /tmp/dom-canvas-rotated-resize.png.
+
+## Canvas gesture cancellation
+
+Canvas gestures now capture the original inline style or frame geometry. Escape in capture phase, pointer cancellation, lost pointer capture and window blur restore that snapshot without committing history; pan cancellation restores its initial camera and drawing cancellation removes the preview. Pointer IDs isolate the active gesture. Normal pointer-up clears rollback state before releasing capture so lost-capture cannot cancel a completed gesture.
+
+Build and diff review passed. Browser regression: an ordinary east-edge drag changed width 376.625 to 359.023, and one Undo restored 376.625 with history then empty. The available UI automation performs drags atomically, so Escape/blur during a held pointer gesture remains a manual QA item; restoration and event ordering were code-reviewed, not claimed as directly exercised.

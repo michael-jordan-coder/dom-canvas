@@ -54,12 +54,48 @@ export function Canvas(props: Props) {
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<Drag | null>(null);
+  const restoreDrag = useRef<(() => void) | null>(null);
+  const pointerId = useRef<number | null>(null);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [panning, setPanning] = useState(false);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [drawPreview, setDrawPreview] = useState<Rect | null>(null);
   const [editing, setEditing] = useState<HTMLElement | null>(null);
   const handMode = tool === "hand" || spaceHeld;
+
+  const cancelDrag = () => {
+    if (!dragRef.current) return false;
+    const drag = dragRef.current;
+    dragRef.current = null;
+    const restore = restoreDrag.current;
+    restoreDrag.current = null;
+    restore?.();
+    if (drag.kind === "pan") onCameraChange(drag.camera);
+    const id = pointerId.current;
+    pointerId.current = null;
+    if (id !== null && canvasRef.current?.hasPointerCapture(id)) canvasRef.current.releasePointerCapture(id);
+    setPanning(false);
+    setDrawPreview(null);
+    return true;
+  };
+  const cancelDragRef = useRef(cancelDrag);
+  cancelDragRef.current = cancelDrag;
+  useEffect(() => {
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && cancelDragRef.current()) { event.preventDefault(); event.stopImmediatePropagation(); }
+    };
+    const blur = () => { cancelDragRef.current(); setSpaceHeld(false); };
+    window.addEventListener("keydown", escape, true);
+    window.addEventListener("blur", blur);
+    return () => { window.removeEventListener("keydown", escape, true); window.removeEventListener("blur", blur); };
+  }, []);
+  const captureElement = (element: Styled) => {
+    const style = element.getAttribute("style");
+    restoreDrag.current = () => {
+      if (style === null) element.removeAttribute("style"); else element.setAttribute("style", style);
+      onChange();
+    };
+  };
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.code === "Space" && !isTyping(e)) { setSpaceHeld(true); e.preventDefault(); } };
@@ -177,13 +213,15 @@ export function Canvas(props: Props) {
   };
 
   const onPointerDown = (e: ReactPointerEvent) => {
-    if (e.button !== 0 && e.button !== 1) return;
+    if ((e.button !== 0 && e.button !== 1) || dragRef.current) return;
     const hit = hitTest(e);
     if (editing && hit.kind === "element" && editing.contains(hit.element)) return;
 
     const canvas = canvasRef.current!;
     canvas.focus();
     canvas.setPointerCapture(e.pointerId);
+    pointerId.current = e.pointerId;
+    restoreDrag.current = null;
 
     if (e.button === 1 || handMode) {
       dragRef.current = { kind: "pan", startX: e.clientX, startY: e.clientY, camera };
@@ -214,6 +252,7 @@ export function Canvas(props: Props) {
     if (hit.kind === "artboard" || hit.kind === "label") {
       const ab = artboards.find((a) => a.id === hit.id)!;
       onSelect({ kind: "artboard", artboardId: hit.id });
+      restoreDrag.current = () => onUpdateArtboard(ab.id, { x: ab.x, y: ab.y });
       dragRef.current = { kind: "artboard", id: hit.id, startX: e.clientX, startY: e.clientY, originX: ab.x, originY: ab.y, moved: false };
       return;
     }
@@ -231,23 +270,31 @@ export function Canvas(props: Props) {
     const el = hit.element;
     if (el instanceof HTMLElement || el instanceof SVGElement) {
       const origin = getTranslate(el);
+      captureElement(el);
       dragRef.current = { kind: "element", element: el, startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y, moved: false };
     }
   };
 
   const startResize = (handle: Handle) => (e: ReactPointerEvent) => {
     e.stopPropagation();
-    if (e.button !== 0) return;
+    if (e.button !== 0 || dragRef.current) return;
+    canvasRef.current!.focus();
     canvasRef.current!.setPointerCapture(e.pointerId);
+    pointerId.current = e.pointerId;
+    restoreDrag.current = null;
     let target: ResizeTarget | null = null;
     if (selection.kind === "artboard") {
       const ab = artboards.find((a) => a.id === selection.artboardId);
       const host = hosts.get(selection.artboardId);
-      if (ab && host) target = { kind: "artboard", id: ab.id, x: ab.x, y: ab.y, w: ab.width, h: host.offsetHeight };
+      if (ab && host) {
+        target = { kind: "artboard", id: ab.id, x: ab.x, y: ab.y, w: ab.width, h: host.offsetHeight };
+        restoreDrag.current = () => onUpdateArtboard(ab.id, { x: ab.x, y: ab.y, width: ab.width, height: ab.height, aspectRatio: ab.aspectRatio });
+      }
     } else if (selection.kind === "element" && isResizable(selection.element)) {
       const el = selection.element;
       const r = el.getBoundingClientRect();
       const t = getTranslate(el);
+      captureElement(el);
       const box = affineBorderBox(el);
       const anchorX = handle.includes("w") ? 1 : handle.includes("e") ? 0 : 0.5;
       const anchorY = handle.includes("n") ? 1 : handle.includes("s") ? 0 : 0.5;
@@ -258,6 +305,7 @@ export function Canvas(props: Props) {
 
   const onPointerMove = (e: ReactPointerEvent) => {
     const drag = dragRef.current;
+    if (drag && pointerId.current !== e.pointerId) return;
     if (!drag) {
       if (handMode || tool !== "move") return setHovered(null);
       const hit = hitTest(e);
@@ -331,10 +379,13 @@ export function Canvas(props: Props) {
   };
 
   const onPointerUp = (e: ReactPointerEvent) => {
+    if (pointerId.current !== e.pointerId) return;
     const canvas = canvasRef.current!;
-    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     const drag = dragRef.current;
     dragRef.current = null;
+    restoreDrag.current = null;
+    pointerId.current = null;
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     setPanning(false);
     setDrawPreview(null);
     if (!drag) return;
@@ -417,6 +468,8 @@ export function Canvas(props: Props) {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={(event) => { if (pointerId.current === event.pointerId) cancelDrag(); }}
+      onLostPointerCapture={(event) => { if (pointerId.current === event.pointerId) cancelDrag(); }}
       onDoubleClick={onDoubleClick}
       onPointerLeave={() => setHovered(null)}
     >
