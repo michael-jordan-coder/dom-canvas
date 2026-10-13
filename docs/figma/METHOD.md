@@ -53,3 +53,14 @@ from product behavior.
 Store durable evidence under `evidence/`, not only `/tmp`. Raw accessibility index
 numbers are ephemeral and useful only within their captured snapshot. Use labels
 and geometry in reproduction steps. Keep each claim linked to a focused source.
+
+
+## Overlay cross-surface discrepancy (observed 2026-10-13)
+
+The native Chrome AX tree and screenshot showed the Assets Details overlay while
+browser DOM snapshots omitted it. An absent overlay in that snapshot therefore
+cannot establish that the preceding action had no effect. For ambiguous menu,
+popup or asset actions, inspect an actual rendered screenshot or native AX before
+retrying mutations. A successful tool return alone also does not prove an edit.
+See components CO04–CO05. Do not retroactively infer the cause of unrelated earlier
+inconclusive actions from this single discrepancy.

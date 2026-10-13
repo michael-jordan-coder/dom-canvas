@@ -1,0 +1,44 @@
+The following is a diff from the previous accessibility tree for Window: "Untitled – Figma" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
++								265 container
+~											24 heading Assets, Value: 2
+~										31 heading Created in this file, Value: 3
+~										37 slider Resize handle, Value: 240, Details: 240 pixels (min), Secondary Actions: Increment, Decrement
+~													55 checkbox Multi-edit variants, Value: 0
+~													69 heading Position, Value: 2
+~														81 stepper (settable, float) X-position, Value: 20
+~														82 stepper (settable, float) Y-position, Value: 20
+~														86 stepper (settable, float) Rotation, Value: 0, Details: 0°
+~													90 heading Layout, Value: 2
+~													93 checkbox Toggle auto layout, Value: 0
+~															99 radio button Freeform, Value: 1
+~															100 radio button Vertical, Value: 0
+~															101 radio button Horizontal, Value: 0
+~															102 radio button Grid, Value: 0
+~														111 checkbox Lock aspect ratio, Value: 0
+~													113 checkbox Clip content, Value: 1
+~													117 heading Appearance, Value: 2
+~													119 checkbox Hide, Value: 0
+~													137 heading Fill, Value: 2
+~																152 checkbox Toggle visibility, Value: 1
+~										168 slider Resize handle, Value: 241, Details: 241 pixels (min), Secondary Actions: Increment, Decrement
+~										172 toggle button Move, Value: 1
+~										174 toggle button Move tools, Value: 0
+~										176 toggle button Frame, Value: 0
+~										178 toggle button Region tools, Value: 0
+~										180 toggle button Rectangle, Value: 0
+~										182 toggle button Shape tools, Value: 0
+~										184 toggle button Pen, Value: 0
+~										186 toggle button Creation tools, Value: 0
+~										188 toggle button Text, Value: 0
+~										190 toggle button Type tools, Value: 0
+~										192 toggle button Comment, Value: 0
+~										194 toggle button Comment tools, Value: 0
+~									195 toggle button Actions, Value: 0
+~										199 radio button Draw, Value: 0
+~										200 radio button Design, Value: 1
+~										201 radio button Motion, Value: 0
+~										202 radio button Dev Mode, Value: 0
+~								208 heading Details Flawless's team / Untitled, Value: 2
+~									209 heading Details, Value: 1
+~								215 heading Frame 2, Value: 2
+The focused UI element is 207 container Details Flawless's team / Untitled

@@ -92,3 +92,25 @@ Evidence: [context menu](../evidence/components/11-main-context-menu.txt),
 [Assets](../evidence/components/13-assets.txt),
 [current card state](../evidence/components/14-instance-attempt-current.txt),
 [text-click result](../evidence/components/15-asset-details.txt).
+
+
+## CO05 — Native inspection reveals the Details overlay
+
+Native Chrome initially targeted a different user window. Window → Untitled –
+Figma selected the research window. Its native accessibility tree and screenshot
+showed a Details overlay for Frame2, Includes2 variants, Insert instance, Property1
+Default and disabled Reset properties. This overlay was absent from the preceding
+browser DOM snapshots. Consequently CO04's no-visible-result must not be read as
+proof the asset Details overlay never opened.
+
+Native AX click on Insert instance produced no verified instance header. A fresh
+screenshot still showed the overlay. Coordinate activation of its visible button
+then failed with noWindowsAvailable. Browser snapshots remained readable but still
+did not represent the native Details overlay. Insertion remains unverified.
+
+Evidence: [native post-click diff](../evidence/components/16-native-insert.txt),
+[browser after attempt](../evidence/components/17-after-native-attempt.txt).
+The native screenshot was viewed during the experiment but not saved as a durable
+file; do not treat this paragraph as a pixel-measurement record. Next insertion
+attempt requires a fresh rendered/native state before any mutation. Native/DOM
+agreement is now an explicit verification requirement for this overlay.

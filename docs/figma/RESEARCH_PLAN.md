@@ -68,3 +68,15 @@ auto-layout frames, text resizing modes, shared widths and transactional Undo.
 3. Appearance editors and dependent state: fill/stroke/effects, preview/cancel, opacity.
 4. Mixed-type selections and per-field support; panel-to-canvas synchronization.
 5. Resume nested selection and group resize research after panel foundations.
+
+
+## Evidence maintenance checkpoint — 2026-10-13
+
+A local Markdown-link audit checked17 Markdown files and130 evidence files;
+no referenced local file was missing. This proves link integrity only, not claim
+accuracy or coverage completion. Critical remaining tracks include instances and
+overrides, styles/variables, primitive/vector/group/section contexts, layout
+wrap/grid, transforms, numeric sequential typing/scrub, and visual state matrices.
+Assets Details has a native-versus-browser snapshot discrepancy, documented in
+METHOD.md. Resolve that discrepancy for instance insertion before asserting a
+successful creation or retrying blind paste operations.
