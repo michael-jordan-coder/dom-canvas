@@ -203,3 +203,8 @@ bound child and hides the property control. See boolean-property BP04–BP07.
 Boolean-default pass: named Reset "Research visible" tested, followed by source
 False→True propagation. DefaultTrue/instanceTrue, child visible; instance15:62
 selected69%, direct blue Fill and1xPNG preserved. See topics/boolean-default.md.
+
+Text-property pass: Variant2 child24:128 Panel label at20/30,62×15 Auto width,
+black InterRegular12 bound Research label. DefaultPanel label; instance15:62
+overrideUpdated label,BooleanTrue,blueFill/1xPNG. Instance selected69%,menusclosed.
+Browser reconnected to Chrome4, same tab858575047. See topics/text-property.md.

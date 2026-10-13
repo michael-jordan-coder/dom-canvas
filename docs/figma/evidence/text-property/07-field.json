@@ -1,0 +1,12 @@
+{
+  "bg": "rgb(245, 245, 245)",
+  "font": "11px",
+  "height": 40,
+  "lineHeight": "16px",
+  "padding": "3px 7px",
+  "radius": "5px",
+  "tag": "TEXTAREA",
+  "value": "Updated label",
+  "weight": "450",
+  "width": 88
+}

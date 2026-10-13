@@ -88,3 +88,5 @@ bundles into evidence. Keep only the UI measurements and disposable fixture resu
 [Boolean property creation and unbound state](topics/boolean-property.md).
 
 [Boolean default propagation and targeted reset](topics/boolean-default.md).
+
+[Text property creation, binding and instance edit](topics/text-property.md).
