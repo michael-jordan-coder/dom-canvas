@@ -23,6 +23,8 @@
   shadow editing and close/hide/remove behavior.
 - [Stroke and corners](topics/stroke-corners.md): dashed dependencies, per-side
   editor and Mixed corner values within one object.
+- [Typography](topics/typography.md): contextual Type settings and font/line-height
+  propagation into child and parent geometry.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
