@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
 import { lockedAncestor } from "@/features/layers/locking";
 import { affineBorderBox, inverseLinearDelta, getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
@@ -6,6 +6,7 @@ import { elementRectInCanvas, normalizeRect, zoomAround, type Bounds, type Point
 import type { Artboard, Camera, Selection, Tool } from "./types";
 
 type Props = {
+  surfaceRef: RefObject<HTMLDivElement | null>;
   artboards: Artboard[];
   cssPreview: { id: string; css: string } | null;
   camera: Camera;
@@ -54,7 +55,7 @@ export function Canvas(props: Props) {
     hosts, onHostMount, onUpdateArtboard, onCreateArtboard, externalHover, version, onChange, onCommit,
   } = props;
 
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = props.surfaceRef;
   const dragRef = useRef<Drag | null>(null);
   const restoreDrag = useRef<(() => void) | null>(null);
   const pointerId = useRef<number | null>(null);

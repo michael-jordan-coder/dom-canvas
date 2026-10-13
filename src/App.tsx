@@ -50,6 +50,11 @@ export function App() {
   // Start offset so the first artboard clears the floating layers panel.
   const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
   const [tool, setTool] = useState<Tool>("move");
+  const canvasSurface = useRef<HTMLDivElement>(null);
+  const activateTool = useCallback((next: Tool) => {
+    setTool(next);
+    requestAnimationFrame(() => canvasSurface.current?.focus({ preventScroll: true }));
+  }, []);
   const [actionSearchOpen, setActionSearchOpen] = useState(false);
   const [htmlImportOpen, setHtmlImportOpen] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState(emptyHtmlDraft);
@@ -486,13 +491,14 @@ export function App() {
     { label: "Fit all frames", shortcut: "⇧ 1", disabled: !artboards.length, run: zoomToFit },
     { label: "Zoom to 100%", shortcut: "⇧ 0", run: () => setZoom(1) },
     { label: uiHidden ? "Show interface" : "Hide interface", shortcut: "⌘/Ctrl \\", run: () => setUiHidden(value => !value) },
-    ...([{ id: "move", label: "Move tool", shortcut: "V" }, { id: "frame", label: "Frame tool", shortcut: "F" }, { id: "rect", label: "Rectangle tool", shortcut: "R" }, { id: "text", label: "Text tool", shortcut: "T" }, { id: "hand", label: "Hand tool", shortcut: "H" }] as const).map(item => ({ label: item.label, shortcut: item.shortcut, run: () => setTool(item.id) })),
+    ...([{ id: "move", label: "Move tool", shortcut: "V" }, { id: "frame", label: "Frame tool", shortcut: "F" }, { id: "rect", label: "Rectangle tool", shortcut: "R" }, { id: "text", label: "Text tool", shortcut: "T" }, { id: "hand", label: "Hand tool", shortcut: "H" }] as const).map(item => ({ label: item.label, shortcut: item.shortcut, run: () => activateTool(item.id) })),
   ];
 
   return (
     <div className={`app${uiHidden ? " ui-hidden" : ""}${!layersVisible ? " layers-hidden" : ""}${!inspectorVisible ? " inspector-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
       {fonts && <style>{fonts}</style>}
       <Canvas
+        surfaceRef={canvasSurface}
         artboards={artboards}
         cssPreview={cssPreview}
         camera={camera}
@@ -583,7 +589,7 @@ export function App() {
       {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}
       {htmlImportOpen && <HtmlImportDialog draft={htmlDraft} onDraft={setHtmlDraft} onClose={() => setHtmlImportOpen(false)} onCreate={content => { addArtboard(content); setHtmlImportOpen(false); setHtmlDraft(emptyHtmlDraft); }} />}
       {keyboardHelpOpen && <KeyboardHelp onClose={closeKeyboardHelp} />}
-      <Toolbar tool={tool} onToolChange={setTool}>
+      <Toolbar tool={tool} onToolChange={activateTool}>
         <button className="tool" aria-label="Paste HTML" title="Paste HTML" onClick={() => setHtmlImportOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="m6 5-4 5 4 5m8-10 4 5-4 5M12 3 8 17"/></svg></button>
         <button className="tool" aria-label="Find an action" title="Find an action (⌘/Ctrl+K)" onClick={() => setActionSearchOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg></button>
         <button className="tool" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setKeyboardHelpOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M8 7a2 2 0 0 1 4 0c0 2-2 2-2 4m0 2v1"/></svg></button>

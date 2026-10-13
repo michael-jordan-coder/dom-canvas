@@ -446,3 +446,9 @@ Browser QA on 5181: width720 advanced to721 and Undo returned720. Separate Shift
 Added a compact native modal with grouped shortcut descriptions, search and a no-results state. Entry points: toolbar help, ? outside text fields/popups, and action search. Entries reflect current handlers, including frame/parent selection, zoom, nudging, numeric editing and code-editor focus escape. Native modal focus containment and Escape closing are used; previous focus is restored on close. The footer explains contextual arrow behavior.
 
 Browser QA on 5181: toolbar and ? opened the dialog; Escape returned focus to its trigger. Searching numeric returned the numeric adjustment entry, and an unknown query showed No matching shortcuts. Typing ? in layer search did not open help. Invoking Keyboard shortcuts from action search opened the modal with its search field focused. Build and diff check passed. Screenshot: /tmp/dom-canvas-keyboard-help.png.
+
+## Focus after choosing a canvas tool
+
+Toolbar and action-search tool activation now focus the actual canvas surface after the React update and any modal cleanup, without scrolling or changing selection. This avoids leaving keyboard control on a toolbar button, where canvas shortcuts are intentionally ignored. Internal tool transitions retain their existing behavior. Inspection also confirmed that the existing window-blur handler already clears temporary Space hand mode and cancels active drags.
+
+Browser QA on 5181: clicking Hand left activeElement on canvas hand; V switched to Move. Choosing Rectangle from action search left activeElement on canvas draw-tool. Returning to Move and nudging the selected frame created an undoable change; Undo restored it. Build and diff check passed. Screenshot: /tmp/dom-canvas-tool-focus.png. Window switching during held Space was code-inspected, not simulated.
