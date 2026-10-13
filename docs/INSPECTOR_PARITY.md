@@ -218,3 +218,9 @@ Browser QA after the fix: width777 survived wheel panning while the actual frame
 Numeric fields evaluate plain-number expressions on commit, with precedence, parentheses and unary signs. Existing field units are retained, property validation still applies, and invalid/non-finite arithmetic is rejected before calling property setters. The parser does not evaluate JavaScript or interpret CSS functions/units. Tooltips expose the supported operators. Three parser tests cover precedence, malformed expressions, division by zero and CSS passthrough.
 
 Browser QA on port 5181: frame width `(640 + 80) / 2` became360; `1 / 0` was rejected, Escape restored360, and one Undo restored640. A10% corner radius changed to15% through `10 + 5`, then was undone. Font size `24 + 8 * 2` computed40px. Screenshot: /tmp/dom-canvas-arithmetic.png. Build and diff check passed.
+
+## Position and opacity validation
+
+Replaced parseFloat/fallback coercion in frame/element coordinates and HTML opacity with complete finite numeric validation. Pixel suffixes remain supported for coordinates; opacity accepts an optional percent suffix. Blank/partial/non-finite numbers now return validation errors without edits. HTML opacity display reads computed opacity, so imported `opacity:50%` displays50 rather than5000. Three numeric-input tests cover valid units, partial/invalid values and percentage parsing.
+
+Browser QA on port 5181: imported50% opacity displayed50. `55oops` was rejected and computed opacity stayed0.5; invalid element/frame X remained errors without translation. `25%` applied0.25 and `80px` moved X to80; both were undone. Screenshot: /tmp/dom-canvas-numeric-validation.png. Build and diff check passed.
