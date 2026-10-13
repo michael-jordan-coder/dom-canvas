@@ -117,3 +117,7 @@ Star selected. See topics/mixed-paint.md.
 Size-limits pass: temporary parent width240 and child max140 undone. Frame3 is80
 Fixed ×50 Hug, centered/padding10; selected child8:3 is100 Fill/min100, no max,
 height30 Hug/Auto height, X-10/Y10. See topics/size-limits.md.
+
+Font-controls pass: child8:3 tested withRoboto/Bold and20%,100%,2px tracking;
+restoredInter Regular12, line heightAuto, spacing0%,100 Fill/min100 ×30 Hug.
+Frame3 restored80 ×50, selected and zoomed to selection. See topics/font-controls.md.

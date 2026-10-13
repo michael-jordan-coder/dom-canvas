@@ -40,6 +40,7 @@
 - [Mixed types](topics/mixed-types.md): supported subsets, Mixed inputs and selection-aware Undo/Redo.
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
+- [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.

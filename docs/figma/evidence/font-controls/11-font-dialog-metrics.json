@@ -1,0 +1,24 @@
+{
+  "state": "Roboto Bold selected; Fonts dialog search Inter focused",
+  "dialog": {
+    "background": "rgba(0, 0, 0, 0)",
+    "height": 469,
+    "padding": "0px",
+    "radius": "0px",
+    "width": 240,
+    "x": 270,
+    "y": 408
+  },
+  "searchInput": {
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgba(0, 0, 0, 0.898)",
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "height": 24,
+    "lineHeight": "16px",
+    "outline": "rgba(0, 0, 0, 0.898) none 3px",
+    "padding": "0px",
+    "radius": "5px",
+    "width": 176
+  }
+}
