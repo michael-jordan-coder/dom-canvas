@@ -1,4 +1,4 @@
-
+import { parseRotation } from "./rotation";
 export type Styled = HTMLElement | SVGElement;
 
 // Layout dimensions exclude visual transforms and retain fractional CSS pixels.
@@ -52,13 +52,8 @@ export function screenLinearTransform(el: Element, includeSelf = false): DOMMatr
   for (let parent = includeSelf ? el : parentOf(el); parent; parent = parentOf(parent)) {
     const style = getComputedStyle(parent);
     const transform = new DOMMatrix();
-    const rotate = style.rotate.split(/\s+/);
-    const angle = rotate.at(-1) ?? "none";
-    const degrees = parseFloat(angle) * (angle.endsWith("grad") ? 0.9 : angle.endsWith("rad") ? 180 / Math.PI : angle.endsWith("turn") ? 360 : 1);
-    if (Number.isFinite(degrees)) {
-      if (rotate.length === 4) transform.rotateAxisAngleSelf(Number(rotate[0]), Number(rotate[1]), Number(rotate[2]), degrees);
-      else transform.rotateSelf(0, 0, degrees);
-    }
+    const rotation = parseRotation(style.rotate);
+    if (rotation) transform.rotateAxisAngleSelf(...rotation.axis, rotation.degrees);
     const scale = style.scale.split(/\s+/).map(Number);
     if (scale.every(Number.isFinite)) transform.scaleSelf(scale[0], scale[1] ?? scale[0]);
     if (style.transform !== "none") transform.multiplySelf(new DOMMatrix(style.transform));

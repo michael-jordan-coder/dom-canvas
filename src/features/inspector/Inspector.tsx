@@ -1,4 +1,5 @@
 import { InspectorIcon } from "./InspectorIcon";
+import { rotationField, rotationInput } from "@/features/canvas/rotation";
 import { useRef, useState, type ReactNode } from "react";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
@@ -268,13 +269,15 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <ColorField label="Stroke color" value={computed.borderTopColor} onCommit={(v) => set("border-color", v)} onReset={resetProperty("border-color")} />
     </Section>
 
-    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "z-index"])}>
+    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "transform-origin", "z-index"])}>
       <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
       <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
       {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
       <div className="property-subheading"><span>Visual position in frame</span></div>
       <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => moveTo(number(v, geometry.x), geometry.y)} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => moveTo(geometry.x, number(v, geometry.y))} /></Row>
-      <Row><Field prefix="Angle" label="Rotation" suffix="°" value={read("rotate") === "none" ? "0" : read("rotate").replace(/deg$/, "")} onCommit={(v) => set("rotate", `${number(v, 0)}deg`)} />{property("Z index", "z-index", "Z", false)}</Row>
+      <Row><Field prefix={<InspectorIcon name="rotation" />} label="Rotation" {...rotationField(read("rotate"))} onCommit={(v) => set("rotate", rotationInput(v))} onReset={resetProperty("rotate")} />{property("Z index", "z-index", "Z", false)}</Row>
+      <Field label="Transform origin" prefix="Origin" value={read("transform-origin")} onCommit={(v) => set("transform-origin", v)} onReset={resetProperty("transform-origin")} />
+      {computed.transform !== "none" && <p className="property-note">Rotation adds to the existing CSS transform.</p>}
       <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
     </Section>
 

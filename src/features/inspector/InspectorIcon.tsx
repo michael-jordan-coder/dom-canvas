@@ -1,4 +1,5 @@
 const paths = {
+  rotation: 'M3 8a5 5 0 1 0 2-4M2 2v4h4',
   flowHorizontal: "M2 8h12M10 4l4 4-4 4",
   flowVertical: "M8 2v12M4 10l4 4 4-4",
   ratio: 'm6 10 4-4M5 7l-1 1a2.8 2.8 0 0 0 4 4l1-1M7 5l1-1a2.8 2.8 0 0 1 4 4l-1 1',

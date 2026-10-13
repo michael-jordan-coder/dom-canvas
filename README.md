@@ -66,6 +66,7 @@ Open http://localhost:5180.
 - The inspector uses a 241px Design panel with 24px fields. CSS mode opens a wider code editor.
 - Width/height support CSS, Fixed, Hug and Fill, plus constraints and ratio locking.
 - Numeric labels scrub with one undo step. Colors, gradients, shadows and SVG properties have contextual controls.
+- Position includes individual CSS rotation and transform origin. Bare angles use degrees; `deg`, `rad`, `grad`, `turn`, explicit axes and browser-supported CSS expressions are accepted. Rotation adds to any existing `transform` rule; invalid input leaves the element unchanged.
 - Selection outlines and resize handles follow affine 2D transforms. Rotated resizing keeps the opposite corner anchored; perspective and fragmented inline boxes use an axis-aligned fallback.
 - Selected-element CSS uses explicit Apply/Discard. If Design changes while a draft is open, the editor shows a comparison before an explicit replacement. Element drafts survive tab/selection changes for the same live DOM node, but not reloads or document remounts.
 - See [inspector verification notes](docs/INSPECTOR_PARITY.md) for browser evidence and remaining QA limits.
