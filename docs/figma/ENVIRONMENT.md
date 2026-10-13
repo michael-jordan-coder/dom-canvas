@@ -186,3 +186,7 @@ Variable-alias pass: new Research/Panel alias retained in Variable collection.
 Mode1 references Research/Panel color; Mode2 rawFFFFFF. Source restoredMode1
 3366FF/Mode2 22AA66; instance remains directly bound toPanel color/AutoMode1.
 Instance selected69%, manager closed. See topics/variable-alias.md.
+
+Alias-object pass: instance15:62 temporarily boundPanel alias andMode2, restored
+directPanel color/AutoMode1, blue, original geometry/radius0/1xPNG; selected69%.
+Variable values unchanged. See topics/alias-object.md.

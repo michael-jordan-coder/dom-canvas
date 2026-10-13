@@ -41,6 +41,7 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
+- [Alias object binding](topics/alias-object.md): per-mode values on an instance and mode preservation during rebinding.
 - [Variable aliases](topics/variable-alias.md): per-mode reference creation and measured source-color propagation.
 - [Variable modes](topics/variable-modes.md): editor scope inventory, mode creation, explicit selection and Auto restoration.
 - [Component propagation](topics/component-propagation.md): source radius, local override and partial reset with Fill preservation.
