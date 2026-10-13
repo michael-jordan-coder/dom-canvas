@@ -173,13 +173,32 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   };
   const backgroundImages = splitCss(read("background-image"), ",").some(layer => /^var\(/i.test(layer)) ? computed.backgroundImage : read("background-image");
   const backgroundDefaults: Record<string, string> = { "background-size": "auto", "background-position": "0% 0%", "background-repeat": "repeat", "background-origin": "padding-box", "background-clip": "border-box", "background-attachment": "scroll", "background-blend-mode": "normal" };
+  const backgroundList = (property: string) => {
+    const authored = read(property);
+    return /var\(/i.test(authored) || splitCss(authored, ",").some(item => /^(initial|inherit|unset|revert|revert-layer)$/i.test(item)) ? computed.getPropertyValue(property) : authored;
+  };
+  const backgroundLayerValue = (property: string, index: number) => {
+    const values = splitCss(backgroundList(property), ",");
+    return values[index % values.length] ?? backgroundDefaults[property];
+  };
+  const setBackgroundLayer = (property: string, index: number, value: string) => {
+    if (splitCss(value, ",").length !== 1) return false;
+    const values = splitCss(backgroundImages, ",").map((_, i) => i === index ? value : backgroundLayerValue(property, i));
+    const next = values.join(", ");
+    if (!CSS.supports(property, next)) return false;
+    styled.style.setProperty(property, next, styled.style.getPropertyPriority(property));
+    onChange();
+    return true;
+  };
+  const backgroundLayerSettings = (index: number) => <>
+    <Field label={`Background layer ${index + 1} size`} prefix="Size" value={backgroundLayerValue("background-size", index)} suggestions={["auto", "cover", "contain"].map(value => ({ value }))} onCommit={value => setBackgroundLayer("background-size", index, value)} />
+    <Field label={`Background layer ${index + 1} position`} prefix="Position" value={backgroundLayerValue("background-position", index)} onCommit={value => setBackgroundLayer("background-position", index, value)} />
+    <Field label={`Background layer ${index + 1} repeat`} prefix="Repeat" value={backgroundLayerValue("background-repeat", index)} suggestions={["repeat", "no-repeat", "repeat-x", "repeat-y", "space", "round"].map(value => ({ value }))} onCommit={value => setBackgroundLayer("background-repeat", index, value)} />
+  </>;
   const changeBackgroundLayers = (layers: string[], order: (number | null)[]) => {
     const patch: Record<string, string> = { "background-image": layers.join(", ") || "none" };
     if (layers.length) for (const [property, fallback] of Object.entries(backgroundDefaults)) {
-      const authored = read(property);
-      // Resolve cascade keywords and variables before indexing a potentially expanded list.
-      const source = /var\(/i.test(authored) || splitCss(authored, ",").some(item => /^(initial|inherit|unset|revert|revert-layer)$/i.test(item)) ? computed.getPropertyValue(property) : authored;
-      patch[property] = remapCssLayers(source, order, fallback);
+      patch[property] = remapCssLayers(backgroundList(property), order, fallback);
     }
     if (!Object.entries(patch).every(([property, value]) => CSS.supports(property, value))) return false;
     Object.entries(patch).forEach(([property, value]) => styled.style.setProperty(property, value, styled.style.getPropertyPriority(property)));
@@ -373,8 +392,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <Section title="Fill" onReset={resetGroup(["background", "background-color", "background-image", ...Object.keys(backgroundDefaults)])}>
       <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
       <div className="property-subheading"><span>Image or gradient</span></div>
-      <GradientEditor value={backgroundImages} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} onLayersChange={changeBackgroundLayers} />
-      {read("background-image") !== "none" && <><SelectField label="Image sizing" value={read("background-size")} options={[{ value: "auto", label: "Original size" }, { value: "cover", label: "Cover" }, { value: "contain", label: "Contain" }]} onCommit={(v) => set("background-size", v)} /><Field label="Background position" prefix="Position" value={read("background-position")} onCommit={(v) => set("background-position", v)} /></>}
+      <GradientEditor value={backgroundImages} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} onLayersChange={changeBackgroundLayers} renderLayerSettings={backgroundLayerSettings} />
     </Section>
 
     <Section title="Stroke" defaultOpen={false} onReset={resetGroup(["border", "border-width", "border-style", "border-color", ...["top", "right", "bottom", "left"].flatMap((side) => [`border-${side}`, `border-${side}-width`, `border-${side}-style`, `border-${side}-color`])])}>
