@@ -1006,3 +1006,16 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .variable-input { width: 100%; height: 24px; border: 1px solid transparent; border-radius: var(--radius-control); padding: 0 6px; background: var(--field); color: var(--text); font: 11px var(--font); }
 .variable-input:focus-visible { outline: 1px solid var(--accent); }
 .variable-error { margin: 0; font-size: 10px; color: var(--danger); }
+.html-import-dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 16px; border: 1px solid var(--divider); border-radius: 10px; background: var(--panel); color: var(--text); box-shadow: 0 16px 56px #0003; }
+.html-import-dialog::backdrop { background: #0002; }
+.html-import-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.html-import-heading strong { font-size: 13px; }
+.html-import-heading p { margin: 6px 0 12px; color: var(--text-secondary); font-size: 11px; }
+.html-import-settings { display: grid; grid-template-columns: 1fr 100px; gap: 12px; margin-bottom: 12px; }
+.html-import-settings label { display: flex; flex-direction: column; gap: 5px; color: var(--text-secondary); font-size: 10px; }
+.html-import-settings input { width: 100%; height: 28px; border: 1px solid var(--divider); border-radius: 4px; padding: 0 8px; background: var(--field); color: var(--text); font: 11px var(--font); }
+.html-import-dialog .code-input { width: 100%; height: min(340px, 45vh); min-height: 100px; resize: vertical; }
+.html-import-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.html-import-footer span { color: var(--text-secondary); font-size: 10px; }
+.html-import-footer button { flex-shrink: 0; }
+.html-import-error { margin: 8px 0 0; color: var(--danger); font-size: 11px; }

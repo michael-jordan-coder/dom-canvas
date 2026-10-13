@@ -15,6 +15,7 @@ import { DocumentName } from "@/features/document/DocumentTitle";
 import { FileControls } from "@/features/document/FileControls";
 import { projectFilename, decodeProject, encodeProject, inertProjectHtml, isProjectClipboard, type ProjectFile } from "@/features/document/projectFile";
 import { ImportButton } from "@/features/import/ImportButton";
+import { HtmlImportDialog, emptyHtmlDraft } from "@/features/import/HtmlImportDialog";
 import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
 import { useInspectorSectionActions } from "@/features/inspector/InspectorPreferences";
@@ -47,6 +48,8 @@ export function App() {
   const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
   const [tool, setTool] = useState<Tool>("move");
   const [actionSearchOpen, setActionSearchOpen] = useState(false);
+  const [htmlImportOpen, setHtmlImportOpen] = useState(false);
+  const [htmlDraft, setHtmlDraft] = useState(emptyHtmlDraft);
   const closeActionSearch = useCallback(() => setActionSearchOpen(false), []);
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
@@ -457,6 +460,7 @@ export function App() {
     { label: "Delete", shortcut: "⌫", run: deleteSelection, danger: true, disabled: selection.kind === "element" && !!lockedAncestor(selection.element) },
   ];
   const searchActions: SelectionAction[] = [
+    { label: "Paste HTML", run: () => setHtmlImportOpen(true) },
     { label: "Undo", shortcut: "⌘/Ctrl Z", disabled: !doc.canUndo, run: () => travel("undo") },
     { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
     ...selectionActions,
@@ -557,7 +561,9 @@ export function App() {
       {notice && <div className="toast" role="status">{notice}</div>}
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[...selectionActions, ...inspectorActions]} />}
       {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}
+      {htmlImportOpen && <HtmlImportDialog draft={htmlDraft} onDraft={setHtmlDraft} onClose={() => setHtmlImportOpen(false)} onCreate={content => { addArtboard(content); setHtmlImportOpen(false); setHtmlDraft(emptyHtmlDraft); }} />}
       <Toolbar tool={tool} onToolChange={setTool}>
+        <button className="tool" aria-label="Paste HTML" title="Paste HTML" onClick={() => setHtmlImportOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="m6 5-4 5 4 5m8-10 4 5-4 5M12 3 8 17"/></svg></button>
         <button className="tool" aria-label="Find an action" title="Find an action (⌘/Ctrl+K)" onClick={() => setActionSearchOpen(true)}><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg></button>
         <ImportButton busy={importing} error={importError} onImport={importSite} />
       </Toolbar>
