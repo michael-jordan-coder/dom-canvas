@@ -452,3 +452,9 @@ Browser QA on 5181: toolbar and ? opened the dialog; Escape returned focus to it
 Toolbar and action-search tool activation now focus the actual canvas surface after the React update and any modal cleanup, without scrolling or changing selection. This avoids leaving keyboard control on a toolbar button, where canvas shortcuts are intentionally ignored. Internal tool transitions retain their existing behavior. Inspection also confirmed that the existing window-blur handler already clears temporary Space hand mode and cancels active drags.
 
 Browser QA on 5181: clicking Hand left activeElement on canvas hand; V switched to Move. Choosing Rectangle from action search left activeElement on canvas draw-tool. Returning to Move and nudging the selected frame created an undoable change; Undo restored it. Build and diff check passed. Screenshot: /tmp/dom-canvas-tool-focus.png. Window switching during held Space was code-inspected, not simulated.
+
+## Editable font weight
+
+Replaced the HTML fixed weight select with a shared editable suggestion field, also used for SVG text. Named standard weights remain available; arbitrary browser-valid CSS weights can be typed, and local overrides have a direct Reset. Font availability still determines actual glyph rendering.
+
+Browser QA on5181: HTML weight450 remained450 in inline and computed style;1001 was rejected. Choosing Semibold committed600. Reset restored stylesheet400; Undo restored600. SVG uses the same field and existing CSS setter but was not separately exercised. Build and diff check passed.

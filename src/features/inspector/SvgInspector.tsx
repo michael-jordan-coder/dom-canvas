@@ -1,3 +1,4 @@
+import { FontWeightField } from "./FontWeightField";
 import { numericInput } from "./numeric";
 import { getLayoutSize, setSize } from "@/features/canvas/elementStyle";
 import { layerName } from "@/features/layers/Layers";
@@ -38,7 +39,7 @@ export function SvgInspector({ element, onChange }: { element: SVGElement; onCha
     </Section>
     {(tag === "text" || tag === "tspan") && <Section title="Typography" onReset={reset(["font-family", "font-size", "font-weight", "text-anchor"])}>
       <Field label="Font family" value={computed.fontFamily} onCommit={(v) => set("font-family", v)} />
-      <Row><Field prefix="Size" label="Font size" value={computed.fontSize.replace(/px$/, "")} onCommit={(v) => set("font-size", /^\d*\.?\d+$/.test(v) ? `${v}px` : v)} /><Field prefix="Weight" label="Font weight" value={computed.fontWeight} onCommit={(v) => set("font-weight", v)} /></Row>
+      <Row><Field prefix="Size" label="Font size" value={computed.fontSize.replace(/px$/, "")} onCommit={(v) => set("font-size", /^\d*\.?\d+$/.test(v) ? `${v}px` : v)} /><FontWeightField value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={reset(["font-weight"])} /></Row>
       <SelectField label="Text anchor" value={read("text-anchor")} options={["start", "middle", "end"]} onCommit={(v) => set("text-anchor", v)} />
       {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
     </Section>}

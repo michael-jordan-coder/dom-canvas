@@ -116,3 +116,4 @@ Open http://localhost:5180.
 - Numeric inspector arrows use a preview transaction until key release, focus loss or the next editing action. Shift changes by10, Alt by0.1; Escape during an active hold cancels that adjustment. Separate presses remain separate Undo steps.
 - Open searchable keyboard help with `?` outside text fields, the toolbar help button, or Keyboard shortcuts in action search. It lists canvas, selection and editing shortcuts with their relevant context.
 - Choosing a drawing tool from the toolbar or action search returns focus to the canvas, preserving selection so canvas shortcuts are immediately available.
+- Font weight accepts custom CSS values as well as named suggestions, with a per-property Reset in HTML and SVG text inspectors.
