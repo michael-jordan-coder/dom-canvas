@@ -1,0 +1,130 @@
+[
+  {
+    "background": "rgb(255, 255, 255)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "13px",
+    "boxShadow": "rgba(0, 0, 0, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 10px 16px 0px, rgba(0, 0, 0, 0.12) 0px 0px 0.5px 0px",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 156,
+      "width": 240,
+      "x": 269,
+      "y": 647
+    },
+    "tag": "DIV",
+    "text": "Background blurInner shadowDrop shadowLayer b"
+  },
+  {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "0px",
+    "boxShadow": "rgb(230, 230, 230) 0px -1px 0px 0px inset",
+    "gap": "normal",
+    "padding": "0px 32px 0px 8px",
+    "rect": {
+      "height": 40,
+      "width": 240,
+      "x": 269,
+      "y": 647
+    },
+    "tag": "DIV",
+    "text": "Background blurInner shadowDrop shadowLayer b"
+  },
+  {
+    "background": "rgb(245, 245, 245)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 208,
+      "x": 285,
+      "y": 699
+    },
+    "tag": "DIV",
+    "text": "UniformProgressive"
+  },
+  {
+    "background": "rgb(255, 255, 255)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "5px",
+    "boxShadow": "rgb(230, 230, 230) 0px 0px 0px 1px inset",
+    "gap": "normal",
+    "padding": "0px 8px",
+    "rect": {
+      "height": 24,
+      "width": 104,
+      "x": 389,
+      "y": 699
+    },
+    "tag": "LABEL",
+    "text": "Progressive"
+  },
+  {
+    "background": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(230, 230, 230)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 136,
+      "x": 357,
+      "y": 731
+    },
+    "tag": "DIV",
+    "text": ""
+  },
+  {
+    "background": "rgb(245, 245, 245)",
+    "border": "1px solid rgb(245, 245, 245)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 136,
+      "x": 357,
+      "y": 731
+    },
+    "tag": "LABEL",
+    "text": ""
+  },
+  {
+    "background": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(230, 230, 230)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 136,
+      "x": 357,
+      "y": 763
+    },
+    "tag": "DIV",
+    "text": ""
+  },
+  {
+    "background": "rgb(245, 245, 245)",
+    "border": "1px solid rgb(245, 245, 245)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 136,
+      "x": 357,
+      "y": 763
+    },
+    "tag": "LABEL",
+    "text": ""
+  }
+]

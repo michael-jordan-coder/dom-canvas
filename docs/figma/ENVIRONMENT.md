@@ -126,3 +126,7 @@ Layout-details pass: Frame3 clipping/padding/stroke tests restored.80 Fixed ×50
 Hug, all padding10, gap10, centered, Clip off, no Stroke. Advanced Inside stroke
 returned toIncluded, dialog closed, padding collapsed; Frame3 selected, zoom155%.
 See topics/layout-details.md; final pair-label repeat did not confirm any value edit.
+
+Blur-effects pass: Star18:79 Layer/Background blur tests removed. Star100 ×100
+at240/200, Count7/Ratio50%, D9D9D9 Fill100%, object opacity100%, no Effects.
+Star selected, editor closed, canvas101%. See topics/blur-effects.md.

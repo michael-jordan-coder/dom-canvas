@@ -1,0 +1,245 @@
+{
+  "ancestors": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "borderRadius": "0px",
+      "boxShadow": "none",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "fontSize": "11px",
+      "fontWeight": "400",
+      "gap": "normal",
+      "label": null,
+      "lineHeight": "16px",
+      "padding": "0px",
+      "rect": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "role": null,
+      "tag": "DIV"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "borderRadius": "0px",
+      "boxShadow": "none",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "fontSize": "11px",
+      "fontWeight": "400",
+      "gap": "normal",
+      "label": null,
+      "lineHeight": "16px",
+      "padding": "0px",
+      "rect": {
+        "height": 0,
+        "width": 750,
+        "x": 0,
+        "y": 0
+      },
+      "role": null,
+      "tag": "DIV"
+    }
+  ],
+  "close": {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgb(0, 0, 0)",
+    "borderRadius": "5px",
+    "boxShadow": "none",
+    "color": "rgb(0, 0, 0)",
+    "fontSize": "11px",
+    "fontWeight": "400",
+    "gap": "normal",
+    "label": "Close",
+    "lineHeight": "16px",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 24,
+      "x": 477,
+      "y": 655
+    },
+    "role": null,
+    "tag": "BUTTON"
+  },
+  "dialog": {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "0px",
+    "boxShadow": "none",
+    "color": "rgba(0, 0, 0, 0.898)",
+    "fontSize": "11px",
+    "fontWeight": "400",
+    "gap": "normal",
+    "label": null,
+    "lineHeight": "16px",
+    "padding": "0px",
+    "rect": {
+      "height": 156,
+      "width": 240,
+      "x": 269,
+      "y": 647
+    },
+    "role": "dialog",
+    "tag": "DIV"
+  },
+  "radios": [
+    {
+      "checked": false,
+      "input": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px none rgb(0, 0, 0)",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "color": "rgb(0, 0, 0)",
+        "fontSize": "11px",
+        "fontWeight": "450",
+        "gap": "normal",
+        "label": null,
+        "lineHeight": "0px",
+        "padding": "0px",
+        "rect": {
+          "height": 24,
+          "width": 104,
+          "x": 285,
+          "y": 699
+        },
+        "role": null,
+        "tag": "INPUT"
+      },
+      "parent": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px none rgba(0, 0, 0, 0.898)",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "color": "rgba(0, 0, 0, 0.898)",
+        "fontSize": "11px",
+        "fontWeight": "450",
+        "gap": "normal",
+        "label": null,
+        "lineHeight": "0px",
+        "padding": "0px",
+        "rect": {
+          "height": 24,
+          "width": 104,
+          "x": 285,
+          "y": 699
+        },
+        "role": null,
+        "tag": "DIV"
+      }
+    },
+    {
+      "checked": true,
+      "input": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px none rgb(0, 0, 0)",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "color": "rgb(0, 0, 0)",
+        "fontSize": "11px",
+        "fontWeight": "450",
+        "gap": "normal",
+        "label": null,
+        "lineHeight": "0px",
+        "padding": "0px",
+        "rect": {
+          "height": 24,
+          "width": 104,
+          "x": 389,
+          "y": 699
+        },
+        "role": null,
+        "tag": "INPUT"
+      },
+      "parent": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px none rgba(0, 0, 0, 0.898)",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "color": "rgba(0, 0, 0, 0.898)",
+        "fontSize": "11px",
+        "fontWeight": "450",
+        "gap": "normal",
+        "label": null,
+        "lineHeight": "0px",
+        "padding": "0px",
+        "rect": {
+          "height": 24,
+          "width": 104,
+          "x": 389,
+          "y": 699
+        },
+        "role": null,
+        "tag": "DIV"
+      }
+    }
+  ],
+  "start": {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "1px solid rgba(0, 0, 0, 0)",
+    "borderRadius": "2px",
+    "boxShadow": "none",
+    "color": "rgba(0, 0, 0, 0.898)",
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "gap": "normal",
+    "label": "Start",
+    "lineHeight": "16px",
+    "padding": "0px",
+    "rect": {
+      "height": 24,
+      "width": 110,
+      "x": 382,
+      "y": 731
+    },
+    "role": null,
+    "tag": "INPUT"
+  },
+  "startParents": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "borderRadius": "0px",
+      "boxShadow": "none",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "gap": "normal",
+      "label": null,
+      "lineHeight": "16px",
+      "padding": "0px",
+      "rect": {
+        "height": 24,
+        "width": 110,
+        "x": 382,
+        "y": 731
+      },
+      "role": null,
+      "tag": "DIV"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgba(0, 0, 0, 0.898)",
+      "borderRadius": "0px",
+      "boxShadow": "none",
+      "color": "rgba(0, 0, 0, 0.898)",
+      "fontSize": "11px",
+      "fontWeight": "450",
+      "gap": "normal",
+      "label": null,
+      "lineHeight": "16px",
+      "padding": "0px",
+      "rect": {
+        "height": 24,
+        "width": 110,
+        "x": 382,
+        "y": 731
+      },
+      "role": null,
+      "tag": "DIV"
+    }
+  ]
+}
