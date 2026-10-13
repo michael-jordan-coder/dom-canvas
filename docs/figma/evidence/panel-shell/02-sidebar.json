@@ -1,0 +1,19 @@
+{
+  "bg": "rgba(0, 0, 0, 0)",
+  "border": "0px none rgba(0, 0, 0, 0.898)",
+  "children": [
+    {
+      "class": "",
+      "role": null,
+      "tag": "DIV"
+    }
+  ],
+  "overflow": "visible",
+  "padding": "0px",
+  "rect": {
+    "height": 0,
+    "width": 0,
+    "x": 0,
+    "y": 0
+  }
+}

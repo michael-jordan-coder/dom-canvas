@@ -1,0 +1,102 @@
+[
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "rows--ui3RowInput1--dlL-a",
+    "clientHeight": 16,
+    "h": 16,
+    "level": 0,
+    "overflowY": "visible",
+    "scrollHeight": 16,
+    "w": 184
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "rows--ui3OneInputOneIconRow--EZsL9 rows--_row--zTlZW rows--_grid--R5joA ui3_panel_title_rows--ui3PanelTitleRow--jCmEG ui3_panel_title_rows--ui3PanelTitleOneIconRow--9dZTa",
+    "clientHeight": 40,
+    "h": 40,
+    "level": 1,
+    "overflowY": "visible",
+    "scrollHeight": 40,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "propertiesPanel ",
+    "clientHeight": 148,
+    "h": 149,
+    "level": 2,
+    "overflowY": "visible",
+    "scrollHeight": 148,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "cachedSubtree displayContents",
+    "clientHeight": 0,
+    "h": 0,
+    "level": 3,
+    "overflowY": "visible",
+    "scrollHeight": 0,
+    "w": 0
+  },
+  {
+    "bg": "rgb(255, 255, 255)",
+    "class": "properties_panel--propertiesPanel--PI-3x",
+    "clientHeight": 823,
+    "h": 823,
+    "level": 4,
+    "overflowY": "visible",
+    "scrollHeight": 823,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "",
+    "clientHeight": 823,
+    "h": 823,
+    "level": 5,
+    "overflowY": "visible",
+    "scrollHeight": 823,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "xh8yej3 x5yr21d x82snj4",
+    "clientHeight": 823,
+    "h": 823,
+    "level": 6,
+    "overflowY": "visible",
+    "scrollHeight": 823,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "xh8yej3 x5yr21d xedcshv x1rife3k x6ikm8r x78zum5 x1q0g3np x1cy8zhl x1rohswg x8du1vd xfk6m8 xx69xxh",
+    "clientHeight": 812,
+    "h": 812,
+    "level": 7,
+    "overflowY": "scroll",
+    "scrollHeight": 823,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "xb3r6kr xd0t9eb xpm7p51 x10l6tqk x13vifvy x3m8u43 xh8yej3 x1ey2m1c x87ps6o",
+    "clientHeight": 812,
+    "h": 812,
+    "level": 8,
+    "overflowY": "hidden",
+    "scrollHeight": 812,
+    "w": 240
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "class": "properties_panel--scrollOuterContainer--fEKvn",
+    "clientHeight": 812,
+    "h": 812,
+    "level": 9,
+    "overflowY": "visible",
+    "scrollHeight": 812,
+    "w": 240
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(0, 0, 0)",
+    "disabled": false,
+    "h": 24,
+    "icons": [
+      {
+        "h": 24,
+        "w": 24
+      }
+    ],
+    "name": "More actions",
+    "padding": "0px",
+    "radius": "5px",
+    "w": 24
+  },
+  {
+    "bg": "rgb(245, 245, 245)",
+    "color": "rgb(0, 0, 0)",
+    "disabled": false,
+    "h": 24,
+    "icons": [
+      {
+        "h": 24,
+        "w": 24
+      }
+    ],
+    "name": "Align left",
+    "padding": "0px",
+    "radius": "5px 0px 0px 5px",
+    "w": 28.6640625
+  },
+  {
+    "bg": "rgb(229, 244, 255)",
+    "color": "rgb(0, 0, 0)",
+    "disabled": false,
+    "h": 24,
+    "icons": [
+      {
+        "h": 24,
+        "w": 24
+      }
+    ],
+    "name": "Individual corners",
+    "padding": "0px",
+    "radius": "5px",
+    "w": 24
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(0, 0, 0)",
+    "disabled": false,
+    "h": 24,
+    "icons": [
+      {
+        "h": 24,
+        "w": 24
+      }
+    ],
+    "name": "Add fill",
+    "padding": "0px",
+    "radius": "5px",
+    "w": 24
+  }
+]

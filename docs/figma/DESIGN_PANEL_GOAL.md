@@ -41,7 +41,7 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Numeric/text input lifecycle | Focus, select-all, typing, expressions, units, arrows/modifiers, scrub, Enter/blur/Escape, invalid input | Caret/selection, focus rings, hover cursors, errors, disabled presentation | Partial: Width expressions, invalid input, arrows, Tab/Escape; other controls open |
 | Multi-edit transactions | Common/mixed, supported subsets, per-target restoration, undo/redo, picker preview/cancel | Mixed placeholders, shared fields, aggregate controls | Partial: shared frame width + Undo |
 | Canvas synchronization | Move/resize/text/layout changes reflected in panel, panel edits reflected on canvas | Live values, selection changes, feedback and retained focus | Reflow observed; broad matrix open |
-| Panel shell | Scroll, collapse, navigation, floating editors, keyboard traversal, narrow window | Width, spacing, dividers, typography, surfaces, border/radius, icon/hit areas, z-order | Partial: control CSS and rest/focus wrapper measurements |
+| Panel shell | Scroll, collapse, navigation, floating editors, keyboard traversal, narrow window | Width, spacing, dividers, typography, surfaces, border/radius, icon/hit areas, z-order | Partial: control/wrapper focus, title rows, sections/actions and scroll container metrics |
 
 Newly discovered contextual controls extend the inventory. A row is not complete
 merely because a Markdown file exists or one example succeeds.
