@@ -41,6 +41,7 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
+- [Text case and underline](topics/text-case.md): case rendering, nested decoration editor, center alignment and disabled states.
 - [Alignment and spacing](topics/alignment.md): selection-edge alignment, distribution and contextual spacing fields.
 - [Inner shadow](topics/inner-shadow.md): type-dependent Spread, blend persistence and independent effect rows.
 - [Glass history](topics/glass-history.md): combined Fill/effect Undo, translucent Fill, slider keys and numeric bounds.

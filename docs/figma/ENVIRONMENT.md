@@ -147,3 +147,8 @@ selected at240/50,100 ×100, zoom101%, editor closed. See topics/inner-shadow.md
 Alignment pass: original coordinates individually restored after align/distribute/
 spacing tests: Star240/200, Polygon10/200, Ellipse240/50, all100 ×100 and no effects.
 Ellipse selected, canvas43%, no dialog. See topics/alignment.md.
+
+Text-case pass: child8:3 selected,215% zoom, As typed/None/left-top restored,
+100 Fill/min100 ×30 Hug, Inter Regular12/Auto/0%, white Fill. Underline Solid/Auto
+thickness/offset verified on re-enable; final latent Skip ink across None remains
+inconclusive. No visible decoration. See topics/text-case.md.
