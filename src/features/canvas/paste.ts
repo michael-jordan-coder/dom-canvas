@@ -47,17 +47,21 @@ function splitDocument(source: string): PastedCode {
     doc.body.prepend(link);
   });
 
-  const bodyStyle = doc.body.getAttribute("style");
-  const bodyClass = doc.body.getAttribute("class");
+  const bodyAttributes = new Map<string, string>();
+  for (const name of ["style", "class", "id", "dir", "lang"]) {
+    const inherited = name === "dir" || name === "lang"
+      ? doc.documentElement.getAttribute(name)
+      : null;
+    const value = doc.body.getAttribute(name) ?? inherited;
+    if (value !== null) bodyAttributes.set(name, value);
+  }
   let html = doc.body.innerHTML;
-  if (bodyStyle || bodyClass) {
-    const attrs = [
-      bodyClass ? `class="${bodyClass}"` : "",
-      bodyStyle ? `style="${bodyStyle}"` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-    html = `<div ${attrs}>${html}</div>`;
+  if (bodyAttributes.size) {
+    // Let the DOM serializer escape quotes and ampersands in attributes.
+    const wrapper = doc.createElement("div");
+    bodyAttributes.forEach((value, name) => wrapper.setAttribute(name, value));
+    wrapper.append(...Array.from(doc.body.childNodes));
+    html = wrapper.outerHTML;
   }
 
   return { kind: "document", html, css: scopeCss(css) };

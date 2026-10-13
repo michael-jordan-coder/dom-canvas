@@ -188,3 +188,9 @@ Verified after a clean reload on port 5181: Space toggled Position open/closed. 
 Added remembered Flex item/Grid item sections with CSS validation, per-field and section resets, and history support. Flex exposes grow/shrink/basis; Grid exposes column/row placement and justify-self; both offer align-self and order. Shared parent detection crosses the frame shadow boundary, skips display:contents wrappers and excludes absolute/fixed/non-box elements. Width/height sizing also uses this corrected parent detection.
 
 Browser QA on port 5181: a direct child of a flex frame grew from 100px to 420px with grow1, align-self:center applied, negative grow was rejected and two Undo actions restored 100px/grow0/auto. A direct child of a three-column grid changed to span2, measured423.328px and moved the third sibling onto a second row. Reset restored auto/206.664px; Undo restored the span. Screenshot: /tmp/dom-canvas-layout-items.png. Build and diff check passed.
+
+## Full-document body attributes
+
+Full HTML paste preserves body style/class/id/dir/lang in a DOM-serialized wrapper. Direction and language fall back to html attributes when absent on body. Serialization escapes quotes and ampersands, fixing quoted font names breaking interpolated style attributes. Fragments without these attributes retain the existing unwrapped structure.
+
+Browser QA on port 5181: a Hebrew document inherited rtl/he, retained its ID, class containing an ampersand, quoted Arial font, padding and blue background. A second document with html rtl/he and body ltr/en computed ltr and retained en and its quoted font. Undo removed the second frame and restored the prior document. Screenshot: /tmp/dom-canvas-rtl-paste.png. This does not address root-qualified selectors such as body.class or arbitrary html attributes.

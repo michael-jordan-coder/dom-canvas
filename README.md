@@ -16,6 +16,7 @@ Open http://localhost:5180.
 ## Use
 
 - Paste HTML (with or without `<style>`) with Cmd+V to create a frame. The camera fits the new frame automatically.
+- Full documents preserve body style/class/id and body direction/language, falling back to `html` direction/language. Quoted style values and attribute entities survive import.
 - Paste a URL, or use the link button in the toolbar, to snapshot a real website.
 - Draw frames, rectangles and text with the toolbar tools. Double-click text to edit it.
 - Click to select, drag to move, drag the handles to resize. Double-click a layer to rename it.
