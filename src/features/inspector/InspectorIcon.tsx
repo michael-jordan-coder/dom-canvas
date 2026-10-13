@@ -1,4 +1,6 @@
 const paths = {
+  flowHorizontal: "M2 8h12M10 4l4 4-4 4",
+  flowVertical: "M8 2v12M4 10l4 4 4-4",
   ratio: 'm6 10 4-4M5 7l-1 1a2.8 2.8 0 0 0 4 4l1-1M7 5l1-1a2.8 2.8 0 0 1 4 4l-1 1',
   corners: 'M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4',
   padding: 'M2 2h12v12H2zM5 5h6v6H5z',

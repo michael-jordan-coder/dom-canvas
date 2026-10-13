@@ -852,3 +852,16 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .css-conflict pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 160px; overflow: auto; font: 11px/1.5 var(--mono); }
 .css-conflict .editor-actions { margin-top: 8px; gap: 4px; }
 .css-conflict .editor-actions button { padding: 0 6px; font-size: 11px; height: 24px; }
+.flow-layout { display: flex; align-items: center; gap: 10px; }
+.flow-controls { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.flow-controls .property-row { gap: 6px; }
+.flow-layout .alignment-grid { width: 56px; height: 56px; padding: 4px; }
+.layout-details { font-size: 10px; color: var(--text-secondary); }
+.layout-details > summary { display: flex; align-items: center; gap: 4px; cursor: pointer; min-height: 24px; list-style: none; }
+.layout-details > summary::before { content: '›'; width: 8px; font-size: 13px; }
+.layout-details[open] > summary::before { transform: rotate(90deg); }
+.layout-state { margin-left: auto; font-size: 9px; text-align: right; }
+.layout-details-body { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 6px; }
+.layout-details .alignment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.layout-details > summary > span:first-child { white-space: nowrap; }
+.layout-state { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

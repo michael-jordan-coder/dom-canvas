@@ -165,7 +165,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
 
-    <Section title={isFlex || isGrid ? "Auto layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
+    <Section title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
       <div className="sizing-row"><Row>{sizeField("width")}{sizeField("height")}</Row><button className="inspector-icon" title="Lock aspect ratio" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
@@ -176,15 +176,13 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         onChange();
       }}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 10 4-4M5 7l-1 1a2.8 2.8 0 0 0 4 4l1-1M7 5l1-1a2.8 2.8 0 0 1 4 4l-1 1" /></svg></button></div>
       {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row><p className="property-note">Min / Max follow the CSS box model. In content-box, padding and borders add to these limits.</p></>}
-      {isFlex && <>
-        <Segmented label="Direction" value={read("flex-direction").startsWith("column") ? "column" : "row"} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", `${v}${read("flex-direction").endsWith("reverse") ? "-reverse" : ""}`)} />
-        <label className="property-checkbox"><input type="checkbox" checked={read("flex-direction").endsWith("reverse")} onChange={(e) => set("flex-direction", `${read("flex-direction").startsWith("column") ? "column" : "row"}${e.target.checked ? "-reverse" : ""}`)} />Reverse order</label>
-        <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
-      </>}
       {(isFlex || isGrid) && <>
-        <SelectField label="Reading order" value={read("direction")} options={[{ value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => set("direction", v)} />
-        <div className="property-subheading"><span>{isGrid ? "Cell alignment" : "Content alignment"}</span></div>
-        <div className="layout-alignment">
+        <div className="flow-layout">
+          <div className="flow-controls">
+            {isFlex && <Segmented label="Direction" value={read("flex-direction").startsWith("column") ? "column" : "row"} options={[{ value: "row", label: "Horizontal", icon: <InspectorIcon name="flowHorizontal" /> }, { value: "column", label: "Vertical", icon: <InspectorIcon name="flowVertical" /> }]} onChange={(v) => set("flex-direction", `${v}${read("flex-direction").endsWith("reverse") ? "-reverse" : ""}`)} />}
+            <Row>{property("Column gap", "column-gap", <InspectorIcon name="horizontal" />)}{property("Row gap", "row-gap", <InspectorIcon name="vertical" />)}</Row>
+            {isGrid && <span className="property-note">Cell alignment</span>}
+          </div>
           <div className="alignment-grid" role="group" aria-label="Content alignment">
             {["flex-start", "center", "flex-end"].flatMap((vertical, row) => ["flex-start", "center", "flex-end"].map((horizontal, column) => {
               const columnDirection = isFlex && read("flex-direction").startsWith("column");
@@ -203,9 +201,18 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
               return <button key={`${row}-${column}`} aria-label={`Align ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][column]}`} aria-pressed={active} onClick={() => { styled.style.setProperty(horizontalProperty, justify); styled.style.alignItems = align; onChange(); }}><span /></button>;
             }))}
           </div>
-          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items").replace(/^start$/, "flex-start").replace(/^end$/, "flex-end")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>
         </div>
-        <Row>{property("Column gap", "column-gap", "↔")}{property("Row gap", "row-gap", "↕")}</Row>
+        <details className="layout-details">
+          <summary aria-label="More layout settings"><span>Layout options</span><span className="layout-state">{[computed.direction === "rtl" ? "RTL" : "", isFlex && read("flex-direction").endsWith("reverse") ? "Reverse" : "", isFlex && read("flex-wrap") !== "nowrap" ? read("flex-wrap") === "wrap-reverse" ? "Wrap ↶" : "Wrap" : ""].filter(Boolean).join(" · ")}</span></summary>
+          <div className="layout-details-body">
+            <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items").replace(/^start$/, "flex-start").replace(/^end$/, "flex-end")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>
+            {isFlex && <>
+        <label className="property-checkbox"><input type="checkbox" checked={read("flex-direction").endsWith("reverse")} onChange={(e) => set("flex-direction", `${read("flex-direction").startsWith("column") ? "column" : "row"}${e.target.checked ? "-reverse" : ""}`)} />Reverse order</label>
+        <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
+            </>}
+            <SelectField label="Reading order" value={read("direction")} options={[{ value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => set("direction", v)} />
+          </div>
+        </details>
       </>}
       {isGrid && <><Field label="Grid columns" prefix="Cols" value={read("grid-template-columns")} onCommit={(v) => set("grid-template-columns", v)} onReset={resetProperty("grid-template-columns")} /><Field label="Grid rows" prefix="Rows" value={read("grid-template-rows")} onCommit={(v) => set("grid-template-rows", v)} onReset={resetProperty("grid-template-rows")} /></>}
       {paddingControls}

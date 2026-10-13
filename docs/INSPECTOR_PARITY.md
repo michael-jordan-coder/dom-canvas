@@ -82,3 +82,9 @@ Verified on isolated port 5181: typed color #7c3aed, font-size 36px, a custom pr
 ### CSS draft conflicts
 
 Element drafts retain their starting inline source. If Design changes that source while a draft is pending, ordinary Apply and Cmd/Ctrl+Enter are disabled. A comparison disclosure offers Use current styles or explicit Replace with draft. Browser verification: a pending blue/40px draft did not overwrite a later Design font-size change to 48px through the shortcut; explicit replacement applied blue/40px, and one Undo restored purple/48px. Screenshot: /tmp/dom-canvas-css-conflict.png.
+
+### Compact Auto layout group
+
+Direction icons and both gap fields now sit beside the alignment grid. Distribution, stretch/baseline alignment, reverse order, wrap and reading direction are grouped under Layout options. Active RTL/reverse/wrap states remain summarized when collapsed. Grid has its own Grid layout heading and cell-alignment label. All controls retain accessible names.
+
+Browser check on port 5181: opened Layout options on the existing RTL/column-reverse/wrap-reverse fixture; changed it to LTR/nowrap/normal order, closed options, selected Horizontal, set column gap 20 and middle-center alignment. Computed styles were row, 20px, center/center; panel had no horizontal overflow. Screenshot: /tmp/dom-canvas-compact-autolayout.png.
