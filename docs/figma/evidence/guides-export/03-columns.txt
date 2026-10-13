@@ -1,0 +1,262 @@
+- application
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region "Comments on canvas":
+  - button "Create new comment"
+- region "Left sidebar":
+  - toolbar "Navigation Bar":
+    - button "Main menu":
+    - separator
+    - button "File" [expanded]:
+    - button "Agents":
+    - button "Assets":
+    - button "Tools":
+    - separator
+    - button "Variables":
+  - button "Untitled, file name": Untitled
+  - generic: File name
+  - button "Edit file menu":
+  - button "Minimize UI":
+  - link "community":
+    - /url: https://www.figma.com/files/team/1669091168837591051/project/649249618
+  - heading "Pages Find Add new page" [level=2]:
+    - button "Pages" [expanded]:
+      - generic: Pages
+    - button "Find":
+    - button "Add new page":
+  - grid:
+    - row "Page 1":
+      - gridcell "Page 1":
+        - button "Page 1":
+          - generic: Page 1
+    - row "Page 2":
+      - gridcell "Page 2":
+        - button "Page 2":
+          - generic: Page 2
+  - slider "Resize handle"
+  - heading "Layers Collapse layers" [level=2]:
+    - button "Layers" [expanded]:
+      - generic: Layers
+    - button "Collapse layers":
+  - treegrid:
+    - row "Frame 2" [selected]:
+      - gridcell:
+      - gridcell "Frame 2":
+        - generic: Frame 2
+    - row "Frame 2" [expanded]:
+      - button:
+      - gridcell:
+      - gridcell "Frame 2":
+        - generic: Frame 2
+    - row "Variant2" [level=1]:
+      - gridcell:
+      - gridcell "Variant2":
+        - generic: Variant2
+    - row "Default" [level=1]:
+      - gridcell:
+      - gridcell "Default":
+        - generic: Default
+    - row "Frame 1":
+      - gridcell:
+      - gridcell "Frame 1":
+        - generic: Frame 1
+    - row "A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.":
+      - gridcell:
+      - gridcell "A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.":
+        - generic: A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.
+    - row "Frame 3" [expanded]:
+      - button:
+      - gridcell:
+      - gridcell "Frame 3":
+        - generic: Frame 3
+    - row "Text tool comparison" [level=1]:
+      - gridcell:
+      - gridcell "Text tool comparison":
+        - generic: Text tool comparison
+  - slider "Resize handle"
+- region "Right sidebar":
+  - button "Multiplayer tools":
+  - group "Prototype view":
+    - button "Present":
+    - button "Prototype view":
+  - button "Share"
+  - tablist:
+    - tab "Design" [selected]:
+      - generic: Design
+      - generic: Design
+    - tab "Prototype":
+      - generic: Prototype
+      - generic: Prototype
+  - button "125%, zoom and view options":
+    - text: 125%
+  - button "Frame 2":
+    - generic: Frame 2
+  - button "More actions":
+  - button "From this file":
+    - generic: From this file
+  - generic: Property 1
+  - generic: Property 1
+  - combobox "Property 1":
+    - generic: Variant2
+  - button "Apply variable":
+  - heading "Position" [level=2]
+  - group "Alignment":
+    - generic: Alignment
+    - button "Align left" [disabled]:
+    - button "Align horizontal centers" [disabled]:
+    - button "Align right" [disabled]:
+    - button "Align top" [disabled]:
+    - button "Align vertical centers" [disabled]:
+    - button "Align bottom" [disabled]:
+  - group "Position":
+    - generic: Position
+    - generic: X
+    - spinbutton "X-position": "-163"
+    - generic: "Y"
+    - spinbutton "Y-position": "-67"
+  - group "Rotation":
+    - generic: Rotation
+    - spinbutton "Rotation": 0°
+    - button "Rotate 90˚ right":
+    - button "Flip horizontal":
+    - button "Flip vertical":
+  - heading "Layout" [level=2]
+  - group "Dimensions":
+    - generic: Dimensions
+    - generic "Width":
+      - generic: W
+      - textbox "Width": "200"
+    - generic "Height":
+      - generic: H
+      - textbox "Height": "125"
+    - checkbox "Lock aspect ratio"
+    - generic: Lock aspect ratio
+  - checkbox "Clip content" [checked]
+  - generic: Clip content
+  - heading "Appearance" [level=2]
+  - checkbox "Hide"
+  - generic: Hide
+  - button "Apply blend mode":
+  - generic "Opacity":
+    - textbox "Opacity": 100%
+  - generic "Corner radius":
+    - textbox "Corner radius": "0"
+  - button "Individual corners" [expanded]:
+  - generic "Top left corner radius":
+    - textbox "Top left corner radius": "0"
+  - generic "Top right corner radius":
+    - textbox "Top right corner radius": "0"
+  - generic "Bottom left corner radius":
+    - textbox "Bottom left corner radius": "0"
+  - generic "Bottom right corner radius":
+    - textbox "Bottom right corner radius": "0"
+  - button "Corner smoothing":
+  - heading "Fill" [level=2]
+  - button "Fill, Apply styles and variables":
+  - button "Add fill":
+  - grid:
+    - 'row "Color Variable Research/Panel color with value #36F · 100% Toggle visibility Remove"':
+      - 'gridcell "Color Variable Research/Panel color with value #36F · 100%"':
+        - 'button "Color Variable Research/Panel color with value #36F · 100%"':
+          - generic "Research/Panel color"
+        - generic: Click to edit color variable
+      - gridcell "Toggle visibility":
+        - checkbox "Toggle visibility" [checked]
+        - generic: Toggle visibility
+      - gridcell "Remove":
+        - button "Remove":
+  - button "Stroke":
+    - heading "Stroke" [level=2]
+  - button "Stroke, Apply styles and variables":
+  - button "Add stroke":
+  - button "Effects":
+    - heading "Effects" [level=2]
+  - button "Effects, Apply styles":
+  - button "Add effect":
+  - heading "Layout guide" [level=2]
+  - button "Layout guide, Apply styles":
+  - button "Add layout guide":
+  - grid:
+    - row "Layout guide settings Layout guide type Toggle visibility Remove layout guide":
+      - gridcell "Layout guide settings":
+        - button "Layout guide settings" [expanded]:
+      - gridcell "Layout guide type":
+        - generic: Layout guide type
+        - combobox "Layout guide type":
+          - generic: 5 columns
+      - gridcell "Toggle visibility":
+        - checkbox "Toggle visibility" [checked]
+        - generic: Toggle visibility
+      - gridcell "Remove layout guide":
+        - button "Remove layout guide":
+  - button "Export":
+    - generic: Export
+  - button "Add export settings":
+  - slider "Resize handle"
+- region "Application toolbar":
+  - toolbar "Editor":
+    - group "Move":
+      - button "Move" [pressed]:
+      - button "Move tools":
+    - group "Frame":
+      - button "Frame":
+      - button "Region tools":
+    - group "Rectangle":
+      - button "Rectangle":
+      - button "Shape tools":
+    - group "Pen":
+      - button "Pen":
+      - button "Creation tools":
+    - group "Text":
+      - button "Text":
+      - button "Type tools":
+    - group "Comment":
+      - button "Comment":
+      - button "Comment tools":
+    - button "Actions":
+    - radiogroup "Toolbelt Mode":
+      - generic: Toolbelt Mode
+      - radio "Draw"
+      - generic: Draw
+      - radio "Design" [checked]
+      - generic: Design
+      - radio "Motion"
+      - generic: Motion
+      - radio "Dev Mode"
+      - generic: Dev Mode
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- dialog "Layout guide type":
+  - heading "Layout guide type" [level=2]:
+    - generic: Layout guide type
+    - combobox "Layout guide type":
+      - generic: Columns
+  - generic: Count
+  - listbox
+  - generic "Count":
+    - combobox "Count" [active]: "5"
+  - generic: Color
+  - 'button "Solid color hex: FF0000"'
+  - textbox: FF0000
+  - generic "Opacity":
+    - textbox "Opacity": "10"
+    - generic: "%"
+  - generic: Type
+  - generic: Layout guide type
+  - combobox "Layout guide type":
+    - generic: Stretch
+  - generic: Width
+  - generic "Width":
+    - textbox "Width" [disabled]:
+      - /placeholder: Auto
+  - generic: Margin
+  - generic "Offset":
+    - textbox "Offset": "0"
+  - generic: Gutter
+  - generic "Gutter":
+    - textbox "Gutter": "20"
+  - button "Close":
+- status
+- alert
+- alert

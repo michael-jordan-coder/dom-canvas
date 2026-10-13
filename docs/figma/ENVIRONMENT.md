@@ -62,3 +62,6 @@ No library publication or push to main component was performed.
 
 Variable research: Research/Panel color in Variable collection is3366FF and
 bound to the Fill of instance15:62. Previous raw-white state is superseded.
+
+Guide/export pass: instance15:62 has no guide after test removal, and now has one
+PNG1x export preset. Advanced Export dialog is open. No file was exported.

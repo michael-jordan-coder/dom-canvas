@@ -29,6 +29,7 @@
 - [Bindings](topics/bindings.md): local color style linking, removal and instance Fill reset.
 - [Panel shell](topics/panel-shell.md): measured title rows, section dividers,
   action boxes, scroll containers and disabled semantics.
+- [Guides and export](topics/guides-export.md): Grid/Columns context and Export-to-Fill dependency.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
