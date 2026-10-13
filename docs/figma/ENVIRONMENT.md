@@ -139,3 +139,7 @@ and Count7/Ratio50%; selected, zoom101%. See topics/material-effects.md.
 Glass-history pass: fresh-add Undo/Redo, bounds and Fill30 context tested.
 Final Star18:79 again has no effects, D9D9D9 Fill100%, object opacity100%, original
 100 ×100/X240/Y200/Count7/Ratio50%; selected, zoom101%. See topics/glass-history.md.
+
+Inner-shadow pass: Star18:79 and Ellipse18:77 shadow effects added/tested/removed.
+Both no effects, D9D9D9 Fill100%, object opacity100%, original geometry. Ellipse
+selected at240/50,100 ×100, zoom101%, editor closed. See topics/inner-shadow.md.

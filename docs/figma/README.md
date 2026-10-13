@@ -41,6 +41,7 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
+- [Inner shadow](topics/inner-shadow.md): type-dependent Spread, blend persistence and independent effect rows.
 - [Glass history](topics/glass-history.md): combined Fill/effect Undo, translucent Fill, slider keys and numeric bounds.
 - [Material effects](topics/material-effects.md): Noise modes, Texture/Glass conversion, Fill dependency and slider metrics.
 - [Blur effects](topics/blur-effects.md): Uniform/Progressive, type conversion, mode history and editor measurements.

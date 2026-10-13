@@ -1,0 +1,16 @@
+{
+  "ariaDisabled": null,
+  "background": "rgba(0, 0, 0, 0)",
+  "color": "rgba(0, 0, 0, 0.3)",
+  "disabled": true,
+  "fontSize": "11px",
+  "fontWeight": "450",
+  "lineHeight": "16px",
+  "opacity": "1",
+  "radius": "2px",
+  "rect": {
+    "height": 24,
+    "width": 110
+  },
+  "value": "0"
+}
