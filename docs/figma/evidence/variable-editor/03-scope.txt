@@ -1,0 +1,121 @@
+- application
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region "Left sidebar":
+  - toolbar "Navigation Bar":
+    - button "Main menu":
+    - separator
+    - button "File":
+    - button "Agents":
+    - button "Assets":
+    - button "Tools":
+    - separator
+    - button "Variables" [expanded]:
+  - button "Untitled":
+    - heading "Untitled" [level=2]
+  - button "Hide panel":
+  - navigation:
+    - region "Variable collections":
+      - generic: Collections
+      - button "Collections options":
+      - button "Create collection":
+      - grid:
+        - row "Variable collection 1 variable":
+          - gridcell "Variable collection 1 variable":
+            - button "Variable collection 1 variable":
+              - generic "Variable collection"
+              - generic: 1 variable
+              - text: "1"
+    - button "Groups" [expanded]:
+      - generic: Groups
+    - button "Collapse groups":
+    - grid:
+      - row "All 1 variable":
+        - gridcell "All 1 variable":
+          - button "All":
+            - generic "All"
+          - generic: 1 variable
+          - text: "1"
+      - row "Research 1 variable":
+        - gridcell "Research 1 variable":
+          - button "Research":
+            - generic "Research"
+          - generic: 1 variable
+          - text: "1"
+  - slider "Resize handle"
+- heading "Variable collection" [level=2]:
+  - button "Variable collection":
+    - generic: Variable collection
+- group "Search and filter":
+  - textbox "Search"
+  - button "Filter":
+- checkbox "Minimize"
+- generic: Minimize
+- button "Share"
+- table:
+  - rowgroup:
+    - row "Name Value New variable mode":
+      - columnheader "Name": Name
+      - columnheader "Value":
+        - generic "Value"
+      - cell
+      - cell "New variable mode":
+        - button "New variable mode":
+    - row
+    - row "Research":
+      - cell "Research":
+        - button "Research":
+          - generic: Research
+    - 'row "Panel color Solid color hex: 3366FF 3366FF Edit variable"':
+      - rowheader "Panel color":
+        - generic "Panel color"
+      - 'cell "Solid color hex: 3366FF 3366FF"':
+        - 'button "Solid color hex: 3366FF"'
+        - generic: Autofill available. Type to see suggestions.
+        - combobox: 3366FF
+      - cell
+      - cell "Edit variable":
+        - button "Edit variable" [expanded]:
+- button "Create variable button":
+  - generic: Create variable
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- dialog "Edit variable":
+  - heading "Edit variable" [level=2]
+  - tablist:
+    - tab "Details":
+      - generic: Details
+      - generic: Details
+    - tab "Scope" [active] [selected]:
+      - generic: Scope
+      - generic: Scope
+  - tabpanel "Scope":
+    - heading "Color scope" [level=3]: Color scope
+    - list:
+      - checkbox "Show in all supported properties" [checked]
+      - generic: Show in all supported properties
+      - generic: Show in all supported properties
+      - checkbox "Fill" [checked]
+      - generic: Fill
+      - generic: Fill
+      - list:
+        - checkbox "Frame" [checked]
+        - generic: Frame
+        - generic: Frame
+        - checkbox "Shape" [checked]
+        - generic: Shape
+        - generic: Shape
+        - checkbox "Text" [checked]
+        - generic: Text
+        - generic: Text
+      - checkbox "Stroke" [checked]
+      - generic: Stroke
+      - generic: Stroke
+      - checkbox "Effects" [checked]
+      - generic: Effects
+      - generic: Effects
+  - button "Close":
+- status
+- alert
+- alert

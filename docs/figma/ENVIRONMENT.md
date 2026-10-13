@@ -176,3 +176,8 @@ Component-propagation pass: Variant2 source and instance radii restored0. Local
 radius override cleared through Reset others; following source0 verified. Instance
 15:62 stillVariant2,200 ×125 at-163/-67, blue Research/Panel color binding and1xPNG.
 Instance selected, zoom69%, no popup. See topics/component-propagation.md.
+
+Variable-mode pass: Variable collection now retains Mode1=3366FF and
+Mode2=22AA66 for Research/Panel color. Instance15:62 restoredAuto(Mode1), blue
+binding, original200 ×125/-163/-67/radius0,1xPNG. Selected69%, manager closed.
+Mode2 deliberately retained for further research. See topics/variable-modes.md.
