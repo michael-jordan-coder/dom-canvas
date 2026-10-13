@@ -90,3 +90,9 @@ inconclusive Undo; previous Wrap child modes are no longer the current fixture.
 Selection context pass: Frame1 hidden/edit/show and lock/edit/reselect experiments
 completed, then restored to150 ×125 at-99/-19, visible/unlocked, white Fill,
 clip enabled. Frame1 selected, canvas zoom93%. Frame4 retained in Grid state above.
+
+Group/Section pass: duplicated Frame1 as Frame5 (`18:72`), grouped into18:73,
+then converted group to Section1 (`18:74`). Group no longer exists. Section1 is
+350 ×325 at400/0 after Resize to fit; Frame5 is150 ×125 at100/100 relative,
+white Fill, clip enabled. Section1 selected, menu closed, canvas zoom40%.
+Other fixtures unchanged. See topics/groups-sections.md.

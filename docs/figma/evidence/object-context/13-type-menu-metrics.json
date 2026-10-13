@@ -1,0 +1,44 @@
+[
+  {
+    "background": "rgba(0, 0, 0, 0)",
+    "checked": "true",
+    "color": "rgba(255, 255, 255, 0.4)",
+    "disabled": "true",
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "height": 24,
+    "lineHeight": "16px",
+    "padding": "0px 8px",
+    "radius": "0px",
+    "text": "Section",
+    "width": 222
+  },
+  {
+    "background": "rgba(0, 0, 0, 0)",
+    "checked": "false",
+    "color": "rgb(255, 255, 255)",
+    "disabled": "false",
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "height": 24,
+    "lineHeight": "16px",
+    "padding": "0px 8px",
+    "radius": "0px",
+    "text": "Frame",
+    "width": 222
+  },
+  {
+    "background": "rgba(0, 0, 0, 0)",
+    "checked": "false",
+    "color": "rgba(255, 255, 255, 0.4)",
+    "disabled": "true",
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "height": 24,
+    "lineHeight": "16px",
+    "padding": "0px 8px",
+    "radius": "0px",
+    "text": "Group",
+    "width": 222
+  }
+]
