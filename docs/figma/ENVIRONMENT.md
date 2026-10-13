@@ -171,3 +171,8 @@ container succeeded; parent180 produced child160 Fill, then restored parent80
 Type-UI pass: UI navigation/measurement only; child8:3 still100 Fill/min100 ×30
 Hug, original typography, selected at215%. Type settings restored to Basics and
 closed. See topics/type-ui.md.
+
+Component-propagation pass: Variant2 source and instance radii restored0. Local
+radius override cleared through Reset others; following source0 verified. Instance
+15:62 stillVariant2,200 ×125 at-163/-67, blue Research/Panel color binding and1xPNG.
+Instance selected, zoom69%, no popup. See topics/component-propagation.md.

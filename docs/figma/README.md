@@ -41,6 +41,7 @@
 - [Mixed and multiple paints](topics/mixed-paint.md): Fill replacement/restoration, Escape and independent alpha/opacity.
 - [Size limits](topics/size-limits.md): minimum removal/Undo and maximum-capped Fill reflow.
 - [Font controls](topics/font-controls.md): family search, font-dependent styles, tracking units and reflow.
+- [Component propagation](topics/component-propagation.md): source radius, local override and partial reset with Fill preservation.
 - [Type settings UI](topics/type-ui.md): shell/tab measurements, disabled icon paint, keyboard focus and tab retention.
 - [Lists and Fill recovery](topics/text-list.md): contextual list controls and verified restoration via Actions.
 - [Constraint resizing](topics/constraints-resize.md): tested Left/Right/Center geometry and sizing transition.
@@ -78,3 +79,5 @@ Use the topic documents here as the index for new research.
 
 Do not copy private content, account details, console/network logs or entire source
 bundles into evidence. Keep only the UI measurements and disposable fixture results.
+
+[Interim coverage audit](INTERIM_AUDIT.md) records prioritized gaps; it is not a completion claim.

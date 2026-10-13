@@ -25,7 +25,7 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 
 | Area | Behavioral coverage | UI coverage | Current status |
 | --- | --- | --- | --- |
-| Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames/text, Page context, editable hidden/locked frame; heterogeneous/ancestor contexts open |
+| Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames/text, Page context, editable hidden/locked frame; heterogeneous Count/Ratio/Clip subsets tested; ancestor/descendant contexts open |
 | Object types | Frame, text, primitive shape, vector, group, section, component, instance and variants where available | Contextual controls and actions per type | Partial: frame/text, group/section, components, Rectangle/Ellipse/Polygon/Star and vector edit mode; Line/Arrow and individual vector points open |
 | Position | X/Y, rotation, flip, alignment/distribution, constraints, absolute positioning | Fields, icons, alignment groups, menus, axis labels | Partial: rotation/position coupling; left/top alignment, horizontal distribution and row spacing; Left/Right/Center constraints tested; remaining directions/flip/stretch/vertical constraints open |
 | Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: directions/Wrap/Grid, clipping, asymmetric padding, inside-stroke participation; flexible content, stacking/baseline/auto spacing and manual placement open |
@@ -36,7 +36,7 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Strokes | Width, alignment, sides, joins/caps/dashes where available, multiple strokes | Rows, menus, advanced settings, unavailable states | Partial: frame stroke, dashed dependencies, custom-side editor |
 | Effects | Types exposed by UI, parameters, order, visibility, add/remove, preview/cancel | Effect rows, floating editors, icons, overflow behavior | Partial: Drop shadow lifecycle; Layer/Background blur modes, retained parameters, mode Undo/Redo and editor metrics; Noise/Texture/Glass controls, conversion dependencies, fresh Glass/Fill history and selected bounds; Inner shadow Spread context/blend and independent rows; Shader/order/cancellation open |
 | Styles/variables | Binding, modes, source indicators, overrides, reset/detach where available | Menus, search, badges, linked/mixed states | Partial: color style create/link/remove, variable binding/source propagation; modes/aliases open |
-| Components/instances | Properties, variants, overrides, reset, instance-specific actions | Context header, property editors, unavailable actions | Partial: main/variant/set/instance context, width reset, variant switch; nested overrides open |
+| Components/instances | Properties, variants, overrides, reset, instance-specific actions | Context header, property editors, unavailable actions | Partial: main/variant/set/instance context, width reset, variant switch, radius source propagation/override/partial reset; nested properties open |
 | Other Design sections | Selection colors, layout guides, export, contextual sections discovered during research | Collapsed/expanded/empty/populated states | Partial: Grid/Columns, export preset/settings and Show in exports dependency |
 | Numeric/text input lifecycle | Focus, select-all, typing, expressions, units, arrows/modifiers, scrub, Enter/blur/Escape, invalid input | Caret/selection, focus rings, hover cursors, errors, disabled presentation | Partial: Width expressions, invalid input, arrows, Tab/Escape; other controls open |
 | Multi-edit transactions | Common/mixed, supported subsets, per-target restoration, undo/redo, picker preview/cancel | Mixed placeholders, shared fields, aggregate controls | Partial: frame width, heterogeneous Count/Ratio/Clip, per-target restoration and selection history; text+shape and picker cancellation open |
@@ -77,9 +77,10 @@ Animations require timing evidence rather than a single screenshot.
 
 ## Immediate next batch
 
-Create a populated auto-layout parent and compare its panel with a selected child:
-Fill/Hug/Fixed, editable position, absolute positioning, min/max and their UI.
-Then cover the input lifecycle and paint/effect editor transactions.
+Follow the [interim audit](INTERIM_AUDIT.md): prioritize actual component-property
+binding and nested overrides, variable modes/aliases, and direct canvas-to-panel
+synchronization. Continue the remaining behavior and UI-state matrix; prior
+parent/child, input and effect cases are partial evidence, not complete coverage.
 
 Starting evidence: [Design panel map](topics/design-panel.md).
 Process: [Method](METHOD.md). Shared fixture: [Environment](ENVIRONMENT.md).
