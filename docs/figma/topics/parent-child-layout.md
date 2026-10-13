@@ -1,5 +1,9 @@
 # Parent-child layout and Design panel dependencies
 
+Follow-up: [Size limits](size-limits.md) verifies Remove min and Undo with unchanged
+selection, plus Fill capped by max width. Earlier inconclusive attempts below remain
+historical evidence rather than the final result for removal/Undo in this fixture.
+
 Observed 2026-10-13 in Untitled / Page 2, Chrome, light UI, canvas zoom 125%.
 Scope: one text child inside one horizontal Auto layout frame. Other object types,
 multiple children and vertical flow remain open.

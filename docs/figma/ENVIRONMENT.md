@@ -113,3 +113,7 @@ Mixed-paint pass: five-object Fill replacement and color edits fully undone;
 Frame5 white and four shapesD9D9D9 individually verified. Star second-fill test
 removed; Star has one visibleD9D9D9 Fill100%, object opacity100%, Count7/Ratio50%.
 Star selected. See topics/mixed-paint.md.
+
+Size-limits pass: temporary parent width240 and child max140 undone. Frame3 is80
+Fixed ×50 Hug, centered/padding10; selected child8:3 is100 Fill/min100, no max,
+height30 Hug/Auto height, X-10/Y10. See topics/size-limits.md.
