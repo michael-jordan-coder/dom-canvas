@@ -213,3 +213,7 @@ Text-reset pass: Research label instance override cleared via named reset;
 Undo/Redo verified. Source two-line default followed by instance, then restored
 Panel label. Instance15:62 selected69%,BooleanTrue/blueFill/1xPNG unchanged.
 Source child24:128 measured67×30 with multiline; restored single-line content.
+
+Text-detach pass: source binding removed, Undo/Redo, unused definition retained;
+default changed while unbound, rebind adopted new default. Restored bound
+Panel label source/instance,BooleanTrue,blueFill/1xPNG,instance selected69%.

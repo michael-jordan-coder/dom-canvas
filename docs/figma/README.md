@@ -92,3 +92,5 @@ bundles into evidence. Keep only the UI measurements and disposable fixture resu
 [Text property creation, binding and instance edit](topics/text-property.md).
 
 [Text property reset, history and multiline inheritance](topics/text-reset.md).
+
+[Text property detach and rebind](topics/text-detach.md).
