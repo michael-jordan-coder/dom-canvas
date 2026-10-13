@@ -194,3 +194,8 @@ Variable values unchanged. See topics/alias-object.md.
 Boolean-property pass: set15:57 retains unused Research visible=True. Existing
 instance15:62 does not expose it in its panel. Set selected69%; source and instance
 geometry/paint untouched. Binding remains open. See topics/boolean-property.md.
+
+Boolean binding pass: Variant2 now contains Rectangle2 at20/20,100×100,D9D9D9,
+visibility bound to Research visible=True. Instance15:62 Variant2/True selected69%;
+manual True restoration does not prove override cleared. Default variant has no
+bound child and hides the property control. See boolean-property BP04–BP07.

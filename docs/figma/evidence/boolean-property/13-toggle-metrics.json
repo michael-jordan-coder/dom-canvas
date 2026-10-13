@@ -1,0 +1,35 @@
+[
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "gap": "normal",
+    "height": 16,
+    "opacity": "0",
+    "padding": "0px",
+    "radius": "0px",
+    "role": null,
+    "tag": "INPUT",
+    "width": 32
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "gap": "normal",
+    "height": 24,
+    "opacity": "1",
+    "padding": "0px",
+    "radius": "0px",
+    "role": null,
+    "tag": "SPAN",
+    "width": 32
+  },
+  {
+    "bg": "rgba(0, 0, 0, 0)",
+    "gap": "normal",
+    "height": 24,
+    "opacity": "1",
+    "padding": "0px",
+    "radius": "0px",
+    "role": null,
+    "tag": "DIV",
+    "width": 88
+  }
+]
