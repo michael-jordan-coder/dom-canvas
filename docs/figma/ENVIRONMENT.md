@@ -65,3 +65,11 @@ bound to the Fill of instance15:62. Previous raw-white state is superseded.
 
 Guide/export pass: instance15:62 has no guide after test removal, and now has one
 PNG1x export preset. Advanced Export dialog is open. No file was exported.
+
+Transform pass: Export dialog closed; instance15:62 restored to200 ×125,
+X-163/Y-67, rotation0, aspect ratio unlocked. See topics/transforms.md.
+
+Grid/Wrap pass: Frame3 returned to Horizontal, Wrap off, centered,80 Fixed ×50
+Hug, padding/gap10, clip off. Child8:3 selected,100 Fill/min100 ×30 Hug,
+Auto height, X-10/Y10 in flow. Grid's persisted inactive track settings were not
+audited. See topics/grid-wrap.md.

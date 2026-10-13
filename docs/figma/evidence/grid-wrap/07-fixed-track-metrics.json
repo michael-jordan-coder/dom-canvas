@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-13",
+  "theme": "light",
+  "control": "Grid settings / Column width after choosing Fixed width (60)",
+  "input": {
+    "width": 68,
+    "height": 24,
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "lineHeight": "16px",
+    "borderRadius": "5px"
+  },
+  "immediateParent": {
+    "tag": "DIV",
+    "width": 76,
+    "height": 24,
+    "backgroundColor": "rgb(245, 245, 245)",
+    "borderRadius": "5px",
+    "padding": "0px"
+  }
+}
