@@ -1,0 +1,21 @@
+{
+  "input": {
+    "ariaDisabled": null,
+    "color": "rgba(0, 0, 0, 0.3)",
+    "cursor": "default",
+    "disabled": true,
+    "fontSize": "11px",
+    "fontWeight": "450",
+    "height": 24,
+    "lineHeight": "16px",
+    "opacity": "1",
+    "radius": "2px",
+    "width": 63
+  },
+  "parent": {
+    "background": "rgba(0, 0, 0, 0)",
+    "height": 24,
+    "radius": "0px",
+    "width": 63
+  }
+}

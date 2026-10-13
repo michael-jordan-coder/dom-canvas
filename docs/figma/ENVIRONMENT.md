@@ -96,3 +96,10 @@ then converted group to Section1 (`18:74`). Group no longer exists. Section1 is
 350 ×325 at400/0 after Resize to fit; Frame5 is150 ×125 at100/100 relative,
 white Fill, clip enabled. Section1 selected, menu closed, canvas zoom40%.
 Other fixtures unchanged. See topics/groups-sections.md.
+
+Shapes pass: Section1 now also contains18:75 Rectangle1 (converted Vector path,
+100 ×100 at127/189,radius10),18:77 Ellipse1 (100 ×100 at240/50),18:78 Polygon1
+(100 ×100 at10/200,Count6),18:79 Star1 (100 ×100 at240/200,Count7,Ratio50%).
+All haveD9D9D9 Fill; positions are section-relative. Section bounds unchanged.
+Star1 selected, Move active, vector editor closed, zoom40%. Line attempt created
+no layer. See topics/shapes-vector.md.

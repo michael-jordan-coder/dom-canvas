@@ -36,6 +36,7 @@
 - [Multi-track Grid](topics/grid-multi.md): spans, fractional tracks, minimum widths and parent resizing.
 - [Selection contexts](topics/selection-context.md): Page panel, hidden edits and locked-layer editing.
 - [Groups and sections](topics/groups-sections.md): contextual controls, child edits, coordinates and Resize to fit.
+- [Shapes and vector editing](topics/shapes-vector.md): contextual geometry fields, point selection and disabled corners.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
