@@ -19,9 +19,10 @@ export function isResizable(el: Element): el is Styled {
 export function setSize(el: Styled, size: { width?: number; height?: number }) {
   const computed = getComputedStyle(el);
   if (computed.display === "inline") el.style.display = "inline-block";
-  el.style.boxSizing = "border-box";
-  if (size.width !== undefined) el.style.width = `${round(Math.max(1, size.width))}px`;
-  if (size.height !== undefined) el.style.height = `${round(Math.max(1, size.height))}px`;
+  const extra = (properties: string[]) => computed.boxSizing === "border-box" ? 0 : properties.reduce((sum, property) => sum + (parseFloat(computed.getPropertyValue(property)) || 0), 0);
+  // Keep the imported box model: changing box-sizing also changes the other axis.
+  if (size.width !== undefined) el.style.width = `${round(Math.max(0, size.width - extra(["padding-left", "padding-right", "border-left-width", "border-right-width"])))}px`;
+  if (size.height !== undefined) el.style.height = `${round(Math.max(0, size.height - extra(["padding-top", "padding-bottom", "border-top-width", "border-bottom-width"])))}px`;
 }
 
 export function isTextEditable(el: Element): el is HTMLElement {

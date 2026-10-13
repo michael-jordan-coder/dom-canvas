@@ -773,3 +773,14 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .inspector-empty strong { font-size: 13px; }
 .inspector-empty p { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
 .inspector-empty span { display: block; margin-top: 20px; color: var(--text-secondary); font-size: 11px; line-height: 1.7; }
+
+.field .size-mode { width: 52px; flex-shrink: 0; height: 100%; border: 0; border-left: 1px solid var(--divider); border-radius: 0 4px 4px 0; background: transparent; font: 10px var(--font); color: var(--text-secondary); padding: 0 2px; cursor: pointer; }
+.field .size-mode:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
+.property-shell:has(.size-mode) .prefix { min-width: 20px; padding: 0 4px; }
+.property-shell:has(.size-mode) .reset-value { position: absolute; right: 0; top: -15px; height: 15px; font-size: 11px; opacity: 0; }
+.property-shell:has(.size-mode):hover .reset-value, .property-shell:has(.size-mode):focus-within .reset-value { opacity: 1; }
+.property-checkbox { display: flex; align-items: center; gap: 7px; font-size: 11px; min-height: 24px; }
+.property-checkbox input { accent-color: var(--accent); width: 13px; height: 13px; margin: 0; }
+.property-row .select-field { flex-direction: column; align-items: stretch; position: relative; }
+.property-row .select-field > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.property-row .select-field select { width: 100%; flex: auto; font-size: 11px; }

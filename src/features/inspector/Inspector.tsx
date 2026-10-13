@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { getTranslate, setSize, setTranslate } from "@/features/canvas/elementStyle";
+import { getTranslate, setTranslate } from "@/features/canvas/elementStyle";
+import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { layerName } from "@/features/layers/Layers";
 import { ColorField, Field, Row, Section, Segmented, SelectField, TextArea } from "./InspectorControls";
@@ -24,8 +25,8 @@ export function Inspector({ selection, artboards, onUpdateArtboard, onChange }: 
       <Section title="Frame">
         <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
         <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
-        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => update({ width: Math.max(1, number(v, ab.width)) })} /><Field prefix="H" label="Frame height" value={ab.height === undefined ? "Hug" : String(ab.height)} onCommit={(v) => update({ height: /^hug$/i.test(v) ? undefined : Math.max(1, number(v, measuredHeight)) })} /></Row>
-        <Segmented label="Frame height mode" value={ab.height === undefined ? "hug" : "fixed"} options={[{ value: "hug", label: "Hug content" }, { value: "fixed", label: "Fixed height" }]} onChange={(mode) => update({ height: mode === "hug" ? undefined : measuredHeight })} />
+        <div className="property-subheading"><span>Resizing</span></div>
+        <Row><Field prefix="W" label="Frame width" value={String(ab.width)} suffix="px" onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => update({ height: e.target.value === "hug" ? undefined : measuredHeight })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row>
       </Section>
       <Section title="Position">
         <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => update({ x: number(v, ab.x) })} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => update({ y: number(v, ab.y) })} /></Row>
@@ -47,6 +48,8 @@ function elementKey(element: Element) {
 
 function ElementInspector({ element, onChange }: { element: Element; onChange: () => void }) {
   const [individualPadding, setIndividualPadding] = useState(false);
+  const [individualCorners, setIndividualCorners] = useState(false);
+  const [showConstraints, setShowConstraints] = useState(false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.trim());
@@ -76,22 +79,43 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "align-items", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
   const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
   const typographyProps = ["font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-align", "color"];
+  const sizeField = (axis: SizeAxis) => {
+    const label = axis === "width" ? "Width" : "Height";
+    const mode = sizeMode(styled, axis);
+    const main = isFlexMainAxis(element, axis);
+    const measured = axis === "width" ? (element as HTMLElement).offsetWidth || geometry.width : (element as HTMLElement).offsetHeight || geometry.height;
+    const value = mode === "custom" ? styled.style.getPropertyValue(axis) : String(measured);
+    return <Field prefix={axis === "width" ? "W" : "H"} label={label} value={value}
+      onReset={resetGroup(sizingProperties(element, axis))}
+      onCommit={(v) => {
+        if (/^\d*\.?\d+$/.test(v)) { setSizeMode(styled, axis, "fixed", Number(v)); onChange(); return true; }
+        if (!CSS.supports(axis, v)) return false;
+        if (main) { styled.style.flexGrow = "0"; styled.style.flexBasis = "auto"; }
+        return set(axis, v);
+      }}
+      trailing={<select className="size-mode" aria-label={`${label} sizing`} value={mode} title={`${label} sizing. CSS follows the stylesheet. Fill uses available parent space.`} onChange={(e) => { setSizeMode(styled, axis, e.target.value as SizeMode, measured); onChange(); }}>
+        <option value="css">CSS</option><option value="fixed">Fixed</option><option value="hug">Hug</option><option value="fill">Fill</option>{mode === "custom" && <option value="custom">Custom</option>}
+      </select>} />;
+  };
+  const paddingControls = <>
+    <div className="property-subheading"><span>Padding</span><button className="small-toggle" aria-label="Individual padding" aria-pressed={individualPadding} onClick={() => setIndividualPadding(!individualPadding)}>{individualPadding ? "All sides" : "Individual sides"}</button></div>
+    {individualPadding ? <><Row>{property("Padding top", "padding-top", "T")}{property("Padding right", "padding-right", "R")}</Row><Row>{property("Padding bottom", "padding-bottom", "B")}{property("Padding left", "padding-left", "L")}</Row></> : property("Padding", "padding", "All")}
+  </>;
   const overrides = styled.style.length;
 
   return <>
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
 
-    <Section title="Layout" onReset={resetGroup(layoutProps)}>
+    <Section title={isFlex || isGrid ? "Auto layout" : "Layout"} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
-      <Row>
-        <Field prefix="W" label="Width" value={trimNumber(styled.style.width) || String(geometry.width)} onReset={resetProperty("width")} onCommit={(v) => { if (/^-?\d*\.?\d+$/.test(v)) { setSize(styled, { width: number(v, geometry.width) }); onChange(); return true; } return set("width", v); }} />
-        <Field prefix="H" label="Height" value={trimNumber(styled.style.height) || String(geometry.height)} onReset={resetProperty("height")} onCommit={(v) => { if (/^-?\d*\.?\d+$/.test(v)) { setSize(styled, { height: number(v, geometry.height) }); onChange(); return true; } return set("height", v); }} />
-      </Row>
+      <div className="property-subheading"><span>Resizing</span><button className="small-toggle" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}>Min / Max</button></div>
+      <Row>{sizeField("width")}{sizeField("height")}</Row>
+      {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row></>}
       {isFlex && <>
         <Segmented label="Direction" value={read("flex-direction")} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", v)} />
-        <SelectField label="Wrap" value={read("flex-wrap")} options={["nowrap", "wrap", "wrap-reverse"]} onCommit={(v) => set("flex-wrap", v)} />
+        <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
       </>}
       {(isFlex || isGrid) && <>
         <div className="layout-alignment">
@@ -111,31 +135,35 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
               return <button key={`${row}-${column}`} aria-label={`Align ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][column]}`} aria-pressed={active} onClick={() => { styled.style.justifyContent = justify; styled.style.alignItems = align; onChange(); }}><span /></button>;
             }))}
           </div>
-          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={["flex-start", "center", "flex-end", "space-between", "space-around", "space-evenly"]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items")} options={["stretch", "flex-start", "center", "flex-end", "baseline"]} onCommit={(v) => set("align-items", v)} /></div>
+          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>
         </div>
         <Row>{property("Column gap", "column-gap", "↔")}{property("Row gap", "row-gap", "↕")}</Row>
       </>}
       {isGrid && <><Field label="Grid columns" prefix="Cols" value={read("grid-template-columns")} onCommit={(v) => set("grid-template-columns", v)} onReset={resetProperty("grid-template-columns")} /><Field label="Grid rows" prefix="Rows" value={read("grid-template-rows")} onCommit={(v) => set("grid-template-rows", v)} onReset={resetProperty("grid-template-rows")} /></>}
+      {paddingControls}
+      <label className="property-checkbox"><input type="checkbox" checked={["hidden", "clip"].includes(read("overflow"))} onChange={(e) => set("overflow", e.target.checked ? "hidden" : "visible")} />Clip content</label>
     </Section>
 
-    <Section title="Spacing" defaultOpen={!hasText} onReset={resetGroup(paddingProps)}>
-      <div className="property-subheading"><span>Padding</span><button className="small-toggle" aria-pressed={individualPadding} onClick={() => setIndividualPadding(!individualPadding)}>{individualPadding ? "All sides" : "Individual sides"}</button></div>
-      {individualPadding ? <><Row>{property("Padding top", "padding-top", "T")}{property("Padding right", "padding-right", "R")}</Row><Row>{property("Padding bottom", "padding-bottom", "B")}{property("Padding left", "padding-left", "L")}</Row></> : property("Padding", "padding", "All")}
+    <Section title="Spacing" defaultOpen={false} onReset={resetGroup(paddingProps.filter((p) => p.startsWith("margin")))}>
       <div className="property-subheading"><span>Margin</span></div>
       {property("Margin", "margin", "All")}
+      <Row>{property("Margin top", "margin-top", "T")}{property("Margin right", "margin-right", "R")}</Row>
+      <Row>{property("Margin bottom", "margin-bottom", "B")}{property("Margin left", "margin-left", "L")}</Row>
     </Section>
 
     {hasText && <Section title="Typography" onReset={resetGroup(typographyProps)}>
-      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} />
-      <Row>{property("Font size", "font-size", "Size")}<Field label="Font weight" prefix="Wt" value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={resetProperty("font-weight")} /></Row>
+      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
+      <Row><SelectField label="Weight" value={read("font-weight")} options={[{ value: "100", label: "Thin" }, { value: "200", label: "Extra light" }, { value: "300", label: "Light" }, { value: "400", label: "Regular" }, { value: "500", label: "Medium" }, { value: "600", label: "Semibold" }, { value: "700", label: "Bold" }, { value: "800", label: "Extra bold" }, { value: "900", label: "Black" }]} onCommit={(v) => set("font-weight", v)} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
       <Row>{property("Line height", "line-height", "Line", false)}{property("Letter spacing", "letter-spacing", "Track")}</Row>
       <Segmented label="Text alignment" value={read("text-align")} options={[{ value: "start", label: "Start" }, { value: "center", label: "Center" }, { value: "end", label: "End" }]} onChange={(v) => set("text-align", v)} />
       <ColorField label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
       {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
     </Section>}
 
-    <Section title="Appearance" onReset={resetGroup(["opacity", "border-radius", "background-color"])}>
+    <Section title="Appearance" onReset={resetGroup(["opacity", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius", "background-color"])}>
       <Row><Field label="Opacity" prefix="Opacity" suffix="%" value={String(Math.round(parseFloat(read("opacity") || "1") * 100))} onCommit={(v) => set("opacity", String(Math.min(100, Math.max(0, number(v, 100))) / 100))} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", "Radius")}</Row>
+      <div className="property-subheading"><span>Corners</span><button className="small-toggle" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}>Individual corners</button></div>
+      {individualCorners && <><Row>{property("Top left radius", "border-top-left-radius", "TL")}{property("Top right radius", "border-top-right-radius", "TR")}</Row><Row>{property("Bottom left radius", "border-bottom-left-radius", "BL")}{property("Bottom right radius", "border-bottom-right-radius", "BR")}</Row></>}
       <div className="property-subheading"><span>Fill</span></div>
       <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
     </Section>

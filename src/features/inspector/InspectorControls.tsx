@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 type Commit = (value: string) => boolean | void;
 
@@ -17,9 +17,10 @@ export function Row({ single, children }: { single?: boolean; children: ReactNod
   return <div className={`property-row${single ? " single" : ""}`}>{children}</div>;
 }
 
-export function Field({ value, label, prefix, suffix, onCommit, onReset }: {
-  value: string; label: string; prefix?: string; suffix?: string; onCommit: Commit; onReset?: () => void;
+export function Field({ value, label, prefix, suffix, onCommit, onReset, trailing, suggestions }: {
+  value: string; label: string; prefix?: string; suffix?: string; onCommit: Commit; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
 }) {
+  const listId = useId();
   const [draft, setDraft] = useState(value);
   const [invalid, setInvalid] = useState(false);
   const cancelled = useRef(false);
@@ -29,9 +30,9 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset }: {
     if (draft !== value) setInvalid(onCommit(draft.trim()) === false);
   };
   return <div className={`property-shell${onReset ? " overridden" : ""}`}>
-    <label className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : label}>
+    <div className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : label}>
       {prefix && <span className="prefix">{prefix}</span>}
-      <input aria-label={label} aria-invalid={invalid || undefined} value={draft}
+      <input list={suggestions ? listId : undefined} aria-label={label} aria-invalid={invalid || undefined} value={draft}
         onChange={(e) => { setDraft(e.target.value); setInvalid(false); }} onBlur={commit} onFocus={(e) => e.target.select()}
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
@@ -46,15 +47,18 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset }: {
           }
         }} />
       {suffix && <span className="suffix">{suffix}</span>}
-    </label>
+      {trailing}
+    </div>
+    {suggestions && <datalist id={listId}>{suggestions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</datalist>}
     {onReset && <button className="reset-value" title={`Reset ${label} to stylesheet`} aria-label={`Reset ${label} to stylesheet`} onMouseDown={(e) => e.preventDefault()} onClick={() => { setDraft(value); setInvalid(false); onReset(); }}>↺</button>}
     {invalid && <span className="invalid-value" role="alert">Invalid value</span>}
   </div>;
 }
 
-export function SelectField({ label, value, options, onCommit }: { label: string; value: string; options: string[]; onCommit: Commit }) {
-  const choices = options.includes(value) ? options : [value, ...options];
-  return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
+export function SelectField({ label, value, options, onCommit }: { label: string; value: string; options: (string | { value: string; label: string })[]; onCommit: Commit }) {
+  const normalized = options.map((option) => typeof option === "string" ? { value: option, label: option } : option);
+  const choices = normalized.some((option) => option.value === value) ? normalized : [{ value, label: value }, ...normalized];
+  return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
 }
 
 export function Segmented({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }) {
