@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
+import { colorWithAlpha, parseColor } from "./color";
+
 type Commit = (value: string) => boolean | void;
 
 export function Section({ title, children, defaultOpen = true, onReset }: { title: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void }) {
@@ -73,22 +75,21 @@ export function TextArea({ value, onCommit }: { value: string; onCommit: Commit 
 }
 
 export function ColorField({ value, label, onCommit, onReset }: { value: string; label: string; onCommit: Commit; onReset?: () => void }) {
-  const normalized = normalizeColor(value);
+  const parsed = parseColor(value);
   return <div className="color-property">
     <label className="color-picker" title={`Pick ${label}`}>
       <span style={{ background: value }} />
-      <input type="color" aria-label={`Pick ${label}`} value={normalized.hex} onChange={(e) => onCommit(e.target.value)} />
+      <input type="color" aria-label={`Pick ${label}`} value={parsed?.hex ?? "#000000"} onChange={(e) => onCommit(colorWithAlpha(e.target.value, parsed?.alpha || 1))} />
     </label>
-    <Field label={label} value={normalized.text} onCommit={(v) => onCommit(/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v)} onReset={onReset} />
+    <Field label={label} value={parsed?.hex ?? value} onCommit={(v) => {
+      const next = /^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v;
+      const color = parseColor(next);
+      return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, parsed?.alpha || 1) : next);
+    }} onReset={onReset} />
+    {parsed && <div className="color-alpha"><Field label={`${label} opacity`} value={String(Math.round(parsed.alpha * 100))} suffix="%" onCommit={(v) => {
+      const alpha = Number(v);
+      if (!v || !Number.isFinite(alpha) || alpha < 0 || alpha > 100) return false;
+      return onCommit(colorWithAlpha(parsed.hex, alpha / 100));
+    }} /></div>}
   </div>;
-}
-
-function normalizeColor(value: string) {
-  if (/^#[\da-f]{6}$/i.test(value)) return { hex: value, text: value.toUpperCase() };
-  const rgb = value.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/);
-  if (rgb) {
-    const hex = `#${rgb.slice(1, 4).map((n) => Math.max(0, Math.min(255, Math.round(Number(n)))).toString(16).padStart(2, "0")).join("")}`;
-    return { hex, text: rgb[4] !== undefined && Number(rgb[4]) < 1 ? value : hex.toUpperCase() };
-  }
-  return { hex: "#000000", text: value };
 }

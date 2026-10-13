@@ -288,12 +288,20 @@ export function Canvas(props: Props) {
     } else {
       const { handle, target } = drag;
       const grow = (start: number, delta: number, fromStart: boolean) => Math.max(1, fromStart ? start - delta : start + delta);
-      const w = handle.includes("e") ? grow(target.w, dx, false) : handle.includes("w") ? grow(target.w, dx, true) : target.w;
-      const h = handle.includes("s") ? grow(target.h, dy, false) : handle.includes("n") ? grow(target.h, dy, true) : target.h;
+      let w = handle.includes("e") ? grow(target.w, dx, false) : handle.includes("w") ? grow(target.w, dx, true) : target.w;
+      let h = handle.includes("s") ? grow(target.h, dy, false) : handle.includes("n") ? grow(target.h, dy, true) : target.h;
+      const locked = e.shiftKey || (target.kind === "element" ? getComputedStyle(target.element).aspectRatio !== "auto" : !!artboards.find((ab) => ab.id === target.id)?.aspectRatio);
+      if (locked && target.h > 0) {
+        const ratio = target.w / target.h;
+        const horizontal = handle.includes("e") || handle.includes("w");
+        const vertical = handle.includes("n") || handle.includes("s");
+        if (horizontal && (!vertical || Math.abs(w / target.w - 1) >= Math.abs(h / target.h - 1))) h = w / ratio;
+        else w = h * ratio;
+      }
       const shiftX = handle.includes("w") ? target.w - w : 0;
       const shiftY = handle.includes("n") ? target.h - h : 0;
       if (target.kind === "artboard") {
-        const sizesHeight = handle.includes("n") || handle.includes("s");
+        const sizesHeight = locked || handle.includes("n") || handle.includes("s");
         onUpdateArtboard(target.id, {
           x: Math.round(target.x + shiftX),
           y: Math.round(target.y + shiftY),
@@ -302,8 +310,8 @@ export function Canvas(props: Props) {
         });
       } else {
         setSize(target.element, {
-          width: handle.includes("e") || handle.includes("w") ? w : undefined,
-          height: handle.includes("n") || handle.includes("s") ? h : undefined,
+          width: locked || handle.includes("e") || handle.includes("w") ? w : undefined,
+          height: locked || handle.includes("n") || handle.includes("s") ? h : undefined,
         });
         setTranslate(target.element, target.tx + shiftX, target.ty + shiftY);
         onChange();

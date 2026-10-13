@@ -19,6 +19,11 @@ export function isResizable(el: Element): el is Styled {
 export function setSize(el: Styled, size: { width?: number; height?: number }) {
   const computed = getComputedStyle(el);
   if (computed.display === "inline") el.style.display = "inline-block";
+  const parent = el.parentElement ? getComputedStyle(el.parentElement) : null;
+  if (parent?.display.includes("flex")) {
+    const mainAxisChanged = parent.flexDirection.startsWith("column") ? size.height !== undefined : size.width !== undefined;
+    if (mainAxisChanged) { el.style.flexGrow = "0"; el.style.flexShrink = "0"; el.style.flexBasis = "auto"; }
+  }
   const extra = (properties: string[]) => computed.boxSizing === "border-box" ? 0 : properties.reduce((sum, property) => sum + (parseFloat(computed.getPropertyValue(property)) || 0), 0);
   // Keep the imported box model: changing box-sizing also changes the other axis.
   if (size.width !== undefined) el.style.width = `${round(Math.max(0, size.width - extra(["padding-left", "padding-right", "border-left-width", "border-right-width"])))}px`;

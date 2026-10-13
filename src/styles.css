@@ -784,3 +784,13 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .property-row .select-field { flex-direction: column; align-items: stretch; position: relative; }
 .property-row .select-field > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .property-row .select-field select { width: 100%; flex: auto; font-size: 11px; }
+.color-alpha { width: 58px; flex-shrink: 0; }
+.color-alpha .field input { padding-left: 5px; }
+.color-alpha .field .suffix { padding-right: 4px; font-size: 10px; }
+.color-property { gap: 5px; }
+.color-property .reset-value { width: 16px; }
+.effect-layer { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--divider); padding-bottom: 12px; }
+.effect-layer + .effect-layer { padding-top: 4px; }
+.effect-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.add-property { min-height: 28px; border: 1px solid var(--divider); border-radius: 5px; padding: 4px 8px; font-size: 11px; }
+.add-property:hover { background: var(--hover); }

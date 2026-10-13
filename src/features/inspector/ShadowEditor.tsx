@@ -1,0 +1,58 @@
+import { useState } from "react";
+import { ColorField, Field, Row, SelectField } from "./InspectorControls";
+
+type Shadow = { x: number; y: number; blur: number; spread: number; color: string; inset: boolean };
+
+// Split only outside functions: rgb(), color(), and var() may contain commas.
+export function splitCss(value: string, separator: "," | " ") {
+  const parts: string[] = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] === "(") depth++;
+    else if (value[i] === ")") depth--;
+    else if (depth === 0 && (separator === " " ? /\s/.test(value[i]) : value[i] === separator)) {
+      if (value.slice(start, i).trim()) parts.push(value.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  if (value.slice(start).trim()) parts.push(value.slice(start).trim());
+  return parts;
+}
+
+export function parseShadow(value: string): Shadow | null {
+  const tokens = splitCss(value, " ");
+  const lengths = tokens.filter((token) => /^-?(?:\d*\.)?\d+(?:px)?$/.test(token));
+  const colors = tokens.filter((token) => token !== "inset" && !lengths.includes(token));
+  if (lengths.length < 2 || lengths.length > 4 || colors.length !== 1 || !CSS.supports("color", colors[0])) return null;
+  return { x: parseFloat(lengths[0]), y: parseFloat(lengths[1]), blur: parseFloat(lengths[2] || "0"), spread: parseFloat(lengths[3] || "0"), color: colors[0], inset: tokens.includes("inset") };
+}
+
+function serialize(shadow: Shadow) {
+  return `${shadow.inset ? "inset " : ""}${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.spread}px ${shadow.color}`;
+}
+
+export function ShadowEditor({ value, computedValue, onCommit }: { value: string; computedValue: string; onCommit: (value: string) => boolean }) {
+  const [advanced, setAdvanced] = useState(false);
+  const layers = value === "none" ? [] : splitCss(value, ",");
+  const rendered = computedValue === "none" ? [] : splitCss(computedValue, ",");
+  const change = (index: number, patch: Partial<Shadow>, shadow: Shadow) => onCommit(layers.map((layer, i) => i === index ? serialize({ ...shadow, ...patch }) : layer).join(", "));
+  return <>
+    {layers.length === 0 && <p className="property-note">No shadows</p>}
+    {layers.map((layer, index) => {
+      const resolved = rendered.length === layers.length ? parseShadow(rendered[index] ?? "") : null;
+      const authored = parseShadow(layer);
+      const shadow = authored ? { ...authored, color: resolved?.color ?? authored.color } : resolved;
+      return <div className="effect-layer" key={index}>
+        <div className="property-subheading"><span>Shadow {index + 1}</span><button className="small-toggle" aria-label={`Remove shadow ${index + 1}`} onClick={() => onCommit(layers.filter((_, i) => i !== index).join(", ") || "none")}>Remove</button></div>
+        {shadow ? <>
+          <SelectField label="Type" value={shadow.inset ? "inset" : "drop"} options={[{ value: "drop", label: "Drop shadow" }, { value: "inset", label: "Inner shadow" }]} onCommit={(v) => change(index, { inset: v === "inset" }, shadow)} />
+          <Row>{(["x", "y"] as const).map((key) => <Field key={key} prefix={key.toUpperCase()} label={`Shadow ${index + 1} ${key.toUpperCase()}`} value={String(shadow[key])} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) ? change(index, { [key]: Number(v) }, shadow) : false} />)}</Row>
+          <Row>{(["blur", "spread"] as const).map((key) => <Field key={key} prefix={key === "blur" ? "Blur" : "Spread"} label={`Shadow ${index + 1} ${key}`} value={String(shadow[key])} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) && (key !== "blur" || Number(v) >= 0) ? change(index, { [key]: Number(v) }, shadow) : false} />)}</Row>
+          <ColorField label={`Shadow ${index + 1} color`} value={shadow.color} onCommit={(color) => change(index, { color }, shadow)} />
+        </> : <p className="property-note">Edit this effect with the CSS field below.</p>}
+      </div>;
+    })}
+    <div className="effect-actions"><button className="add-property" onClick={() => onCommit([...layers, "0px 4px 16px 0px #00000026"].join(", "))}>+ Add shadow</button><button className="small-toggle" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>CSS value</button></div>
+    {(advanced || layers.some((layer, i) => !parseShadow(layer) && !(rendered.length === layers.length && parseShadow(rendered[i] ?? "")))) && <Field label="Box shadow" value={value} onCommit={onCommit} />}
+  </>;
+}
