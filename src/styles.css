@@ -846,3 +846,9 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .css-parsed { font-size: 11px; color: var(--text-secondary); }
 .css-parsed summary { cursor: pointer; }
 .css-parsed pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px; background: var(--field); border-radius: 4px; color: var(--text); line-height: 1.5; }
+.css-conflict { padding: 10px; border: 1px solid var(--panel-border); border-left: 2px solid var(--accent); border-radius: 5px; font-size: 11px; line-height: 1.5; }
+.css-conflict p { margin: 4px 0 8px; color: var(--text-secondary); }
+.css-conflict summary { cursor: pointer; }
+.css-conflict pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 160px; overflow: auto; font: 11px/1.5 var(--mono); }
+.css-conflict .editor-actions { margin-top: 8px; gap: 4px; }
+.css-conflict .editor-actions button { padding: 0 6px; font-size: 11px; height: 24px; }
