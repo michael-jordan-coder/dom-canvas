@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ColorField, Field } from "./InspectorControls";
-import { splitCss } from "./ShadowEditor";
+import { splitCss } from "./cssList";
 
 type Stop = { color: string; position: string };
 type Gradient = { angle: number; stops: Stop[] };

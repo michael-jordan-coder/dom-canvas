@@ -1,24 +1,9 @@
+import { splitCss } from "./cssList";
 import { useState } from "react";
 import { ColorField, Field, Row, SelectField } from "./InspectorControls";
 import { InspectorIcon } from "./InspectorIcon";
 
 type Shadow = { x: number; y: number; blur: number; spread: number; color: string; inset: boolean };
-
-// Split only outside functions: rgb(), color(), and var() may contain commas.
-export function splitCss(value: string, separator: "," | " ") {
-  const parts: string[] = [];
-  let depth = 0, start = 0;
-  for (let i = 0; i < value.length; i++) {
-    if (value[i] === "(") depth++;
-    else if (value[i] === ")") depth--;
-    else if (depth === 0 && (separator === " " ? /\s/.test(value[i]) : value[i] === separator)) {
-      if (value.slice(start, i).trim()) parts.push(value.slice(start, i).trim());
-      start = i + 1;
-    }
-  }
-  if (value.slice(start).trim()) parts.push(value.slice(start).trim());
-  return parts;
-}
 
 export function parseShadow(value: string): Shadow | null {
   const tokens = splitCss(value, " ");

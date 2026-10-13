@@ -314,3 +314,10 @@ Browser QA on5181:125%75%2 resolved to1.25 .75 2, both flips produced-1.25 -.75 
 Shadows now use single-open compact rows with color swatch, drop/inner/custom label, reorder arrows and remove icon. New shadows open for immediate editing. Moving/removing a layer updates the expanded index so it follows the same effect; endpoint arrows disable. Reordering preserves each authored shadow string, including effects that require the CSS fallback. Gradient removal now similarly shifts or clears its expanded index instead of opening a different layer.
 
 Browser QA on5181: three distinct shadows rendered as31px rows at217px width with no overflow. Moving the blue inner shadow from second to first updated box-shadow order and kept its8px blur editor open; Undo restored original order. Removing a preceding red shadow retained the green shadow's open controls at its new index. Added shadows opened with16px blur. Top-up and bottom-down were disabled. Two gradients with angles135/90 retained the90-degree editor after removing the first layer. Build and diff check passed. Screenshot: /tmp/dom-canvas-compact-effects.png.
+
+
+## Quoted CSS list boundaries
+
+Extracted the shared CSS list splitter from ShadowEditor. It now tracks quoted strings, escaped characters and comments before interpreting parentheses or list delimiters. This preserves image URLs containing literal commas/parentheses instead of treating pieces of the URL as extra background layers. Source slices remain verbatim; the browser still validates CSS.
+
+Three parser tests cover double/single-quoted data URLs, escaped quotes/delimiters, comments and nested color/variable functions. Browser QA on5181 used a rendered orange SVG URL whose text contains a),b(c. A transparent gradient plus that URL produced exactly two rows; removing the gradient produced one and preserved the image string. Undo restored two; adding/removing a gradient produced three/two without changing the URL. Build and diff check passed. Screenshot: /tmp/dom-canvas-css-layers.png.
