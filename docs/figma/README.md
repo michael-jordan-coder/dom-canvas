@@ -86,3 +86,5 @@ bundles into evidence. Keep only the UI measurements and disposable fixture resu
 [Interim coverage audit](INTERIM_AUDIT.md) records prioritized gaps; it is not a completion claim.
 
 [Boolean property creation and unbound state](topics/boolean-property.md).
+
+[Boolean default propagation and targeted reset](topics/boolean-default.md).

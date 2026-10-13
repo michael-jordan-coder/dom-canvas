@@ -1,0 +1,50 @@
+[
+  {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "9999px",
+    "boxShadow": "none",
+    "content": "normal",
+    "height": "16px",
+    "pseudo": "element",
+    "rect": {
+      "height": 16,
+      "width": 32
+    },
+    "transform": "none",
+    "transition": "all",
+    "width": "32px"
+  },
+  {
+    "background": "rgb(13, 153, 255)",
+    "border": "1px solid rgba(0, 0, 0, 0.2)",
+    "borderRadius": "9999px",
+    "boxShadow": "none",
+    "content": "\"\"",
+    "height": "14px",
+    "pseudo": "::before",
+    "rect": {
+      "height": 16,
+      "width": 32
+    },
+    "transform": "none",
+    "transition": "background 0.1s cubic-bezier(0.645, 0.045, 0.355, 1)",
+    "width": "30px"
+  },
+  {
+    "background": "rgb(255, 255, 255)",
+    "border": "0px none rgba(0, 0, 0, 0.898)",
+    "borderRadius": "9999px",
+    "boxShadow": "none",
+    "content": "\"\"",
+    "height": "8px",
+    "pseudo": "::after",
+    "rect": {
+      "height": 16,
+      "width": 32
+    },
+    "transform": "matrix(1, 0, 0, 1, 16, 0)",
+    "transition": "0.1s ease-out",
+    "width": "12px"
+  }
+]
