@@ -43,6 +43,7 @@ export function App() {
   const [layerHover, setLayerHover] = useState<Element | null>(null);
   const [version, setVersion] = useState(0);
   const pendingSelection = useRef<{ artboardId: string; path: number[] | null } | null>(null);
+  const selectionAddress = useRef<{ element: Element; artboardId: string; path: number[] } | null>(null);
 
   const changeCssDraft = (id: string, value: string | null) => {
     setCssDrafts((current) => {
@@ -165,6 +166,18 @@ export function App() {
     const element = pending.path ? resolvePath(root, pending.path) : null;
     setSelection(element ? { kind: "element", artboardId: pending.artboardId, element } : { kind: "artboard", artboardId: pending.artboardId });
   }, [artboards]);
+
+  useLayoutEffect(() => {
+    if (selection.kind !== "element") { selectionAddress.current = null; return; }
+    if (selection.element.isConnected) {
+      selectionAddress.current = { element: selection.element, artboardId: selection.artboardId, path: pathOf(selection.element) };
+      return;
+    }
+    const address = selectionAddress.current;
+    const root = hostsRef.current.get(selection.artboardId)?.shadowRoot;
+    const replacement = root && address?.element === selection.element ? resolvePath(root, address.path) : null;
+    setSelection(replacement ? { ...selection, element: replacement } : root ? { kind: "artboard", artboardId: selection.artboardId } : { kind: "none" });
+  }, [selection, version, artboards]);
 
   const travel = useCallback((direction: "undo" | "redo") => {
     pendingSelection.current =

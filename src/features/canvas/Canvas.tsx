@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
-import { getTranslate, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
+import { getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
 import { elementRectInCanvas, normalizeRect, zoomAround, type Bounds, type Point, type Rect } from "./geometry";
 import type { Artboard, Camera, Selection, Tool } from "./types";
 
@@ -283,7 +283,8 @@ export function Canvas(props: Props) {
     if (drag.kind === "artboard") {
       onUpdateArtboard(drag.id, { x: Math.round(drag.originX + dx), y: Math.round(drag.originY + dy) });
     } else if (drag.kind === "element") {
-      setTranslate(drag.element, drag.originX + dx, drag.originY + dy);
+      const delta = screenDeltaToLocal(drag.element, screenDx, screenDy);
+      setTranslate(drag.element, drag.originX + delta.x, drag.originY + delta.y);
       onChange();
     } else {
       const { handle, target } = drag;
@@ -368,6 +369,30 @@ export function Canvas(props: Props) {
       hover: hoverTarget && hoverTarget.isConnected && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
     });
   }, [camera, version, selection, hoverTarget, hosts, artboards, cssPreview]);
+  useLayoutEffect(() => {
+    const element = selectedElement(selection, hosts);
+    const canvas = canvasRef.current;
+    if (!element || !canvas) return;
+    let scheduled = 0;
+    const refresh = () => {
+      cancelAnimationFrame(scheduled);
+      scheduled = requestAnimationFrame(() => {
+        if (!element.isConnected) return;
+        const next = elementRectInCanvas(element, canvas);
+        setRects((current) => current.selected && (Object.keys(next) as (keyof Rect)[]).every((key) => Math.abs(next[key] - current.selected![key]) < 0.01) ? current : { ...current, selected: next });
+      });
+    };
+    const resize = new ResizeObserver(refresh);
+    resize.observe(element);
+    for (let parent = element.parentElement; parent && parent !== canvas; parent = parent.parentElement) resize.observe(parent);
+    const root = element.shadowRoot ?? element.getRootNode();
+    const mutations = new MutationObserver(refresh);
+    if (root instanceof ShadowRoot) mutations.observe(root, { attributes: true, childList: true, subtree: true, characterData: true });
+    root.addEventListener("scroll", refresh, true);
+    window.addEventListener("resize", refresh);
+    document.fonts.addEventListener("loadingdone", refresh);
+    return () => { cancelAnimationFrame(scheduled); resize.disconnect(); mutations.disconnect(); root.removeEventListener("scroll", refresh, true); window.removeEventListener("resize", refresh); document.fonts.removeEventListener("loadingdone", refresh); };
+  }, [selection, hosts]);
   const { selected: selectedRect, hover: hoverRect } = rects;
 
   const selectedArtboardId = selection.kind === "artboard" ? selection.artboardId : null;

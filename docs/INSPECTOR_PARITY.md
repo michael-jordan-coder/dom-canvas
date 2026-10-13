@@ -42,12 +42,21 @@ User-approved reference: `/Users/home-daniel/Desktop/Coding-Projects/products/ca
 
 Inspected `apps/editor/src/ui/NumberField.tsx`, `ColorField.tsx`, `ColorPicker.tsx`, `PropertiesPanel.module.css`, `styles/tokens.css`, and `docs/FIGMA_PARITY.md`. Adapted incremental scrub deltas, boundary feedback, capture-phase Escape handling, neutral control hierarchy and progressive disclosure. The DOM canvas retains its own HTML/CSS document and history implementation. No changes were made to the reference checkout.
 
-## Remaining work in this goal
+## Contextual layout, vectors and selection
 
-- Further refine stroke controls for per-side colors and styles.
-- Clarify flow placement versus absolute position; contextual controls.
-- Verify grid alignment and reverse/RTL flex behavior with representative documents.
-- Review frame selection, nested navigation, and selection bounds after sizing changes.
-- Recheck the full panel on text, frame, block, flex, grid and SVG at narrow and wide viewports.
+- Per-side stroke width, style and color, with individual reset.
+- Position mode explains document flow; contextual insets are distinct from visual X/Y transforms.
+- Grid alignment targets cells through justify-items/align-items. Flex controls expose reading direction, reverse order and reverse wrap; physical alignment accounts for these combinations.
+- Contextual SVG inspector edits viewBox, basic shape geometry, vector fill/stroke, paint opacity, line caps/joins, dashes and non-scaling stroke. SVG text exposes typography. Path data is preserved.
+- Dragging maps screen movement through ancestor 2D transforms, including the canvas zoom, and starts from computed translation.
+- Selection bounds observe layout, DOM mutations, scrolling and font loading. Disconnected selection references recover after document remounts.
+
+Browser evidence on isolated port 5181: Grid bottom-right placed a 40px child at (160,60) in a 200x100 cell. RTL grid retained physical right/bottom alignment. RTL row-reverse and column-reverse plus wrap-reverse flex aligned physically top-left. Top-only stroke rendered 3px dashed blue while bottom remained 0px. Absolute positioning applied left 30px/top 15px. A child of a rotate(20deg) scale(1.2) container followed a 60x30 screen-pixel drag within 0.03px; Undo restored its stylesheet translation. SVG rect width/fill/stroke edits rendered; circle radius 25->35 survived Undo/Redo and reload. Circle selection bounds matched within 0.007px. Paint opacity 60% computed as 0.6 independently of color alpha. Text, block, frame, flex, grid and SVG panels were inspected at 900px viewport width; no horizontal panel overflow was observed. Viewport override was reset afterward. Build passed.
+
+## Remaining limitations
+
+- Pointer resize handles remain axis-aligned for rotated content; full rotated resize behavior is not implemented.
+- Transform-aware movement is verified for 2D transforms, not perspective/3D projections.
+- Vector path point editing and visual editing of SVG paint-server gradients are not implemented; authored data is retained.
 
 Compatibility: outside a flex main axis, Fill uses CSS stretch when available, with a percentage fallback. Vertical Fill depends on the containing block having a definite height. The editor does not infer authored sizing modes from resolved computed pixels; CSS mode explicitly represents stylesheet ownership.

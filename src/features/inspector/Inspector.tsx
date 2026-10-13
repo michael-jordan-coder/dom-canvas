@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { getLayoutSize, getTranslate, setSize, setTranslate } from "@/features/canvas/elementStyle";
+import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
+import { SvgInspector } from "./SvgInspector";
 import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
 import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
@@ -23,8 +24,12 @@ export function Inspector(props: Props) {
     const selection = props.selection;
     if (selection.kind === "element") {
       const element = selection.element;
-      const style = element.getAttribute("style");
-      session.current = { dirty: false, restore: () => { if (style === null) element.removeAttribute("style"); else element.setAttribute("style", style); props.onPreview(); } };
+      const attributes = Array.from(element.attributes).map((attribute) => ({ name: attribute.name, value: attribute.value, namespace: attribute.namespaceURI }));
+      session.current = { dirty: false, restore: () => {
+        Array.from(element.attributes).forEach((attribute) => element.removeAttributeNode(attribute));
+        attributes.forEach((attribute) => element.setAttributeNS(attribute.namespace, attribute.name, attribute.value));
+        props.onPreview();
+      } };
     } else if (selection.kind === "artboard") {
       const original = props.artboards.find((ab) => ab.id === selection.artboardId);
       if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio }) };
@@ -70,6 +75,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
   }
   const el = selection.element;
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
+  if (el instanceof SVGElement) return <SvgInspector key={elementKey(el)} element={el} onChange={onChange} />;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
 }
 
@@ -105,13 +111,14 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const geometry = frameGeometry(element);
   const moveTo = (x: number, y: number) => {
     const current = getTranslate(styled);
-    setTranslate(styled, current.x + x - geometry.x, current.y + y - geometry.y);
+    const offset = screenDeltaToLocal(element, (x - geometry.x) * geometry.zoom, (y - geometry.y) * geometry.zoom);
+    setTranslate(styled, current.x + offset.x, current.y + offset.y);
     onChange();
   };
   const display = read("display");
   const isFlex = display.includes("flex");
   const isGrid = display.includes("grid");
-  const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "align-items", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
+  const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "justify-items", "align-items", "direction", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
   const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
   const typographyProps = ["font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-align", "color"];
   const sizeField = (axis: SizeAxis) => {
@@ -161,28 +168,33 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <Row>{sizeField("width")}{sizeField("height")}</Row>
       {showConstraints && <><Row>{property("Minimum width", "min-width", "Min W")}{property("Maximum width", "max-width", "Max W")}</Row><Row>{property("Minimum height", "min-height", "Min H")}{property("Maximum height", "max-height", "Max H")}</Row><p className="property-note">Min / Max follow the CSS box model. In content-box, padding and borders add to these limits.</p></>}
       {isFlex && <>
-        <Segmented label="Direction" value={read("flex-direction")} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", v)} />
+        <Segmented label="Direction" value={read("flex-direction").startsWith("column") ? "column" : "row"} options={[{ value: "row", label: "Horizontal" }, { value: "column", label: "Vertical" }]} onChange={(v) => set("flex-direction", `${v}${read("flex-direction").endsWith("reverse") ? "-reverse" : ""}`)} />
+        <label className="property-checkbox"><input type="checkbox" checked={read("flex-direction").endsWith("reverse")} onChange={(e) => set("flex-direction", `${read("flex-direction").startsWith("column") ? "column" : "row"}${e.target.checked ? "-reverse" : ""}`)} />Reverse order</label>
         <SelectField label="Wrap" value={read("flex-wrap")} options={[{ value: "nowrap", label: "No wrap" }, { value: "wrap", label: "Wrap" }, { value: "wrap-reverse", label: "Reverse wrap" }]} onCommit={(v) => set("flex-wrap", v)} />
       </>}
       {(isFlex || isGrid) && <>
+        <SelectField label="Reading direction" value={read("direction")} options={[{ value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => set("direction", v)} />
+        <div className="property-subheading"><span>{isGrid ? "Cell alignment" : "Content alignment"}</span></div>
         <div className="layout-alignment">
           <div className="alignment-grid" role="group" aria-label="Content alignment">
             {["flex-start", "center", "flex-end"].flatMap((vertical, row) => ["flex-start", "center", "flex-end"].map((horizontal, column) => {
               const columnDirection = isFlex && read("flex-direction").startsWith("column");
               const reverse = read("flex-direction").endsWith("reverse");
               const rtl = computed.direction === "rtl";
-              const flipX = columnDirection || !isFlex ? rtl : rtl !== reverse;
+              const wrapReverse = read("flex-wrap") === "wrap-reverse";
+              const flipX = isFlex ? (columnDirection ? rtl !== wrapReverse : rtl !== reverse) : rtl;
               const flipY = isFlex && (columnDirection ? reverse : read("flex-wrap") === "wrap-reverse");
               const flip = (v: string, reversed: boolean) => !reversed || v === "center" ? v : v === "flex-start" ? "flex-end" : "flex-start";
               const x = flip(horizontal, flipX);
               const y = flip(vertical, flipY);
-              const justify = columnDirection ? y : x;
-              const align = columnDirection ? x : y;
-              const active = read("justify-content") === justify && read("align-items") === align;
-              return <button key={`${row}-${column}`} aria-label={`Align ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][column]}`} aria-pressed={active} onClick={() => { styled.style.justifyContent = justify; styled.style.alignItems = align; onChange(); }}><span /></button>;
+              const justify = isGrid ? x.replace("flex-", "") : columnDirection ? y : x;
+              const align = isGrid ? y.replace("flex-", "") : columnDirection ? x : y;
+              const horizontalProperty = isGrid ? "justify-items" : "justify-content";
+              const active = read(horizontalProperty) === justify && read("align-items") === align;
+              return <button key={`${row}-${column}`} aria-label={`Align ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][column]}`} aria-pressed={active} onClick={() => { styled.style.setProperty(horizontalProperty, justify); styled.style.alignItems = align; onChange(); }}><span /></button>;
             }))}
           </div>
-          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>
+          <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items").replace(/^start$/, "flex-start").replace(/^end$/, "flex-end")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>
         </div>
         <Row>{property("Column gap", "column-gap", "↔")}{property("Row gap", "row-gap", "↕")}</Row>
       </>}
@@ -228,20 +240,27 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         onChange(); return true;
       }} /><SelectField label="Style" value={read("border-style")} options={["none", "solid", "dashed", "dotted", "double"]} onCommit={(v) => set("border-style", v)} /></Row>
       <div className="property-subheading"><span>Sides</span><button className="small-toggle" aria-label="Individual strokes" aria-pressed={individualStroke} onClick={() => setIndividualStroke(!individualStroke)}>Individual strokes</button></div>
-      {individualStroke && <div className="property-row">{["top", "right", "bottom", "left"].map((side) => <Field key={side} label={`Stroke ${side} width`} prefix={side[0].toUpperCase()} value={trimNumber(read(`border-${side}-width`))} onReset={resetGroup([`border-${side}-width`, `border-${side}-style`])} onCommit={(v) => {
-        if (!CSS.supports(`border-${side}-width`, withPx(v))) return false;
-        styled.style.setProperty(`border-${side}-width`, withPx(v));
-        if (read(`border-${side}-style`) === "none") styled.style.setProperty(`border-${side}-style`, "solid");
-        onChange(); return true;
-      }} />)}</div>}
+      {individualStroke && ["top", "right", "bottom", "left"].map((side) => <div className="effect-layer" key={side}>
+        <div className="property-subheading"><span>{side[0].toUpperCase() + side.slice(1)}</span>{resetGroup([`border-${side}-width`, `border-${side}-style`, `border-${side}-color`]) && <button className="small-toggle" aria-label={`Reset ${side} stroke`} onClick={() => reset([`border-${side}-width`, `border-${side}-style`, `border-${side}-color`])}>Reset</button>}</div>
+        <Row><Field label={`Stroke ${side} width`} prefix="Width" value={trimNumber(read(`border-${side}-width`))} onCommit={(v) => {
+          if (!CSS.supports(`border-${side}-width`, withPx(v))) return false;
+          styled.style.setProperty(`border-${side}-width`, withPx(v));
+          if (read(`border-${side}-style`) === "none") styled.style.setProperty(`border-${side}-style`, "solid");
+          onChange(); return true;
+        }} /><SelectField label={`Stroke ${side} style`} value={read(`border-${side}-style`)} options={["none", "solid", "dashed", "dotted", "double"]} onCommit={(v) => set(`border-${side}-style`, v)} /></Row>
+        <ColorField label={`Stroke ${side} color`} value={computed.getPropertyValue(`border-${side}-color`)} onCommit={(v) => set(`border-${side}-color`, v)} />
+      </div>)}
       <ColorField label="Stroke color" value={computed.borderTopColor} onCommit={(v) => set("border-color", v)} onReset={resetProperty("border-color")} />
     </Section>
 
-    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "translate", "rotate", "z-index"])}>
-      <SelectField label="Position" value={read("position")} options={["static", "relative", "absolute", "fixed", "sticky"]} onCommit={(v) => set("position", v)} />
+    <Section title="Position" defaultOpen={false} onReset={resetGroup(["position", "top", "right", "bottom", "left", "translate", "rotate", "z-index"])}>
+      <SelectField label="Position mode" value={read("position")} options={[{ value: "static", label: "Normal flow" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "fixed", label: "Fixed" }, { value: "sticky", label: "Sticky" }]} onCommit={(v) => set("position", v)} />
+      <p className="property-note">{["absolute", "fixed"].includes(read("position")) ? "Outside the document flow. Insets are relative to the containing block." : read("position") === "sticky" ? "Stays in flow and sticks within its scroll container. Set an inset to choose the sticky edge." : "Occupies space in the parent layout. Transforms move its appearance without moving siblings."}</p>
+      {read("position") !== "static" && <><div className="property-subheading"><span>Insets</span></div><Row>{property("Left inset", "left", "Left")}{property("Top inset", "top", "Top")}</Row><Row>{property("Right inset", "right", "Right")}{property("Bottom inset", "bottom", "Bottom")}</Row></>}
+      <div className="property-subheading"><span>Visual position in frame</span></div>
       <Row><Field prefix="X" label="X" value={String(geometry.x)} onCommit={(v) => moveTo(number(v, geometry.x), geometry.y)} /><Field prefix="Y" label="Y" value={String(geometry.y)} onCommit={(v) => moveTo(geometry.x, number(v, geometry.y))} /></Row>
       <Row><Field prefix="Angle" label="Rotation" suffix="°" value={read("rotate") === "none" ? "0" : read("rotate").replace(/deg$/, "")} onCommit={(v) => set("rotate", `${number(v, 0)}deg`)} />{property("Z index", "z-index", "Z", false)}</Row>
-      <p className="property-note">X and Y move the element visually; its place in the document flow stays the same.</p>
+      <p className="property-note">X and Y adjust the visual transform. Insets control CSS placement.</p>
     </Section>
 
     <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "overflow"])}>
@@ -256,11 +275,11 @@ function frameGeometry(element: Element) {
   const root = element.getRootNode();
   const host = root instanceof ShadowRoot ? (root.host as HTMLElement) : null;
   const rect = element.getBoundingClientRect();
-  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height };
+  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height, zoom: 1 };
   const parent = host.getBoundingClientRect();
   const zoom = parent.width / host.offsetWidth || 1;
   const round = (n: number) => Math.round(n * 100) / 100;
-  return { x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
+  return { zoom, x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
 }
 function trimNumber(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+px$/.test(part) ? String(Math.round(parseFloat(part) * 100) / 100) : part).join(" "); }
 function number(value: string, fallback: number) { const n = parseFloat(value); return Number.isFinite(n) ? Math.round(n * 100) / 100 : fallback; }
