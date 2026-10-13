@@ -1,3 +1,4 @@
+import { splitCss, remapCssLayers } from "./cssList";
 import { flippedScale } from "@/features/canvas/scale";
 import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
@@ -169,6 +170,21 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     const offset = screenDeltaToLocal(element, (x - geometry.x) * geometry.zoom, (y - geometry.y) * geometry.zoom);
     setTranslate(styled, current.x + offset.x, current.y + offset.y);
     onChange();
+  };
+  const backgroundImages = splitCss(read("background-image"), ",").some(layer => /^var\(/i.test(layer)) ? computed.backgroundImage : read("background-image");
+  const backgroundDefaults: Record<string, string> = { "background-size": "auto", "background-position": "0% 0%", "background-repeat": "repeat", "background-origin": "padding-box", "background-clip": "border-box", "background-attachment": "scroll", "background-blend-mode": "normal" };
+  const changeBackgroundLayers = (layers: string[], order: (number | null)[]) => {
+    const patch: Record<string, string> = { "background-image": layers.join(", ") || "none" };
+    if (layers.length) for (const [property, fallback] of Object.entries(backgroundDefaults)) {
+      const authored = read(property);
+      // Resolve cascade keywords and variables before indexing a potentially expanded list.
+      const source = /var\(/i.test(authored) || splitCss(authored, ",").some(item => /^(initial|inherit|unset|revert|revert-layer)$/i.test(item)) ? computed.getPropertyValue(property) : authored;
+      patch[property] = remapCssLayers(source, order, fallback);
+    }
+    if (!Object.entries(patch).every(([property, value]) => CSS.supports(property, value))) return false;
+    Object.entries(patch).forEach(([property, value]) => styled.style.setProperty(property, value, styled.style.getPropertyPriority(property)));
+    onChange();
+    return true;
   };
   const display = read("display");
   const isFlex = display.includes("flex");
@@ -354,10 +370,10 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       {individualCorners && <><Row>{property("Top left radius", "border-top-left-radius", "TL")}{property("Top right radius", "border-top-right-radius", "TR")}</Row><Row>{property("Bottom left radius", "border-bottom-left-radius", "BL")}{property("Bottom right radius", "border-bottom-right-radius", "BR")}</Row></>}
     </Section>
 
-    <Section title="Fill" onReset={resetGroup(["background", "background-color", "background-image", "background-size", "background-position"])}>
+    <Section title="Fill" onReset={resetGroup(["background", "background-color", "background-image", ...Object.keys(backgroundDefaults)])}>
       <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
       <div className="property-subheading"><span>Image or gradient</span></div>
-      <GradientEditor value={read("background-image")} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} />
+      <GradientEditor value={backgroundImages} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} onLayersChange={changeBackgroundLayers} />
       {read("background-image") !== "none" && <><SelectField label="Image sizing" value={read("background-size")} options={[{ value: "auto", label: "Original size" }, { value: "cover", label: "Cover" }, { value: "contain", label: "Contain" }]} onCommit={(v) => set("background-size", v)} /><Field label="Background position" prefix="Position" value={read("background-position")} onCommit={(v) => set("background-position", v)} /></>}
     </Section>
 

@@ -23,3 +23,9 @@ export function splitCss(value: string, separator: "," | " ") {
   if (value.slice(start).trim()) parts.push(value.slice(start).trim());
   return parts;
 }
+
+/** CSS repeats shorter companion lists across image layers. Null denotes a new layer. */
+export function remapCssLayers(value: string, order: (number | null)[], fallback: string) {
+  const values = splitCss(value, ",");
+  return order.map(index => index === null || !values.length ? fallback : values[index % values.length]).join(", ");
+}

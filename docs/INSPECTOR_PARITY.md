@@ -321,3 +321,12 @@ Browser QA on5181: three distinct shadows rendered as31px rows at217px width wit
 Extracted the shared CSS list splitter from ShadowEditor. It now tracks quoted strings, escaped characters and comments before interpreting parentheses or list delimiters. This preserves image URLs containing literal commas/parentheses instead of treating pieces of the URL as extra background layers. Source slices remain verbatim; the browser still validates CSS.
 
 Three parser tests cover double/single-quoted data URLs, escaped quotes/delimiters, comments and nested color/variable functions. Browser QA on5181 used a rendered orange SVG URL whose text contains a),b(c. A transparent gradient plus that URL produced exactly two rows; removing the gradient produced one and preserved the image string. Undo restored two; adding/removing a gradient produced three/two without changing the URL. Build and diff check passed. Screenshot: /tmp/dom-canvas-css-layers.png.
+
+
+## Background ordering with companion properties
+
+Added compact background reorder controls and routed prepend/remove/reorder through one validated property batch. The image and seven companion lists move together: size, position, repeat, origin, clip, attachment and blend mode. Short lists repeat per CSS indexing. New layers receive default companion values; removing the last image keeps existing companion declarations. Existing inline priorities are retained. Fill reset covers all affected properties. Expanded gradient tracking follows moved indices.
+
+Top-level image variables and companion values containing variables/cascade keywords are resolved before structural indexing. Such operations snapshot their current values rather than maintaining a dynamic variable binding; the custom property itself is not changed, and Undo restores the source declarations. Direct CSS value editing remains direct CSS semantics.
+
+Browser QA on5181: blue/red swap also swapped80/40px size, right-bottom/left-top position, repeat-x/no-repeat, origin, clip, attachment and screen/multiply. Size!important survived. Removing blue retained red's40px/left-top/no-repeat; Undo restored both. Prepending a gradient added auto/0%0%/repeat/normal ahead of existing settings. Two variable-expanded images displayed two rows, reordered with60/30px sizes, and Undo restored var(--images)/var(--sizes). Four list tests, build and diff check passed. Screenshot: /tmp/dom-canvas-background-order.png.
