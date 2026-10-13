@@ -64,3 +64,12 @@ popup or asset actions, inspect an actual rendered screenshot or native AX befor
 retrying mutations. A successful tool return alone also does not prove an edit.
 See components CO04–CO05. Do not retroactively infer the cause of unrelated earlier
 inconclusive actions from this single discrepancy.
+
+## Selection changes in history (observed 2026-10-13)
+
+The mixed-types experiments verified that Undo can restore an intervening selection
+before reverting property values. Record the selection and the property at every
+Undo step. Prefer a controlled sequence that keeps selection constant, or account
+explicitly for inspection selections. One Undo with unchanged values is not enough
+to establish failure. See [MX02 and MX04](topics/mixed-types.md). Earlier uncertain
+cases remain uncertain until reproduced; this evidence is a diagnostic lead.

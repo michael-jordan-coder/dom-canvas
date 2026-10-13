@@ -103,3 +103,8 @@ Shapes pass: Section1 now also contains18:75 Rectangle1 (converted Vector path,
 All haveD9D9D9 Fill; positions are section-relative. Section bounds unchanged.
 Star1 selected, Move active, vector editor closed, zoom40%. Line attempt created
 no layer. See topics/shapes-vector.md.
+
+Mixed-types pass: five Section1 children (Star, Polygon, Ellipse, Vector path,
+Frame5) selected. Count/Ratio and Clip tests undone with per-target restoration:
+Star7/50%, Polygon6, Frame5 clip checked. Other fixture geometry and paints unchanged.
+See topics/mixed-types.md for verified selection changes within Undo history.

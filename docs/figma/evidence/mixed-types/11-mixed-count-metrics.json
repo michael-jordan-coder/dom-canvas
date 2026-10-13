@@ -1,0 +1,12 @@
+{
+  "color": "rgba(0, 0, 0, 0.898)",
+  "disabled": false,
+  "fontSize": "11px",
+  "fontWeight": "450",
+  "height": 24,
+  "lineHeight": "16px",
+  "placeholder": null,
+  "radius": "2px",
+  "value": "Mixed",
+  "width": 63
+}

@@ -171,6 +171,9 @@ Fill-width/Auto-height transaction with Undo/Redo. Coverage remains partial.
   constraints, min/max, parent/child resizing feedback.
 - Freeform child versus frame versus shape, group, component and instance.
 - Mixed-type selections; partial property support and mixed resizing modes.
+- [Mixed-type follow-up](mixed-types.md) verifies Count/Ratio and frame-only Clip
+  content in heterogeneous selections, and Undo traversing selection changes.
+  Mixed sizing modes and text+shape combinations remain open.
 - Numeric focus/blur/Enter/Escape, scrub, arrow modifiers, expressions, invalid input.
 - Fill/stroke/effect rows: add/remove/reorder, visibility, previews, cancellation,
   color alpha versus object opacity, expanded editors and selection colors.
