@@ -262,3 +262,9 @@ Browser QA on port5181: mouse clicks on a hash link, submit button and checkbox 
 Added remembered Image source disclosure with URL validation and existing history integration. Explicit replacement clears img srcset/sizes and direct picture source srcset attributes, preserving other markup, styles and alt text. A contextual note explains the responsive-image change before editing. Loading status now takes precedence over stale natural dimensions while an image request is pending.
 
 Browser QA on port5181: a responsive blue300x100 image was replaced with an orange120x240 image. The box stayed180x180 with cover,100%50% position and rounded corners; all responsive source candidates were cleared. One Undo restored the original natural size, img srcset/sizes and picture source. A non-image data URL was rejected. Screenshot: /tmp/dom-canvas-replace-image.png. Build and diff check passed. File upload is not part of this control.
+
+## Frame clipping
+
+Added frame Clip content with optional clipContent metadata, Reset, normal history and project validation/persistence. Frame hosts apply the explicit overflow setting; disabling clipping also removes paint containment. The base stylesheet uses layout/style containment and retains default overflow:hidden, allowing imported overflow rules to work. Copied code includes browser-normalized overflow/contain overrides alongside frame fill.
+
+Browser QA on port5181: a120px child beginning100px down a160px frame became visible60px beyond its boundary when clipping was disabled, without changing frame height. Undo restored hidden overflow; Redo restored visible. Copied/pasted code retained visible overflow and layout/style containment. Reset restored hidden; Undo and reload retained visible. Four project-file tests and build passed. Screenshot: /tmp/dom-canvas-frame-clipping.png.

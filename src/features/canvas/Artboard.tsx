@@ -11,7 +11,7 @@ const BASE_CSS = `
   color: #111;
   background: #fff;
   container-type: inline-size;
-  contain: layout paint style;
+  contain: layout style;
   overflow: hidden;
 }
 [contenteditable] { outline: none; cursor: text; }
@@ -93,7 +93,7 @@ export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, on
         ref={hostRef}
         className="artboard"
         data-artboard={artboard.id}
-        style={{ left: artboard.x, top: artboard.y, width: artboard.width, height: artboard.height, backgroundColor: artboard.backgroundColor }}
+        style={{ left: artboard.x, top: artboard.y, width: artboard.width, height: artboard.height, backgroundColor: artboard.backgroundColor, overflow: artboard.clipContent === undefined ? undefined : artboard.clipContent ? "hidden" : "visible", contain: artboard.clipContent === false ? "layout style" : undefined }}
       />
     </>
   );

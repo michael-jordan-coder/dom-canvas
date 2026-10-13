@@ -915,3 +915,4 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 
 .layer-lock { margin-left: auto; }
 .layer-visibility { margin-left: 0; }
+.frame-clipping { display: flex; align-items: center; justify-content: space-between; min-height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border); }

@@ -40,7 +40,7 @@ export function Inspector(props: Props) {
       } };
     } else if (selection.kind === "artboard") {
       const original = props.artboards.find((ab) => ab.id === selection.artboardId);
-      if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio, backgroundColor: original.backgroundColor }) };
+      if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio, backgroundColor: original.backgroundColor, clipContent: original.clipContent }) };
     }
   };
   const finish = (cancel: boolean) => {
@@ -76,6 +76,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
         <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
         <div className="sizing-row"><Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row><button className="inspector-icon" title="Lock frame aspect ratio" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}><InspectorIcon name="ratio" /></button></div>
       </Section>
+      <FrameClipping artboard={ab} onUpdate={update} />
       <Section title="Position">
         <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
       </Section>
@@ -87,6 +88,20 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
   if (el instanceof SVGElement) return <SvgInspector key={elementKey(el)} element={el} onChange={onChange} />;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
+}
+
+function FrameClipping({ artboard, onUpdate }: { artboard: Artboard; onUpdate: (patch: Partial<Artboard>) => void }) {
+  const [clipped, setClipped] = useState(artboard.clipContent ?? true);
+  useLayoutEffect(() => {
+    const host = document.querySelector<HTMLElement>(`[data-artboard="${artboard.id}"]`);
+    if (!host) return;
+    const style = getComputedStyle(host);
+    setClipped(style.overflowX !== "visible" || style.overflowY !== "visible" || /paint|strict|content/.test(style.contain));
+  });
+  return <div className="frame-clipping">
+    <label className="property-checkbox"><input aria-label="Clip frame content" type="checkbox" checked={clipped} onChange={e => onUpdate({ clipContent: e.target.checked })} />Clip content</label>
+    {artboard.clipContent !== undefined && <button className="small-toggle" aria-label="Reset frame clipping" onClick={() => onUpdate({ clipContent: undefined })}>Reset</button>}
+  </div>;
 }
 
 function FrameFill({ artboard, onUpdate }: { artboard: Artboard; onUpdate: (patch: Partial<Artboard>) => void }) {

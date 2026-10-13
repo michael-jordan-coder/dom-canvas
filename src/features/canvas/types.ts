@@ -7,6 +7,7 @@ export type Artboard = {
   height?: number;
   aspectRatio?: number;
   backgroundColor?: string;
+  clipContent?: boolean;
   html: string;
   css: string;
   fonts?: string;
