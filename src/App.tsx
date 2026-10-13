@@ -51,6 +51,12 @@ export function App() {
   const [uiHidden, setUiHidden] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [selectionMenu, setSelectionMenu] = useState<MenuAnchor | null>(null);
+  const [renameRequest, setRenameRequest] = useState<{ target: Element | string } | null>(null);
+  const renameSelection = useCallback(() => {
+    if (selection.kind === "none") return;
+    setUiHidden(false);
+    setRenameRequest({ target: selection.kind === "element" ? selection.element : selection.artboardId });
+  }, [selection]);
   const closeSelectionMenu = useCallback(() => setSelectionMenu(null), []);
   const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
   const [cssScope, setCssScope] = useState<"element" | "frame">("element");
@@ -384,6 +390,7 @@ export function App() {
       if (mod && key === "d") { e.preventDefault(); duplicateSelection(); return; }
       if (mod && e.key === "\\") { e.preventDefault(); setUiHidden((v) => !v); return; }
       if (mod || e.altKey) return;
+      if (e.key === "F2") { e.preventDefault(); renameSelection(); return; }
       if (isInteractiveControl(e)) return;
 
       if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); deleteSelection(); return; }
@@ -402,7 +409,7 @@ export function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [travel, duplicateSelection, deleteSelection, selectParent, nudge, zoomToFit, zoomToSelection, setZoom]);
+  }, [travel, duplicateSelection, deleteSelection, selectParent, nudge, zoomToFit, zoomToSelection, setZoom, renameSelection]);
 
   const [copied, setCopied] = useState(false);
   const copyCode = async () => {
@@ -433,6 +440,7 @@ export function App() {
   ];
 
   const selectionActions: SelectionAction[] = selection.kind === "none" ? [] : [
+    { label: "Rename", shortcut: "F2", run: renameSelection },
     { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
     ...(selection.kind === "element" ? [
       { label: "Copy appearance", run: () => { setAppearanceClipboard(captureAppearance(selection.element)); setNotice("Appearance copied — choose another layer and Paste appearance."); }, separator: true },
@@ -493,6 +501,7 @@ export function App() {
         </div>
         <div className="section-label">Layers<div className="history-controls"><button title="Undo (⌘/Ctrl+Z)" disabled={!doc.canUndo} onClick={() => travel("undo")}>Undo</button><button title="Redo (⌘/Ctrl+Shift+Z)" disabled={!doc.canRedo} onClick={() => travel("redo")}>Redo</button></div></div>
         <Layers
+          renameRequest={renameRequest}
           artboards={artboards}
           hosts={hostsRef.current}
           selection={selection}

@@ -5,6 +5,7 @@ import { lockedAncestor } from "./locking";
 import { ChevronIcon, FrameIcon, ImageIcon, RectIcon, TextIcon, VectorIcon } from "@/design-system/icons";
 
 type Props = {
+  renameRequest: { target: Element | string } | null;
   artboards: Artboard[];
   hosts: Map<string, HTMLDivElement>;
   selection: Selection;
@@ -32,6 +33,12 @@ export function Layers(props: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [searchCollapsed, setSearchCollapsed] = useState(() => new Set<Element | string>());
+  useEffect(() => {
+    if (!props.renameRequest) return;
+    setQuery("");
+    setSearchCollapsed(new Set());
+    setRenaming(props.renameRequest.target);
+  }, [props.renameRequest]);
   const needle = query.trim().toLocaleLowerCase();
   const matches = new Set<Element>();
   const visible = new Set<Element>();
@@ -153,7 +160,7 @@ export function Layers(props: Props) {
           {renaming === el ? (
             <RenameInput
               value={layerName(el)}
-              onDone={(name) => { setRenaming(null); if (name && name !== layerName(el)) onRenameElement(el, name); }}
+              onDone={(name, restoreFocus) => { setRenaming(null); if (name && name !== layerName(el)) onRenameElement(el, name); if (restoreFocus) requestAnimationFrame(() => selectedRowRef.current?.focus()); }}
             />
           ) : (
             <span className="name">{layerName(el)}</span>
@@ -215,7 +222,7 @@ export function Layers(props: Props) {
               {renaming === ab.id ? (
                 <RenameInput
                   value={ab.name}
-                  onDone={(name) => { setRenaming(null); if (name && name !== ab.name) onRenameArtboard(ab.id, name); }}
+                  onDone={(name, restoreFocus) => { setRenaming(null); if (name && name !== ab.name) onRenameArtboard(ab.id, name); if (restoreFocus) requestAnimationFrame(() => selectedRowRef.current?.focus()); }}
                 />
               ) : (
                 <span className="name">{ab.name}</span>
@@ -230,21 +237,24 @@ export function Layers(props: Props) {
   );
 }
 
-function RenameInput({ value, onDone }: { value: string; onDone: (name: string) => void }) {
+function RenameInput({ value, onDone }: { value: string; onDone: (name: string, restoreFocus?: boolean) => void }) {
   const [draft, setDraft] = useState(value);
+  const restoreFocus = useRef(false);
   return (
     <input
       className="rename"
       aria-label="Layer name"
       autoFocus
       value={draft}
+      maxLength={120}
       onFocus={(e) => e.target.select()}
       onClick={(e) => e.stopPropagation()}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => onDone(draft.trim())}
+      onBlur={() => onDone(draft.trim(), restoreFocus.current)}
       onKeyDown={(e) => {
-        if (e.key === "Enter") e.currentTarget.blur();
-        if (e.key === "Escape") { setDraft(value); onDone(value); }
+        e.stopPropagation();
+        if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); restoreFocus.current = true; e.currentTarget.blur(); }
+        if (e.key === "Escape") { e.preventDefault(); setDraft(value); onDone(value, true); }
       }}
     />
   );

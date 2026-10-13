@@ -16,7 +16,7 @@ export function SelectionPath({ selection, artboard, onSelect }: {
       {ancestors.map((el, i) => (
         <span className="path-item" key={i}>
           <span aria-hidden="true">›</span>
-          <button title={`${el.tagName.toLowerCase()}: ${layerName(el)}`} aria-current={i === ancestors.length - 1 ? "true" : undefined} onClick={() => onSelect({ kind: "element", artboardId: artboard.id, element: el })}>{el.tagName.toLowerCase()}{el.id ? `#${el.id}` : ""}</button>
+          <button title={`${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}: ${layerName(el)}`} aria-current={i === ancestors.length - 1 ? "true" : undefined} onClick={() => onSelect({ kind: "element", artboardId: artboard.id, element: el })}>{el.getAttribute("data-name") || `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}`}</button>
         </span>
       ))}
     </nav>
