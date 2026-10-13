@@ -1,4 +1,4 @@
-import { makeSelection, selectionItems, sameItem } from "@/features/canvas/selection";
+import { makeSelection, selectionItems, sameItem, reconcileSelection } from "@/features/canvas/selection";
 import { captureAppearance, applyAppearance, type Appearance } from "@/features/inspector/appearance";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, isTyping, isInteractiveControl, isPopupControl } from "@/features/canvas/Canvas";
@@ -88,7 +88,7 @@ export function App() {
   const [version, setVersion] = useState(0);
   const pendingSelection = useRef<{ artboardId: string; path: number[] | null }[] | null>(null);
   const snapshotSelections = useRef(new WeakMap<Artboard[], { artboardId: string; path: number[] | null }[]>());
-  const selectionAddress = useRef<{ element: Element; artboardId: string; path: number[] } | null>(null);
+  const selectionAddresses = useRef(new Map<Element, { artboardId: string; path: number[] }>());
 
   const changeCssDraft = (id: string, value: string | null) => {
     setCssDrafts((current) => {
@@ -238,15 +238,16 @@ export function App() {
       })));
       return;
     }
-    if (selection.kind !== "element") { selectionAddress.current = null; return; }
-    if (selection.element.isConnected) {
-      selectionAddress.current = { element: selection.element, artboardId: selection.artboardId, path: pathOf(selection.element) };
-      return;
-    }
-    const address = selectionAddress.current;
-    const root = hostsRef.current.get(selection.artboardId)?.shadowRoot;
-    const replacement = root && address?.element === selection.element ? resolvePath(root, address.path) : null;
-    setSelection(replacement ? { ...selection, element: replacement } : root ? { kind: "artboard", artboardId: selection.artboardId } : { kind: "none" });
+    const next = reconcileSelection(selection, id => artboards.some(frame => frame.id === id), item => {
+      const root = hostsRef.current.get(item.artboardId)?.shadowRoot;
+      if (!root) return null;
+      if (item.element.isConnected && root.contains(item.element)) return item.element;
+      const address = selectionAddresses.current.get(item.element);
+      return address?.artboardId === item.artboardId ? resolvePath(root, address.path) : null;
+    });
+    selectionAddresses.current = new Map(selectionItems(next).flatMap(item => item.kind === "element"
+      ? [[item.element, { artboardId: item.artboardId, path: pathOf(item.element) }] as const] : []));
+    if (next !== selection) setSelection(next);
   }, [selection, version, artboards]);
 
   const travel = useCallback((direction: "undo" | "redo") => {

@@ -15,3 +15,18 @@ export function toggleSelection(selection: Selection, item: SelectionItem): Sele
   const items = selectionItems(selection);
   return makeSelection(items.some(other => sameItem(item, other)) ? items.filter(other => !sameItem(item, other)) : [...items, item]);
 }
+
+// A missing member of a multiple selection must not select its entire frame:
+// the next move/delete would otherwise affect unrelated content.
+export function reconcileSelection(selection: Selection, frameExists: (id: string) => boolean, resolve: (item: Extract<SelectionItem, { kind: "element" }>) => Element | null): Selection {
+  const items = selectionItems(selection);
+  const next = makeSelection(items.flatMap<SelectionItem>(item => {
+    if (!frameExists(item.artboardId)) return [];
+    if (item.kind === "artboard") return [item];
+    const element = resolve(item);
+    if (element) return [{ ...item, element }];
+    return selection.kind === "element" ? [{ kind: "artboard", artboardId: item.artboardId }] : [];
+  }));
+  const nextItems = selectionItems(next);
+  return items.length === nextItems.length && items.every((item, index) => sameItem(item, nextItems[index])) ? selection : next;
+}
