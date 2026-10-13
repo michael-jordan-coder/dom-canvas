@@ -86,3 +86,7 @@ clip off, columns1fr/1fr.17:71 restored span1,105 Fill/min100 ×30 Hug. Grid
 conversion also changed other child sizing (17:69 observed Fill height/Fixed size).
 Frame4 remains selected. See topics/grid-multi.md for positioning toggle and
 inconclusive Undo; previous Wrap child modes are no longer the current fixture.
+
+Selection context pass: Frame1 hidden/edit/show and lock/edit/reselect experiments
+completed, then restored to150 ×125 at-99/-19, visible/unlocked, white Fill,
+clip enabled. Frame1 selected, canvas zoom93%. Frame4 retained in Grid state above.

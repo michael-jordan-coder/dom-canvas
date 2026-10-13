@@ -25,7 +25,7 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 
 | Area | Behavioral coverage | UI coverage | Current status |
 | --- | --- | --- | --- |
-| Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames and text |
+| Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames/text, Page context, editable hidden/locked frame; heterogeneous/ancestor contexts open |
 | Object types | Frame, text, primitive shape, vector, group, section, component, instance and variants where available | Contextual controls and actions per type | Partial: frame/text |
 | Position | X/Y, rotation, flip, alignment/distribution, constraints, absolute positioning | Fields, icons, alignment groups, menus, axis labels | Partial: rotation/position coupling; alignment/flip/constraints actions open |
 | Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: horizontal/vertical, Wrap thresholds/gaps/history, Grid track sizing/fr/column count/spans; flexible/unequal content, clipping and manual placement open |
