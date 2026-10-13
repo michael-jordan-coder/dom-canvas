@@ -3,6 +3,7 @@ import { useInspectorDisclosure } from "./InspectorPreferences";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { colorWithAlpha, parseColor } from "./color";
+import { numericExpression } from "./arithmetic";
 
 export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel: boolean) => void } | null>(null);
 
@@ -58,7 +59,14 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
   const commit = () => {
     if (cancelled.current) { cancelled.current = false; return; }
-    if (draft !== value) setInvalid(onCommit(draft.trim()) === false);
+    if (draft === value) return;
+    const numericValue = value.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
+    const expression = numericValue ? numericExpression(draft) : null;
+    if (expression && "error" in expression) { setInvalid(true); return; }
+    const next = expression ? `${expression.value}${numericValue![2]}` : draft.trim();
+    const rejected = onCommit(next) === false;
+    setInvalid(rejected);
+    if (!rejected && expression) setDraft(next);
   };
   const finishScrub = (cancel: boolean) => {
     if (!drag.current) return;
@@ -70,7 +78,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   };
   const numeric = /^(-?\d*\.?\d+)([a-z%]*)$/i.test(value);
   return <div className={`property-shell${onReset ? " overridden" : ""}`}>
-    <div className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : label}>
+    <div className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : numeric ? `${label} · Calculate with + − * / and parentheses` : label}>
       {prefix && <span className={`prefix${numeric && edits ? " scrub-label" : ""}`} title={numeric && edits ? `Drag to adjust ${label}. Shift: 10× · Alt: 0.1× · Escape: cancel` : undefined}
         tabIndex={numeric && edits ? 0 : undefined} role={numeric && edits ? "button" : undefined} aria-label={numeric && edits ? `Adjust ${label}` : undefined}
         onPointerDown={(e) => {

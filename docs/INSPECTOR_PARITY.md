@@ -212,3 +212,9 @@ Browser QA on port 5181: a heading containing span/strong/span exposed Typograph
 Reproduced a field draft being erased by canvas wheel panning: an uncommitted frame width777 returned to640. Field synchronization depended on an inline callback whose identity changed on each parent render. Synchronization now depends on the property value only.
 
 Browser QA after the fix: width777 survived wheel panning while the actual frame remained640; Escape restored640, Enter applied777, and Undo restored640. Invalid text and aria-invalid also survived panning until Escape. The final temporary draft was cancelled. Screenshot: /tmp/dom-canvas-field-draft.png. Build and diff check passed.
+
+## Numeric field arithmetic
+
+Numeric fields evaluate plain-number expressions on commit, with precedence, parentheses and unary signs. Existing field units are retained, property validation still applies, and invalid/non-finite arithmetic is rejected before calling property setters. The parser does not evaluate JavaScript or interpret CSS functions/units. Tooltips expose the supported operators. Three parser tests cover precedence, malformed expressions, division by zero and CSS passthrough.
+
+Browser QA on port 5181: frame width `(640 + 80) / 2` became360; `1 / 0` was rejected, Escape restored360, and one Undo restored640. A10% corner radius changed to15% through `10 + 5`, then was undone. Font size `24 + 8 * 2` computed40px. Screenshot: /tmp/dom-canvas-arithmetic.png. Build and diff check passed.
