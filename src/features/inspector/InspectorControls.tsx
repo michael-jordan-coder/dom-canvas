@@ -1,4 +1,5 @@
 import { ColorPopover } from "./ColorPopover";
+import { useInspectorDisclosure } from "./InspectorPreferences";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { colorWithAlpha, parseColor } from "./color";
@@ -7,8 +8,8 @@ export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel
 
 type Commit = (value: string) => boolean | void;
 
-export function Section({ title, children, defaultOpen = true, onReset, actions }: { title: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode }) {
-  const [open, setOpen] = useState(defaultOpen);
+export function Section({ title, preferenceKey, children, defaultOpen = true, onReset, actions }: { title: string; preferenceKey?: string; children: ReactNode; defaultOpen?: boolean; onReset?: () => void; actions?: ReactNode }) {
+  const [open, setOpen] = useInspectorDisclosure(`section:${preferenceKey ?? title}`, defaultOpen);
   const headingId = useId();
   return <section className="property-section" aria-labelledby={headingId}>
     <div className="property-section-heading">

@@ -134,3 +134,9 @@ Verified on port 5181: moving flex-qa to first updated layer order; Undo restore
 Rotation now normalizes scalar CSS angle units for degree display and passes CSS expressions/explicit axes through validation instead of coercing invalid text to zero. Added per-property rotation reset, a compact rotation icon and transform-origin field/reset. Existing transform rules remain composed with individual rotation, with a contextual note. The canvas matrix parser now honors named x/y axes instead of treating them as Z; 3D selections still use the documented fallback.
 
 Three Node tests cover quarter-turn equivalence, 3D axis preservation and numeric/expression/invalid input handling. Browser QA on port 5181: 0.25turn computed to 90deg while retaining the original transform matrix; bad input marked aria-invalid without committing a zero angle. x 30deg remained explicit in the field and computed style. Center origin computed to 100px 70px for a 200x140 box; Undo restored 0px 0px, and subsequent undos restored rotate:none. Screenshot: /tmp/dom-canvas-rotation-controls.png. Build passed.
+
+## Inspector continuity
+
+Section disclosures and HTML detail controls use UI preferences outside document history, scoped to frame/HTML/SVG. Local storage retains them across reloads; unavailable storage falls back to session state. The Layout section has one stable preference key across Block/Flex/Grid headings. Default-open behavior still applies until the user explicitly toggles a section.
+
+Browser QA on port 5181: opened Position and individual padding, edited rotation then undid it; both disclosures stayed open. Selecting another HTML layer and switching CSS/Design retained them. Closing HTML Position did not close the frame Position section. Reload retained closed HTML Position, open Layout options and individual padding. Screenshot: /tmp/dom-canvas-inspector-preferences.png. Build and diff check passed.

@@ -1,6 +1,7 @@
 import { InspectorIcon } from "./InspectorIcon";
 import { rotationField, rotationInput } from "@/features/canvas/rotation";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
 import { GradientEditor } from "./GradientEditor";
@@ -43,10 +44,11 @@ export function Inspector(props: Props) {
     if (!current?.dirty) return;
     if (cancel) current.restore(); else props.onChange();
   };
-  return <InspectorEdits.Provider value={{ begin, finish }}><InspectorContent {...props}
+  const scope = props.selection.kind === "artboard" ? "frame" : props.selection.kind === "element" && props.selection.element instanceof SVGElement ? "svg" : "html";
+  return <InspectorScope.Provider value={scope}><InspectorEdits.Provider value={{ begin, finish }}><InspectorContent {...props}
     onChange={() => { if (session.current) { session.current.dirty = true; props.onPreview(); } else props.onChange(); }}
     onUpdateArtboard={(id, patch) => { if (session.current) { session.current.dirty = true; props.onPreviewArtboard(id, patch); } else props.onUpdateArtboard(id, patch); }}
-  /></InspectorEdits.Provider>;
+  /></InspectorEdits.Provider></InspectorScope.Provider>;
 }
 
 function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: Props) {
@@ -88,10 +90,11 @@ function elementKey(element: Element) {
 }
 
 function ElementInspector({ element, onChange }: { element: Element; onChange: () => void }) {
-  const [individualPadding, setIndividualPadding] = useState(false);
-  const [individualCorners, setIndividualCorners] = useState(false);
-  const [individualStroke, setIndividualStroke] = useState(false);
-  const [showConstraints, setShowConstraints] = useState(false);
+  const [individualPadding, setIndividualPadding] = useInspectorDisclosure("padding-sides", false);
+  const [individualCorners, setIndividualCorners] = useInspectorDisclosure("corners", false);
+  const [individualStroke, setIndividualStroke] = useInspectorDisclosure("stroke-sides", false);
+  const [showConstraints, setShowConstraints] = useInspectorDisclosure("constraints", false);
+  const [layoutOptions, setLayoutOptions] = useInspectorDisclosure("layout-options", false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.trim());
@@ -166,7 +169,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     <div className="selection-summary"><strong title={layerName(element)}>{layerName(element)}</strong><span className="node-badge">{element.tagName.toLowerCase()}</span></div>
     <div className="selection-meta">{overrides ? `${overrides} inline ${overrides === 1 ? "override" : "overrides"}` : "Using stylesheet values"}<span title="Blue markers identify properties set on this element.">CSS</span></div>
 
-    <Section title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
+    <Section preferenceKey="layout" title={isFlex ? "Auto layout" : isGrid ? "Grid layout" : "Layout"} actions={<button className="inspector-icon" title="Min / Max constraints" aria-label="Min / Max" aria-expanded={showConstraints} onClick={() => setShowConstraints(!showConstraints)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5V3h10v2M3 11v2h10v-2M5 8h6M8 5v6" /></svg></button>} onReset={resetGroup([...layoutProps, ...paddingProps.filter((p) => p.startsWith("padding")), "width", "height", "min-width", "max-width", "min-height", "max-height", "flex-grow", "flex-shrink", "flex-basis", "aspect-ratio"])}>
       <Segmented label="Layout" value={isFlex ? "flex" : isGrid ? "grid" : display} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "grid", label: "Grid" }]} onChange={(v) => set("display", v)} />
       {!['block', 'flex', 'grid'].includes(display) && <SelectField label="Display" value={display} options={["block", "flex", "grid", "inline", "inline-block", "inline-flex", "inline-grid", "none"]} onCommit={(v) => set("display", v)} />}
       <div className="sizing-row"><Row>{sizeField("width")}{sizeField("height")}</Row><button className="inspector-icon" title="Lock aspect ratio" aria-label="Lock aspect ratio" aria-pressed={read("aspect-ratio") !== "auto"} onClick={() => {
@@ -203,7 +206,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
             }))}
           </div>
         </div>
-        <details className="layout-details">
+        <details className="layout-details" open={layoutOptions} onToggle={(e) => setLayoutOptions(e.currentTarget.open)}>
           <summary aria-label="More layout settings"><span>Layout options</span><span className="layout-state">{[computed.direction === "rtl" ? "RTL" : "", isFlex && read("flex-direction").endsWith("reverse") ? "Reverse" : "", isFlex && read("flex-wrap") !== "nowrap" ? read("flex-wrap") === "wrap-reverse" ? "Wrap ↶" : "Wrap" : ""].filter(Boolean).join(" · ")}</span></summary>
           <div className="layout-details-body">
             <div className="alignment-options"><SelectField label="Distribute" value={read("justify-content")} options={[{ value: "normal", label: "Default" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Space between" }, { value: "space-around", label: "Space around" }, { value: "space-evenly", label: "Space evenly" }]} onCommit={(v) => set("justify-content", v)} /><SelectField label="Align" value={read("align-items").replace(/^start$/, "flex-start").replace(/^end$/, "flex-end")} options={[{ value: "normal", label: "Default" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} onCommit={(v) => set("align-items", v)} /></div>

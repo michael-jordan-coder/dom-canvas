@@ -64,6 +64,7 @@ Open http://localhost:5180.
 ## Editing behavior
 
 - The inspector uses a 241px Design panel with 24px fields. CSS mode opens a wider code editor.
+- Open/closed sections, individual padding/corners/strokes, constraints and Layout options are remembered across selection changes, Undo, inspector tabs and reloads. Frame, HTML and SVG section preferences are separate and do not enter document history.
 - Width/height support CSS, Fixed, Hug and Fill, plus constraints and ratio locking.
 - Numeric labels scrub with one undo step. Colors, gradients, shadows and SVG properties have contextual controls.
 - Position includes individual CSS rotation and transform origin. Bare angles use degrees; `deg`, `rad`, `grad`, `turn`, explicit axes and browser-supported CSS expressions are accepted. Rotation adds to any existing `transform` rule; invalid input leaves the element unchanged.
