@@ -1,3 +1,4 @@
+import { useSelectionRefresh } from "./useSelectionRefresh";
 import { MultipleFramesInspector, type FramePatch } from "./MultipleFramesInspector";
 import { MultipleInspector } from "./MultipleInspector";
 import { FontWeightField } from "./FontWeightField";
@@ -36,6 +37,7 @@ type Props = {
 };
 
 export function Inspector(props: Props) {
+  useSelectionRefresh(props.selection, props.hosts);
   const session = useRef<{ dirty: boolean; restore: () => void } | null>(null);
   const begin = () => {
     const selection = props.selection;

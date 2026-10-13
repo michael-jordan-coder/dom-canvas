@@ -69,7 +69,7 @@ export function Canvas(props: Props) {
   const [panning, setPanning] = useState(false);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [marquee, setMarquee] = useState<Rect | null>(null);
-  const [multipleRects, setMultipleRects] = useState<Rect[]>([]);
+  const [multipleRects, setMultipleRects] = useState<OutlineRect[]>([]);
   const [drawPreview, setDrawPreview] = useState<Rect | null>(null);
   const [editing, setEditing] = useState<HTMLElement | null>(null);
   const handMode = tool === "hand" || spaceHeld;
@@ -518,7 +518,7 @@ export function Canvas(props: Props) {
     const selectedEl = selectedElement(selection, hosts);
     setMultipleRects(selection.kind === "multiple" ? selection.items.flatMap(item => {
       const element = selectedElement(item, hosts);
-      return element?.isConnected && element.getClientRects().length ? [elementRectInCanvas(element, canvas)] : [];
+      return element?.isConnected && element.getClientRects().length ? [selectionOutline(element, canvas)] : [];
     }) : []);
     setRects({
       selected: selectedEl?.getClientRects().length ? selectionOutline(selectedEl, canvas) : null,
@@ -526,28 +526,43 @@ export function Canvas(props: Props) {
     });
   }, [camera, version, selection, hoverTarget, hosts, artboards, cssPreview]);
   useLayoutEffect(() => {
-    const element = selectedElement(selection, hosts);
+    const elements = selectionItems(selection).flatMap(item => {
+      const element = selectedElement(item, hosts); return element ? [element] : [];
+    });
     const canvas = canvasRef.current;
-    if (!element || !canvas) return;
+    if (!elements.length || !canvas) return;
     let scheduled = 0;
     const refresh = () => {
       cancelAnimationFrame(scheduled);
       scheduled = requestAnimationFrame(() => {
-        if (!element.isConnected) return;
-        const next = element.getClientRects().length ? selectionOutline(element, canvas) : null;
-        setRects((current) => JSON.stringify(current.selected) === JSON.stringify(next) ? current : { ...current, selected: next });
+        const next = elements.flatMap(element => element.isConnected && element.getClientRects().length ? [selectionOutline(element, canvas)] : []);
+        if (selection.kind === "multiple") setMultipleRects(current => JSON.stringify(current) === JSON.stringify(next) ? current : next);
+        else setRects(current => JSON.stringify(current.selected) === JSON.stringify(next[0] ?? null) ? current : { ...current, selected: next[0] ?? null });
       });
     };
     const resize = new ResizeObserver(refresh);
-    resize.observe(element);
-    for (let parent = element.parentElement; parent && parent !== canvas; parent = parent.parentElement) resize.observe(parent);
-    const root = element.shadowRoot ?? element.getRootNode();
+    const roots = new Set(elements.map(element => element.shadowRoot ?? element.getRootNode()));
+    const observed = new Set<Element>();
+    for (const element of elements) {
+      observed.add(element);
+      for (let parent = element.parentElement; parent && parent !== canvas; parent = parent.parentElement) observed.add(parent);
+    }
     const mutations = new MutationObserver(refresh);
-    if (root instanceof ShadowRoot) mutations.observe(root, { attributes: true, childList: true, subtree: true, characterData: true });
-    root.addEventListener("scroll", refresh, true);
+    for (const root of roots) {
+      if (root instanceof ShadowRoot) {
+        observed.add(root.host);
+        mutations.observe(root, { attributes: true, childList: true, subtree: true, characterData: true });
+      }
+      root.addEventListener("scroll", refresh, true);
+    }
+    observed.forEach(element => resize.observe(element));
     window.addEventListener("resize", refresh);
     document.fonts.addEventListener("loadingdone", refresh);
-    return () => { cancelAnimationFrame(scheduled); resize.disconnect(); mutations.disconnect(); root.removeEventListener("scroll", refresh, true); window.removeEventListener("resize", refresh); document.fonts.removeEventListener("loadingdone", refresh); };
+    return () => {
+      cancelAnimationFrame(scheduled); resize.disconnect(); mutations.disconnect();
+      roots.forEach(root => root.removeEventListener("scroll", refresh, true));
+      window.removeEventListener("resize", refresh); document.fonts.removeEventListener("loadingdone", refresh);
+    };
   }, [selection, hosts]);
   const { selected: selectedRect, hover: hoverRect } = rects;
 
@@ -569,7 +584,7 @@ export function Canvas(props: Props) {
       onPointerLeave={() => setHovered(null)}
     >
       {marquee && <div className="selection-marquee" style={rectStyle(marquee)} />}
-      {multipleRects.map((rect, index) => <div key={index} className="outline selected multiple-outline" style={rectStyle(rect)} />)}
+      {multipleRects.map((rect, index) => <div key={index} className="outline selected multiple-outline" style={{ ...rectStyle(rect), transform: rect.transform, transformOrigin: "0 0" }} />)}
       <div className="world" style={{ transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.z})` }}>
         {artboards.map((ab) => (
           <ArtboardView key={ab.id} artboard={ab} previewCss={cssPreview?.id === ab.id ? cssPreview.css : undefined} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
