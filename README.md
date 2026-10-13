@@ -122,5 +122,5 @@ Open http://localhost:5180.
 
 - With Move, drag empty canvas to select fully enclosed frames/elements. Drag bare frame background to select its children. Space-drag or the middle button pans the canvas.
 - Shift-click canvas objects, frame labels or Layers rows to add/remove a target. A selected frame/ancestor absorbs its descendants so they are not moved twice.
-- Drag a selected member to move the selection together; arrows, Duplicate, Delete, Fit selection and Undo/Redo support multiple targets. The inspector supports shared element opacity, size, corner radius, fill and typography with Mixed values. Shared frame properties and group resizing are still pending.
+- Drag a selected member to move the selection together; arrows, Duplicate, Delete, Fit selection and Undo/Redo support multiple targets. The inspector supports shared element opacity, size, corner radius, fill and typography with Mixed values. Frame-only selections also support shared width/height, Hug/Fixed height, fill and Clip content. Group resizing is still pending.
 - With Text (T), click within a frame to create auto-width text, drag to create a wrapping text box, or click existing editable text to edit it. Text creation outside frames is still pending.
