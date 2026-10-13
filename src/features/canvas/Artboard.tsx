@@ -82,7 +82,7 @@ export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, on
         ref={hostRef}
         className="artboard"
         data-artboard={artboard.id}
-        style={{ left: artboard.x, top: artboard.y, width: artboard.width, height: artboard.height }}
+        style={{ left: artboard.x, top: artboard.y, width: artboard.width, height: artboard.height, backgroundColor: artboard.backgroundColor }}
       />
     </>
   );

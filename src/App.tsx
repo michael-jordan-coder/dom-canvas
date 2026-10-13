@@ -393,7 +393,9 @@ export function App() {
     const root = id ? hostsRef.current.get(id)?.shadowRoot : undefined;
     if (!ab || !root) return;
     try {
-      await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}\n</style>\n${serializeRoot(root)}`);
+      const frameColor = (root.host as HTMLElement).style.backgroundColor;
+      const frameCss = frameColor ? `\n:host { background-color: ${frameColor}; }` : "";
+      await navigator.clipboard.writeText(`<style>\n${ab.css.trim()}${frameCss}\n</style>\n${serializeRoot(root)}`);
       setCopied(true);
       setNotice(`Copied ${ab.name}${cssDrafts[ab.id] !== undefined ? " — applied CSS only" : ""}`);
       setTimeout(() => setCopied(false), 1200);

@@ -2,7 +2,7 @@ import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
 import { inspectorStyleValue } from "./styleValue";
 import { rotationField, rotationInput } from "@/features/canvas/rotation";
-import { useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
@@ -39,7 +39,7 @@ export function Inspector(props: Props) {
       } };
     } else if (selection.kind === "artboard") {
       const original = props.artboards.find((ab) => ab.id === selection.artboardId);
-      if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio }) };
+      if (original) session.current = { dirty: false, restore: () => props.onPreviewArtboard(original.id, { ...original, height: original.height, aspectRatio: original.aspectRatio, backgroundColor: original.backgroundColor }) };
     }
   };
   const finish = (cancel: boolean) => {
@@ -66,7 +66,8 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
       else if (ab.aspectRatio && patch.height !== undefined) patch.width = Math.round(patch.height * ab.aspectRatio);
       onUpdateArtboard(ab.id, patch);
     };
-    const measuredHeight = document.querySelector<HTMLElement>(`[data-artboard="${ab.id}"]`)?.offsetHeight ?? 100;
+    const frameHost = document.querySelector<HTMLElement>(`[data-artboard="${ab.id}"]`);
+    const measuredHeight = frameHost?.offsetHeight ?? 100;
     return <>
       <div className="selection-summary"><strong>{ab.name}</strong><span className="node-badge frame-badge">Frame</span></div>
       <Section title="Frame">
@@ -77,6 +78,7 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
       <Section title="Position">
         <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
       </Section>
+      <FrameFill artboard={ab} onUpdate={update} />
       <div className="inspector-footnote">Frame size controls the canvas bounds. Select an element inside to edit its layout and appearance.</div>
     </>;
   }
@@ -84,6 +86,18 @@ function InspectorContent({ selection, artboards, onUpdateArtboard, onChange }: 
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
   if (el instanceof SVGElement) return <SvgInspector key={elementKey(el)} element={el} onChange={onChange} />;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
+}
+
+function FrameFill({ artboard, onUpdate }: { artboard: Artboard; onUpdate: (patch: Partial<Artboard>) => void }) {
+  const [color, setColor] = useState(artboard.backgroundColor ?? "#ffffff");
+  useLayoutEffect(() => {
+    const host = document.querySelector<HTMLElement>(`[data-artboard="${artboard.id}"]`);
+    if (host) setColor(getComputedStyle(host).backgroundColor);
+  });
+  const reset = artboard.backgroundColor !== undefined ? () => onUpdate({ backgroundColor: undefined }) : undefined;
+  return <Section title="Fill" onReset={reset}>
+    <ColorField label="Frame fill" value={color} onCommit={(value) => { if (!CSS.supports("background-color", value)) return false; onUpdate({ backgroundColor: value }); return true; }} onReset={reset} />
+  </Section>;
 }
 
 const elementKeys = new WeakMap<Element, number>();
