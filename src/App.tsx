@@ -1,3 +1,4 @@
+import { captureAppearance, applyAppearance, type Appearance } from "@/features/inspector/appearance";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, isTyping, isInteractiveControl, isPopupControl } from "@/features/canvas/Canvas";
 import { getTranslate, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
@@ -47,6 +48,7 @@ export function App() {
   const [cssScope, setCssScope] = useState<"element" | "frame">("element");
   const elementCssDrafts = useRef(new WeakMap<Element, ElementCssDraft>());
   const [cssDrafts, setCssDrafts] = useState<Record<string, string>>({});
+  const [appearanceClipboard, setAppearanceClipboard] = useState<Appearance | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [liveCssPreview, setLiveCssPreview] = useState(true);
   const [cssPreview, setCssPreview] = useState<{ id: string; css: string } | null>(null);
@@ -502,6 +504,8 @@ export function App() {
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[
         { label: "Duplicate", shortcut: "⌘/Ctrl D", run: duplicateSelection },
         ...(selection.kind === "element" ? [
+          { label: "Copy appearance", run: () => { setAppearanceClipboard(captureAppearance(selection.element)); setNotice("Appearance copied — choose another layer and Paste appearance."); }, separator: true },
+          { label: "Paste appearance", disabled: !appearanceClipboard, run: () => { if (!appearanceClipboard || !selection.element.isConnected) return; applyAppearance(selection.element as HTMLElement | SVGElement, appearanceClipboard); commit(); setNotice("Appearance applied"); } },
           { label: lockedAncestor(selection.element) ? lockedAncestor(selection.element) === selection.element ? "Unlock layer" : "Unlock parent layer" : "Lock layer", run: () => { toggleLayerLock(selection.element); setLayerHover(null); commit(); } },
           { label: isLayerHidden(selection.element) ? "Show layer" : "Hide layer", run: () => { toggleLayerVisibility(selection.element); setLayerHover(null); commit(); }, separator: true },
           { label: "Move earlier", run: () => reorderSelection("earlier"), disabled: !!lockedAncestor(selection.element) || siblingIndex <= 0, separator: true },
