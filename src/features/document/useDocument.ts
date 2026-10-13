@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import type { Artboard, Camera } from "@/features/canvas/types";
+import { SnapshotHistory } from "./history";
 import { serializeRoot } from "./serialize";
 
 const DOC_KEY = "dom-canvas:doc:v1";
@@ -15,53 +16,43 @@ export function useDocument(hosts: Map<string, HTMLDivElement>, initial: () => A
   const [artboards, setArtboards] = useState<Artboard[]>(() => loadDocument() ?? initial());
   const [saveStatus, setSaveStatus] = useState("Local document");
   const latest = useRef(artboards);
-  const committed = useRef(artboards);
-  const past = useRef<Artboard[][]>([]);
-  const future = useRef<Artboard[][]>([]);
+  const history = useRef(new SnapshotHistory(artboards, HISTORY_LIMIT));
 
   const apply = useCallback((next: Artboard[]) => {
     latest.current = next;
     setArtboards(next);
   }, []);
 
-  const update = useCallback((fn: Updater) => apply(fn(latest.current)), [apply]);
+  const update = useCallback((fn: Updater) => { history.current.breakGroup(); apply(fn(latest.current)); }, [apply]);
 
-  const commit = useCallback((fn?: Updater) => {
+  const commit = useCallback((fn?: Updater, group?: symbol) => {
     const base = fn ? fn(latest.current) : latest.current;
     const snapshot = base.map((ab) => {
       const root = hosts.get(ab.id)?.shadowRoot;
       return root ? { ...ab, html: serializeRoot(root) } : ab;
     });
-    past.current = [...past.current, committed.current].slice(-HISTORY_LIMIT);
-    future.current = [];
-    committed.current = snapshot;
+    history.current.commit(snapshot, group);
     apply(snapshot);
     setSaveStatus(saveDocument(snapshot) ? "Saved locally" : "Not saved — storage full or unavailable");
   }, [apply, hosts]);
 
   const undo = useCallback(() => {
-    const previous = past.current.at(-1);
+    const previous = history.current.undo();
     if (!previous) return false;
-    past.current = past.current.slice(0, -1);
-    future.current = [committed.current, ...future.current];
-    committed.current = previous;
     apply(previous);
     setSaveStatus(saveDocument(previous) ? "Saved locally" : "Not saved — storage full or unavailable");
     return true;
   }, [apply]);
 
   const redo = useCallback(() => {
-    const next = future.current[0];
+    const next = history.current.redo();
     if (!next) return false;
-    future.current = future.current.slice(1);
-    past.current = [...past.current, committed.current];
-    committed.current = next;
     apply(next);
     setSaveStatus(saveDocument(next) ? "Saved locally" : "Not saved — storage full or unavailable");
     return true;
   }, [apply]);
 
-  return { artboards, latest, update, commit, undo, redo, saveStatus, canUndo: past.current.length > 0, canRedo: future.current.length > 0 };
+  return { artboards, latest, update, commit, undo, redo, saveStatus, canUndo: history.current.canUndo, canRedo: history.current.canRedo };
 }
 
 function loadDocument(): Artboard[] | null {

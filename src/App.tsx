@@ -76,8 +76,8 @@ export function App() {
     bump();
   }, [bump]);
 
-  const commit = useCallback((fn?: (list: Artboard[]) => Artboard[]) => {
-    doc.commit(fn);
+  const commit = useCallback((fn?: (list: Artboard[]) => Artboard[], group?: symbol) => {
+    doc.commit(fn, group);
     bump();
   }, [doc, bump]);
 
@@ -85,8 +85,8 @@ export function App() {
     doc.update((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)));
   }, [doc]);
 
-  const commitArtboard = useCallback((id: string, patch: Partial<Artboard>) => {
-    commit((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)));
+  const commitArtboard = useCallback((id: string, patch: Partial<Artboard>, group?: symbol) => {
+    commit((list) => list.map((ab) => (ab.id === id ? { ...ab, ...patch } : ab)), group);
   }, [commit]);
 
   const addArtboard = useCallback((content: Pick<Artboard, "html" | "css" | "fonts"> & Partial<Pick<Artboard, "name" | "width">>) => {
@@ -273,16 +273,28 @@ export function App() {
     }
   }, [selection, artboards, commit]);
 
-  const nudge = useCallback((dx: number, dy: number) => {
+  const nudgeGroup = useRef<{ key: string; target: Element | string; token: symbol } | null>(null);
+  useEffect(() => {
+    const release = (event: KeyboardEvent) => { if (event.key.startsWith("Arrow")) nudgeGroup.current = null; };
+    const blur = () => { nudgeGroup.current = null; };
+    window.addEventListener("keyup", release);
+    window.addEventListener("blur", blur);
+    return () => { window.removeEventListener("keyup", release); window.removeEventListener("blur", blur); };
+  }, []);
+  const nudge = useCallback((dx: number, dy: number, repeat: boolean, key: string) => {
+    if (selection.kind === "none") return;
+    const target = selection.kind === "element" ? selection.element : selection.artboardId;
+    if (!repeat || nudgeGroup.current?.key !== key || nudgeGroup.current.target !== target) nudgeGroup.current = { key, target, token: Symbol("keyboard nudge") };
+    const group = nudgeGroup.current.token;
     if (selection.kind === "artboard") {
       const ab = artboards.find((a) => a.id === selection.artboardId);
-      if (ab) commitArtboard(ab.id, { x: ab.x + dx, y: ab.y + dy });
+      if (ab) commitArtboard(ab.id, { x: ab.x + dx, y: ab.y + dy }, group);
     } else if (selection.kind === "element") {
       const el = selection.element as HTMLElement | SVGElement;
       const t = getTranslate(el);
       const delta = screenDeltaToLocal(el, dx * camera.z, dy * camera.z);
       setTranslate(el, t.x + delta.x, t.y + delta.y);
-      commit();
+      commit(undefined, group);
     }
   }, [selection, artboards, camera.z, commit, commitArtboard]);
 
@@ -315,7 +327,7 @@ export function App() {
         e.preventDefault();
         const step = e.shiftKey ? 10 : 1;
         const [dx, dy] = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key] ?? [0, 0];
-        nudge(dx, dy);
+        nudge(dx, dy, e.repeat, e.key);
         return;
       }
       if (e.shiftKey && e.code === "Digit0") { setZoom(1); return; }

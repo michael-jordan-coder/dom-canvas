@@ -110,3 +110,9 @@ Keyboard nudge now uses the same parent-coordinate inverse as pointer dragging, 
 Replaced the OS color input with a compact 240px popover: saturation/value surface, hue and alpha sliders, keyboard-editable saturation/brightness and hex. Preview stays in one InspectorEdits transaction; Done/outside dismissal commits once, Cancel/Escape restores the original attributes. No-change closes do not enter history. Focus is contained within the dialog and returns to the swatch on explicit close. The portal avoids inspector clipping; cleanup handles StrictMode remount checks without prematurely closing.
 
 Browser checks on port 5181: blue at 1% alpha rendered rgba(37,99,235,.01), Cancel restored white with Undo still disabled. Hex plus SV dragging produced #562BB8; Done followed by one Undo restored white and left history empty. Opening/closing without changing color added no history. Escape after a red preview closed the dialog, restored white, and left Undo disabled. Screenshot: /tmp/dom-canvas-color-picker.png.
+
+## Keyboard history grouping
+
+Repeated arrow keydowns share a history group until release, direction/target change, another edit, Undo/Redo or blur. Separate key presses remain separate undo steps. Four Node tests cover a 120-update group, separate edits, branching/group boundaries and bounded history (`node --test tests/history.test.mjs`, Node 24).
+
+Browser check on port 5181: two Right presses moved frame X from 80 to 82; Undo returned 81 then 80 with history empty. The native held-key call emitted only one movement, so physical auto-repeat integration remains a manual check; repeated snapshot grouping passed the automated test. Measured rendered inspector width 241px and field heights 24px. Screenshot: /tmp/dom-canvas-compact-inspector-current.png.
