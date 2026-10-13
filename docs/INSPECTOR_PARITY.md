@@ -224,3 +224,9 @@ Browser QA on port 5181: frame width `(640 + 80) / 2` became360; `1 / 0` was rej
 Replaced parseFloat/fallback coercion in frame/element coordinates and HTML opacity with complete finite numeric validation. Pixel suffixes remain supported for coordinates; opacity accepts an optional percent suffix. Blank/partial/non-finite numbers now return validation errors without edits. HTML opacity display reads computed opacity, so imported `opacity:50%` displays50 rather than5000. Three numeric-input tests cover valid units, partial/invalid values and percentage parsing.
 
 Browser QA on port 5181: imported50% opacity displayed50. `55oops` was rejected and computed opacity stayed0.5; invalid element/frame X remained errors without translation. `25%` applied0.25 and `80px` moved X to80; both were undone. Screenshot: /tmp/dom-canvas-numeric-validation.png. Build and diff check passed.
+
+## CSS-wide keywords in visual controls
+
+HTML and SVG property readers resolve initial/inherit/unset/revert/revert-layer to computed values for visual controls, without mutating authored declarations. This fixes solid background shorthand exposing an `initial` image layer and prevents Add gradient from composing an invalid gradient/initial layer list. Explicit units, CSS variables and other authored values retain their existing handling.
+
+Browser QA on port 5181: the solid-color fixture had no image-sizing or remove-layer controls, while its original style attribute stayed byte-for-byte unchanged. Add gradient produced a valid computed gradient and kept its purple background color; Undo restored the original style and compact solid Fill. An SVG rect with fill-opacity:initial displayed100 and retained its authored keywords; the temporary fixture was undone. Screenshot: /tmp/dom-canvas-solid-fill.png. Build and diff check passed.

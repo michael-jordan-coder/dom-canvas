@@ -1,11 +1,12 @@
 import { getLayoutSize, setSize } from "@/features/canvas/elementStyle";
 import { layerName } from "@/features/layers/Layers";
+import { inspectorStyleValue } from "./styleValue";
 import { ColorField, Field, Row, Section, SelectField, TextArea } from "./InspectorControls";
 
 export function SvgInspector({ element, onChange }: { element: SVGElement; onChange: () => void }) {
   const computed = getComputedStyle(element);
   const tag = element.tagName.toLowerCase();
-  const read = (property: string) => element.style.getPropertyValue(property) || computed.getPropertyValue(property) || element.getAttribute(property) || "0";
+  const read = (property: string) => inspectorStyleValue(element.style.getPropertyValue(property), computed.getPropertyValue(property)) || element.getAttribute(property) || "0";
   const set = (property: string, value: string) => {
     if (!CSS.supports(property, value)) return false;
     element.style.setProperty(property, value); onChange(); return true;

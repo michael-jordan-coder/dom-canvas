@@ -1,5 +1,6 @@
 import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
+import { inspectorStyleValue } from "./styleValue";
 import { rotationField, rotationInput } from "@/features/canvas/rotation";
 import { useRef, type ReactNode } from "react";
 import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
@@ -114,7 +115,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = containsHtmlText(element);
-  const read = (prop: string) => styled.style.getPropertyValue(prop) || computed.getPropertyValue(prop);
+  const read = (prop: string) => inspectorStyleValue(styled.style.getPropertyValue(prop), computed.getPropertyValue(prop));
   const set = (prop: string, value: string) => {
     if (!CSS.supports(prop, value)) return false;
     styled.style.setProperty(prop, value);
