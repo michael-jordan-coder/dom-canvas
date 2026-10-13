@@ -163,6 +163,10 @@ modify their implementation or verify full local parity.
 
 ## 8. Critical remaining research
 
+Parent-child observations now have a [dedicated experiment record](parent-child-layout.md):
+in-flow versus Ignore auto layout context, Constraints menu, and a verified
+Fill-width/Auto-height transaction with Undo/Redo. Coverage remains partial.
+
 - Child of auto layout: Fill availability, disabled position, absolute positioning,
   constraints, min/max, parent/child resizing feedback.
 - Freeform child versus frame versus shape, group, component and instance.

@@ -14,6 +14,8 @@
 - **[Design panel state map](topics/design-panel.md)**: primary track; context,
   sizing dependencies, shared properties and Undo transitions.
 - [Selection](topics/selection.md): marquee, multiple frames, Shift.
+- [Parent-child layout](topics/parent-child-layout.md): positioning context,
+  Constraints, Fill/text-mode coupling, Undo and Redo.
 - [Text](topics/text.md): click creation, drawn boxes, sizing modes.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.

@@ -13,10 +13,10 @@ measurements. Store durable Markdown and focused evidence in this directory.
 
 ## Platform registration
 
-Creating the new goal was attempted and rejected because this thread already has
-an unfinished goal. The existing goal must not be marked complete to bypass that
-restriction. This document records the user's requested scope; it is not a claim
-that the goal-registration tool accepted it. Research can continue independently.
+The previous broad product goal was cleared by the user. The dedicated Design
+panel research goal was successfully created and returned status **active** on
+2026-10-13. This file defines its coverage and evidence requirements. Research is
+in progress; registration is not a claim of research completion.
 
 ## Required coverage
 

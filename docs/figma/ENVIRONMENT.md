@@ -26,6 +26,12 @@
 These are reusable fixtures, not immutable values. Verify current state before a
 new experiment and record any changes. Preserve Page 1 and unrelated user designs.
 
+Latest retained research state (2026-10-13, parent-child pass): `15:2` Frame 3
+wraps `8:3`, at -59/-254, width 240 Fixed, height 35 Hug, horizontal flow,
+padding 10, center alignment. Child `8:3` is now 220 Fill × 15 Hug with text
+Auto height and relative position 10/10. Ignore auto layout is off. Other
+fixtures were not changed during this pass. See `topics/parent-child-layout.md`.
+
 ## Access and input notes
 
 Native UI calls previously failed intermittently with capture/missing-window errors.
