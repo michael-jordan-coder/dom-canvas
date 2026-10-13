@@ -55,3 +55,7 @@ is active. See CO03 in topics/components.md.
 
 Instance continuation: node15:62 is now verified, selected Variant2 of Frame2,
 200 ×125 at -163/-67. Width override260 was reset to200 via Reset instance.
+
+Binding research: local color style Research/Panel white was created and retained.
+Instance15:62 was linked, its Fill removed, then Reset fill restored raw white.
+No library publication or push to main component was performed.
