@@ -182,3 +182,9 @@ Browser QA on port 5181: imported a 300x100 three-band SVG image in a 180x180 im
 Reproduced Space failing to activate inspector section buttons because the canvas pan listener prevented its default. Pan now ignores handled events and interactive controls. App shortcuts ignore handled events and menu/dialog focus, and unmodified canvas shortcuts ignore buttons, tabs, summaries and other interactive controls. Popup focus also excludes document paste.
 
 Verified after a clean reload on port 5181: Space toggled Position open/closed. Delete on the section button preserved the image. Delete, Cmd+D and R on the color dialog's Cancel button left one image, the dialog open and Move selected. Space activated Cancel and closed it. Delete with canvas focus removed the image, and Undo restored it. Build and diff check passed.
+
+## Contextual layout items
+
+Added remembered Flex item/Grid item sections with CSS validation, per-field and section resets, and history support. Flex exposes grow/shrink/basis; Grid exposes column/row placement and justify-self; both offer align-self and order. Shared parent detection crosses the frame shadow boundary, skips display:contents wrappers and excludes absolute/fixed/non-box elements. Width/height sizing also uses this corrected parent detection.
+
+Browser QA on port 5181: a direct child of a flex frame grew from 100px to 420px with grow1, align-self:center applied, negative grow was rejected and two Undo actions restored 100px/grow0/auto. A direct child of a three-column grid changed to span2, measured423.328px and moved the third sibling onto a second row. Reset restored auto/206.664px; Undo restored the span. Screenshot: /tmp/dom-canvas-layout-items.png. Build and diff check passed.

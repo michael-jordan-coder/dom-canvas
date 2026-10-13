@@ -5,6 +5,7 @@ import { InspectorScope, useInspectorDisclosure } from "./InspectorPreferences";
 import { getLayoutSize, getTranslate, setSize, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { SvgInspector } from "./SvgInspector";
 import { ImageControls } from "./ImageControls";
+import { LayoutItemControls } from "./LayoutItemControls";
 import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
 import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
@@ -230,6 +231,8 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       {paddingControls}
       <label className="property-checkbox"><input type="checkbox" checked={["hidden", "clip"].includes(read("overflow"))} onChange={(e) => set("overflow", e.target.checked ? "hidden" : "visible")} />Clip content</label>
     </Section>
+
+    <LayoutItemControls element={element as HTMLElement} onChange={onChange} />
 
     <Section title="Spacing" defaultOpen={false} onReset={resetGroup(paddingProps.filter((p) => p.startsWith("margin")))}>
       <div className="property-subheading"><span>Margin</span></div>

@@ -54,6 +54,7 @@ Open http://localhost:5180.
 
 - Design uses collapsible Layout, Spacing, Typography, Appearance, Stroke, Position and Effects sections. Text selections start with Spacing collapsed.
 - Flex/Grid controls include a nine-point alignment picker, axis gaps and grid tracks. The alignment picker accounts for RTL and reversed flex directions.
+- Children of Flex/Grid expose contextual item controls: grow/shrink/basis for Flex, row/column placement for Grid, plus self-alignment and CSS order. Direct children of a frame and children through `display: contents` wrappers are recognized; out-of-flow elements are excluded.
 - Edit padding together or per side. CSS values such as percentages, `auto`, `calc()` and variables are preserved in supported fields. Invalid values are marked without changing the element.
 - Numeric fields support Up/Down, Shift for steps of 10, and Alt for steps of 0.1. Escape cancels an unfinished field edit.
 - Blue markers identify inline overrides. Reset a single value or section to fall back to the stylesheet; these changes support Undo/Redo.

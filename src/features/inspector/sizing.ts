@@ -3,9 +3,25 @@ import { setSize, type Styled } from "@/features/canvas/elementStyle";
 export type SizeAxis = "width" | "height";
 export type SizeMode = "css" | "fixed" | "hug" | "fill" | "custom";
 
+export function layoutParent(element: Element): Element | null {
+  const parentOf = (node: Element) => node.parentElement ?? (node.getRootNode() instanceof ShadowRoot ? (node.getRootNode() as ShadowRoot).host : null);
+  let parent = parentOf(element);
+  while (parent && getComputedStyle(parent).display === "contents") parent = parentOf(parent);
+  return parent;
+}
+
+export function layoutItemKind(element: Element): "flex" | "grid" | null {
+  const own = getComputedStyle(element);
+  if (["absolute", "fixed"].includes(own.position) || ["none", "contents"].includes(own.display)) return null;
+  const parent = layoutParent(element);
+  if (!parent) return null;
+  const display = getComputedStyle(parent).display;
+  return display.includes("flex") ? "flex" : display.includes("grid") ? "grid" : null;
+}
+
 export function isFlexMainAxis(element: Element, axis: SizeAxis) {
-  const parent = element.parentElement;
-  if (!parent) return false;
+  const parent = layoutParent(element);
+  if (!parent || layoutItemKind(element) !== "flex") return false;
   const style = getComputedStyle(parent);
   return style.display.includes("flex") && style.flexDirection.startsWith("column") === (axis === "height");
 }
