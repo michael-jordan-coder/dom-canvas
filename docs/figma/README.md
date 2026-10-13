@@ -6,6 +6,8 @@
 
 ## Start here
 
+- **[Design panel goal and completion checklist](DESIGN_PANEL_GOAL.md)**: current
+  user priority, including a complete UI-state and behavior research inventory.
 - [Research plan and coverage](RESEARCH_PLAN.md): scope, open work, completion criteria.
 - [Method](METHOD.md): how to reproduce and qualify each observation.
 - [Environment and fixtures](ENVIRONMENT.md): approved test file, node IDs, access.

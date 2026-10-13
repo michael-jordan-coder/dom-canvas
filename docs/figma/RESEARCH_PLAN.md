@@ -1,5 +1,8 @@
 # Research goal and coverage
 
+Current explicit goal: [complete Design panel research, including UI](DESIGN_PANEL_GOAL.md).
+The broader canvas inventory below remains the long-term research backlog.
+
 ## User mandate
 
 Document everything that can be done on the Figma canvas through direct Computer Use
