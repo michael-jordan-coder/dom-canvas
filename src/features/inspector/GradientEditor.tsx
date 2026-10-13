@@ -2,6 +2,8 @@ import { InspectorIcon } from "./InspectorIcon";
 import { useState, type ReactNode } from "react";
 import { ColorField, Field } from "./InspectorControls";
 import { splitCss } from "./cssList";
+import { percentageStops } from "./gradientStops";
+import { GradientStopTrack } from "./GradientStopTrack";
 
 type Stop = { color: string; position: string };
 type Gradient = { angle: number; stops: Stop[] };
@@ -61,6 +63,7 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
     {layers.map((layer, index) => {
       const gradient = parseGradient(layer);
       const resolved = computedLayers.length === layers.length ? parseGradient(computedLayers[index]) : null;
+      const positions = gradient ? percentageStops(gradient.stops.map(stop => stop.position)) : null;
       return <div className="gradient-layer" key={index}>
         <div className="effect-heading"><span className="background-layer-label">{gradient ? "Linear gradient" : "Image / custom"} {layers.length > 1 ? index + 1 : ""}</span>
           <button className="inspector-icon" title="Duplicate background layer" aria-label={`Duplicate background layer ${index + 1}`} onClick={() => duplicate(index)}><InspectorIcon name="duplicate" /></button>
@@ -72,7 +75,7 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
         </div>
         <button className="gradient-summary" aria-label={gradient ? `Edit gradient ${index + 1}` : `Edit background layer ${index + 1}`} aria-expanded={expandedLayer === index} onClick={() => { setExpandedLayer(expandedLayer === index ? null : index); setSelectedStop(0); }}><span className="gradient-summary-swatch" style={{ backgroundImage: layer }} /><span>{gradient ? `${gradient.stops.length} colors · ${Math.round(gradient.angle)}°` : "Image / custom CSS"}</span><span className="gradient-disclosure">{expandedLayer === index ? "⌃" : "⌄"}</span></button>
         {gradient && expandedLayer === index ? <>
-          <div className="gradient-preview" style={{ backgroundImage: layer }} />
+          {positions ? <GradientStopTrack positions={positions} colors={gradient.stops.map((stop, i) => resolved?.stops[i]?.color ?? stop.color)} selected={Math.min(selectedStop, gradient.stops.length - 1)} label={`Gradient ${index + 1} selected stop position`} onChange={next => update(index, { ...gradient, stops: gradient.stops.map((stop, i) => ({ ...stop, position: `${next[i]}%` })) })} /> : <div className="gradient-preview" style={{ backgroundImage: layer }} />}
           <Field label={`Gradient ${index + 1} angle`} prefix="Angle" suffix="°" value={String(Math.round(gradient.angle * 100) / 100)} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) ? update(index, { ...gradient, angle: Number(v) }) : false} />
           <div className="gradient-stop-selector" role="group" aria-label={`Gradient ${index + 1} color stops`}>
             {gradient.stops.map((stop, stopIndex) => <button key={stopIndex} aria-label={`Select gradient ${index + 1} stop ${stopIndex + 1}`} aria-pressed={stopIndex === Math.min(selectedStop, gradient.stops.length - 1)} title={`Stop ${stopIndex + 1} · ${stop.position || "Auto"}`} onClick={() => setSelectedStop(stopIndex)}><span style={{ background: resolved?.stops[stopIndex]?.color ?? stop.color }} /><small>{stopIndex + 1}</small></button>)}

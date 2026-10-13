@@ -364,9 +364,11 @@ export function App() {
   useEffect(() => {
     const TOOL_KEYS: Record<string, Tool> = { v: "move", f: "frame", a: "frame", r: "rect", t: "text", h: "hand" };
     const onKey = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || isTyping(e) || isPopupControl(e)) return;
       const mod = e.metaKey || e.ctrlKey;
       const key = e.key.toLowerCase();
+      const target = e.composedPath()[0];
+      const rangeHistory = mod && (key === "z" || key === "y") && target instanceof HTMLInputElement && target.type === "range";
+      if (e.defaultPrevented || (isTyping(e) && !rangeHistory) || isPopupControl(e)) return;
 
       if (mod && key === "z") { e.preventDefault(); travel(e.shiftKey ? "redo" : "undo"); return; }
       if (mod && key === "y") { e.preventDefault(); travel("redo"); return; }
