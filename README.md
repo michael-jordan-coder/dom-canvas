@@ -112,3 +112,4 @@ Open http://localhost:5180.
 
 - Each sidebar has its own hide button and a compact restore button at the canvas edge. Panel visibility lasts for the session; Fit and zoom use the available canvas area. Action search can show/hide either panel, and Rename reveals Layers automatically.
 - In Design, action search includes `Go to …` for the selected layer’s available inspector sections. Choosing a result reveals the inspector, expands the section and moves keyboard focus to its heading.
+- Invalid inspector values keep keyboard focus on Enter so you can correct them immediately; Escape restores the current property value. Errors include an accessible recovery hint.

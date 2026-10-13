@@ -758,6 +758,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .reset-value:hover { color: var(--accent); background: var(--row-selected); }
 .field.invalid { border-color: var(--danger); }
 .invalid-value { width: 100%; color: var(--danger); font-size: 10px; margin-top: 3px; }
+.property-row:has(.invalid-value), .sizing-row:has(.invalid-value) { align-items: start; }
 .segmented { display: flex; padding: 2px; border-radius: 5px; background: var(--field); gap: 2px; min-height: 24px; }
 .segmented button { flex: 1; min-width: 0; padding: 2px 4px; border-radius: 3px; font-size: 11px; color: var(--text-secondary); }
 .segmented button:hover { color: var(--text); }

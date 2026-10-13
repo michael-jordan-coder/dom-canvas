@@ -71,13 +71,13 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   // Parent renders (for example, canvas panning) must not erase an edit in progress.
   useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
   const commit = () => {
-    if (cancelled.current) { cancelled.current = false; return; }
-    if (draft === value) return;
+    if (cancelled.current) { cancelled.current = false; return true; }
+    if (draft === value) { setInvalid(false); return true; }
     const numericValue = value.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
     const expression = numericValue ? numericExpression(draft) : null;
-    if (expression && "error" in expression) { setInvalid(true); return; }
+    if (expression && "error" in expression) { setInvalid(true); return false; }
     const next = expression ? `${expression.value}${numericValue![2]}` : draft.trim();
-    submit(next);
+    return submit(next) !== null;
   };
   const finishScrub = (cancel: boolean) => {
     if (!drag.current) return;
@@ -120,9 +120,10 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
         onPointerCancel={() => finishScrub(true)} onLostPointerCapture={() => finishScrub(false)}
         onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finishScrub(true); } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.focus(); } }}
       >{prefix}</span>}
-      <input ref={input} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} value={draft}
+      <input ref={input} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} aria-describedby={invalid ? `${listId}-error` : undefined} value={draft}
         onChange={(e) => { setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { setOptionsOpen(false); commit(); }} onFocus={(e) => e.target.select()}
         onKeyDown={(e) => {
+          if (e.nativeEvent.isComposing) return;
           if (suggestions && (e.key === "ArrowDown" || e.key === "ArrowUp") && !e.shiftKey && !e.altKey) {
             e.preventDefault(); e.stopPropagation();
             setOptionsOpen(true);
@@ -132,7 +133,11 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
           if (optionsOpen && (e.key === "Home" || e.key === "End")) { e.preventDefault(); e.stopPropagation(); setOptionIndex(e.key === "Home" ? 0 : options.length - 1); return; }
           if (optionsOpen && e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOptionsOpen(false); return; }
           if (optionsOpen && e.key === "Enter" && optionIndex >= 0 && options[optionIndex]) { e.preventDefault(); chooseOption(options[optionIndex].value); return; }
-          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Enter") {
+            e.preventDefault(); e.stopPropagation();
+            if (commit()) { cancelled.current = true; e.currentTarget.blur(); }
+            return;
+          }
           if (e.key === "Escape") { e.preventDefault(); cancelled.current = true; setDraft(value); setInvalid(false); e.currentTarget.blur(); }
           if (e.key === "ArrowUp" || e.key === "ArrowDown") {
             const match = draft.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
@@ -151,7 +156,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
       {options.length ? options.map((option, index) => <button type="button" role="option" tabIndex={-1} id={`${listId}-${index}`} aria-selected={index === optionIndex} key={option.value} onMouseDown={(e) => e.preventDefault()} onClick={() => chooseOption(option.value)}>{option.label ?? option.value}</button>) : <div className="field-options-empty">Press Enter to use this value</div>}
     </div>}
     {onReset && <button className="reset-value" title={`Reset ${label} to stylesheet`} aria-label={`Reset ${label} to stylesheet`} onMouseDown={(e) => e.preventDefault()} onClick={() => { setDraft(value); setInvalid(false); onReset(); }}>↺</button>}
-    {invalid && <span className="invalid-value" role="alert">Invalid value</span>}
+    {invalid && <span id={`${listId}-error`} className="invalid-value" role="alert">Invalid value · Esc to revert</span>}
   </div>;
 }
 
