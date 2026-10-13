@@ -40,6 +40,15 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   const drag = useRef<{ x: number; value: number; unit: string; initial: string; last: string; lastX: number; moved: boolean } | null>(null);
   const latestEdits = useRef(edits);
   latestEdits.current = edits;
+  const keyAdjustment = useRef<{ key: string; initial: string } | null>(null);
+  const finishKeys = (cancel: boolean) => {
+    const current = keyAdjustment.current;
+    if (!current) return false;
+    keyAdjustment.current = null;
+    latestEdits.current?.finish(cancel);
+    if (cancel) { setDraft(current.initial); setInvalid(false); }
+    return true;
+  };
   useEffect(() => {
     if (!scrubbing) return;
     document.documentElement.dataset.scrubbing = "";
@@ -47,7 +56,15 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
     window.addEventListener("keydown", escape, true);
     return () => { delete document.documentElement.dataset.scrubbing; window.removeEventListener("keydown", escape, true); };
   }, [scrubbing]);
-  useEffect(() => () => { if (drag.current) latestEdits.current?.finish(true); }, []);
+  useEffect(() => {
+    const finishOnWindowBlur = () => finishKeys(false);
+    window.addEventListener("blur", finishOnWindowBlur);
+    return () => {
+      window.removeEventListener("blur", finishOnWindowBlur);
+      finishKeys(true);
+      if (drag.current) latestEdits.current?.finish(true);
+    };
+  }, []);
   const [draft, setDraft] = useState(value);
   const [invalid, setInvalid] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -121,9 +138,15 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
         onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finishScrub(true); } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.focus(); } }}
       >{prefix}</span>}
       <input ref={input} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} aria-describedby={invalid ? `${listId}-error` : undefined} value={draft}
-        onChange={(e) => { setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { setOptionsOpen(false); commit(); }} onFocus={(e) => e.target.select()}
+        onChange={(e) => { finishKeys(false); setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { setOptionsOpen(false); if (!finishKeys(false)) commit(); }} onFocus={(e) => e.target.select()}
+        onKeyUp={(e) => { if (e.key === keyAdjustment.current?.key) finishKeys(false); }}
         onKeyDown={(e) => {
           if (e.nativeEvent.isComposing) return;
+          if (keyAdjustment.current && e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation(); finishKeys(true);
+            cancelled.current = true; e.currentTarget.blur(); return;
+          }
+          if (keyAdjustment.current && e.key !== keyAdjustment.current.key && !["Shift", "Alt"].includes(e.key)) finishKeys(false);
           if (suggestions && (e.key === "ArrowDown" || e.key === "ArrowUp") && !e.shiftKey && !e.altKey) {
             e.preventDefault(); e.stopPropagation();
             setOptionsOpen(true);
@@ -140,9 +163,14 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
           }
           if (e.key === "Escape") { e.preventDefault(); cancelled.current = true; setDraft(value); setInvalid(false); e.currentTarget.blur(); }
           if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            if (e.metaKey || e.ctrlKey) return;
             const match = draft.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
             if (!match) return;
             e.preventDefault(); e.stopPropagation();
+            if (!keyAdjustment.current && edits) {
+              keyAdjustment.current = { key: e.key, initial: value };
+              edits.begin();
+            }
             const step = (e.shiftKey ? 10 : e.altKey ? 0.1 : 1) * (e.key === "ArrowUp" ? 1 : -1);
             const next = `${Math.round((Number(match[1]) + step) * 100) / 100}${match[2]}`;
             setDraft(next); submit(next);
