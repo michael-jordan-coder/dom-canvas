@@ -705,6 +705,13 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .file-name .save-error { color: var(--danger); white-space: normal; font-size: 10px; }
 .toast { position: absolute; z-index: 6; bottom: 80px; left: 50%; transform: translateX(-50%); max-width: min(480px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 8px; background: var(--text); color: var(--panel); box-shadow: var(--shadow-panel); font-size: 12px; line-height: 1.5; pointer-events: none; }
 .layer-tree:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.layer-search { display: flex; align-items: center; gap: 6px; height: 24px; flex-shrink: 0; margin: 0 8px 6px; padding: 0 6px; background: var(--field); border-radius: 4px; }
+.layer-search:focus-within { box-shadow: 0 0 0 1px var(--accent); }
+.layer-search svg { width: 14px; height: 14px; fill: none; stroke: var(--text-secondary); stroke-width: 1.2; flex-shrink: 0; }
+.layer-search input { width: 100%; min-width: 0; border: 0; outline: none; padding: 0; background: transparent; color: var(--text); font: 11px var(--font); }
+.layer-search button { width: 16px; height: 20px; color: var(--text-secondary); }
+.layer-search-status { font-size: 10px; color: var(--text-secondary); padding: 0 12px 6px; }
+.layer[data-search-match="true"] .name { font-weight: 600; }
 .layer[role="treeitem"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* Property panel: compact controls, explicit hierarchy and CSS overrides. */

@@ -152,3 +152,9 @@ Browser QA on port 5181: 125% produced scale(1.25), invalid text was rejected, E
 Added a remembered Type options disclosure for HTML text, with independent italic, underline and strikethrough buttons, case/wrapping selectors and word spacing. The collapsed summary exposes active text styling. Decoration toggles preserve other computed line tokens. Expanded typography reset includes these new properties.
 
 Browser QA on port 5181: italic with underline and line-through computed correctly; toggling underline off preserved line-through, and Undo restored both. Uppercase left the source text unchanged, No wrap computed to nowrap and word spacing 3 computed to 3px. Typography reset restored normal/none/none/0px; Undo restored italic/underline/uppercase/3px. Screenshot: /tmp/dom-canvas-type-options.png. Build and diff check passed.
+
+## Layer search
+
+Added a 24px search field with match count, clear button and empty state. Search indexes frame names, layer names, direct text, tags, IDs and classes; results keep ancestor context, automatically expose matching paths, and use a separate collapse set. Enter/Down selects the first visible match. Escape clears without invoking canvas shortcuts.
+
+Browser QA on port 5181: get started returned Sample > card > actions > Get started; clearing kept card collapsed. .flex-qa returned only its frame and itself, and Enter focused/selected flex-qa. A missing query produced zero rows and No matching layers, Escape restored eleven original rows. button returned both button layers with their ancestors. Screenshot: /tmp/dom-canvas-layer-search.png. Build and diff check passed.

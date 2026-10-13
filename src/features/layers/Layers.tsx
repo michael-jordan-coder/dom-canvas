@@ -24,6 +24,28 @@ export function Layers(props: Props) {
   const [expanded, setExpanded] = useState(() => new Set<Element>());
   const [collapsedArtboards, setCollapsedArtboards] = useState(() => new Set<string>());
   const selectedRowRef = useRef<HTMLDivElement>(null);
+  const treeRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const [searchCollapsed, setSearchCollapsed] = useState(() => new Set<Element | string>());
+  const needle = query.trim().toLocaleLowerCase();
+  const matches = new Set<Element>();
+  const visible = new Set<Element>();
+  const matchingFrames = new Set<string>();
+  if (needle) for (const ab of artboards) {
+    if (ab.name.toLocaleLowerCase().includes(needle)) matchingFrames.add(ab.id);
+    const root = hosts.get(ab.id)?.shadowRoot;
+    for (const el of Array.from(root?.querySelectorAll("*") ?? [])) {
+      if (el.tagName === "STYLE") continue;
+      const directText = Array.from(el.childNodes).filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join(" ");
+      const searchable = [layerName(el), el.tagName, el.id, el.id ? `#${el.id}` : "", ...Array.from(el.classList).flatMap(name => [name, `.${name}`]), directText].join(" ");
+      if (!searchable.toLocaleLowerCase().includes(needle)) continue;
+      matches.add(el);
+      for (let current: Element | null = el; current && !visible.has(current); current = current.parentElement) visible.add(current);
+    }
+  }
+  const updateQuery = (value: string) => { setQuery(value); setSearchCollapsed(new Set()); onHover(null); };
+  const toggleSearch = (key: Element | string) => setSearchCollapsed(previous => { const next = new Set(previous); if (next.has(key)) next.delete(key); else next.add(key); return next; });
 
   useEffect(() => {
     if (selection.kind !== "element") return;
@@ -44,6 +66,7 @@ export function Layers(props: Props) {
 
   const toggle = (el: Element) => (e: MouseEvent) => {
     e.stopPropagation();
+    if (needle) { toggleSearch(el); return; }
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(el)) next.delete(el);
@@ -54,6 +77,7 @@ export function Layers(props: Props) {
 
   const toggleArtboard = (id: string) => (e: MouseEvent) => {
     e.stopPropagation();
+    if (needle) { toggleSearch(id); return; }
     setCollapsedArtboards((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -94,8 +118,8 @@ export function Layers(props: Props) {
 
   const renderNode = (el: Element, depth: number, artboardId: string, within: boolean) => {
     const isSelected = el === selectedEl;
-    const children = Array.from(el.children);
-    const open = expanded.has(el);
+    const children = Array.from(el.children).filter(child => !needle || visible.has(child));
+    const open = needle ? !searchCollapsed.has(el) : expanded.has(el);
     const Icon = layerIcon(el);
     return (
       <div key={keyFor(el)}>
@@ -104,6 +128,7 @@ export function Layers(props: Props) {
           role="treeitem"
           tabIndex={-1}
           aria-label={layerName(el)}
+          data-search-match={needle && matches.has(el) ? "true" : undefined}
           aria-selected={isSelected}
           aria-expanded={children.length ? open : undefined}
           aria-level={depth + 1}
@@ -134,13 +159,24 @@ export function Layers(props: Props) {
   };
 
   return (
-    <div className="panel-scroll layer-tree" role="tree" aria-label="Layers" tabIndex={0} data-version={version} onKeyDown={navigateTree} onMouseLeave={() => onHover(null)}>
+    <>
+    <div className="layer-search">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4"/><path d="m10 10 3 3"/></svg>
+      <input ref={searchRef} aria-label="Search layers" placeholder="Search layers" value={query} onChange={(e) => updateQuery(e.target.value)} onKeyDown={(e) => {
+        if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (query) updateQuery(""); else e.currentTarget.blur(); }
+        if (e.key === "Enter" || e.key === "ArrowDown") { e.preventDefault(); e.stopPropagation(); const row = treeRef.current?.querySelector<HTMLElement>('[data-search-match="true"]') ?? treeRef.current?.querySelector<HTMLElement>('[role="treeitem"]'); row?.focus(); row?.click(); }
+      }} />
+      {query && <button aria-label="Clear layer search" onClick={() => { updateQuery(""); searchRef.current?.focus(); }}>×</button>}
+    </div>
+    {needle && <div className="layer-search-status" role="status">{matches.size + matchingFrames.size ? `${matches.size + matchingFrames.size} ${matches.size + matchingFrames.size === 1 ? "match" : "matches"}` : "No matching layers"}</div>}
+    <div ref={treeRef} className="panel-scroll layer-tree" role="tree" aria-label="Layers" tabIndex={0} data-version={version} onKeyDown={navigateTree} onMouseLeave={() => onHover(null)}>
       {artboards.length === 0 && <div className="empty">Draw a frame, paste HTML or import a site to add layers.</div>}
       {artboards.map((ab) => {
         const root = hosts.get(ab.id)?.shadowRoot;
         const isSelected = selection.kind === "artboard" && selection.artboardId === ab.id;
-        const open = !collapsedArtboards.has(ab.id);
-        const children = root ? Array.from(root.children).filter((el) => el.tagName !== "STYLE") : [];
+        const open = needle ? !searchCollapsed.has(ab.id) : !collapsedArtboards.has(ab.id);
+        const children = root ? Array.from(root.children).filter((el) => el.tagName !== "STYLE" && (!needle || visible.has(el))) : [];
+        if (needle && !matchingFrames.has(ab.id) && !children.length) return null;
         return (
           <div key={ab.id}>
             <div
@@ -148,6 +184,7 @@ export function Layers(props: Props) {
               role="treeitem"
               tabIndex={-1}
               aria-label={ab.name}
+              data-search-match={needle && matchingFrames.has(ab.id) ? "true" : undefined}
               aria-selected={isSelected}
               aria-expanded={children.length ? open : undefined}
               aria-level={1}
@@ -177,6 +214,7 @@ export function Layers(props: Props) {
         );
       })}
     </div>
+    </>
   );
 }
 
