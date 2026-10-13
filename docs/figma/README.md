@@ -19,6 +19,8 @@
 - [Text](topics/text.md): click creation, drawn boxes, sizing modes.
 - [Input lifecycle](topics/input-lifecycle.md): expressions, invalid values, arrows,
   Tab/Escape and measured focus wrappers.
+- [Fill and effect editors](topics/paint-effects.md): paint modes, gradient context,
+  shadow editing and close/hide/remove behavior.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.

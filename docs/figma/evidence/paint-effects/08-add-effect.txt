@@ -1,0 +1,214 @@
+- application
+- status: Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+- status
+- region:
+  - toolbar:
+    - button:
+    - separator
+    - button [expanded]:
+    - button:
+    - button:
+    - button:
+    - separator
+    - button:
+  - button: Untitled
+  - generic: File name
+  - button:
+  - button:
+  - link:
+    - /url: https://www.figma.com/files/team/1669091168837591051/project/649249618
+    - text: community
+  - heading [level=2]:
+    - button [expanded]:
+      - generic: Pages
+    - button:
+    - button:
+  - grid:
+    - row:
+      - gridcell:
+        - button:
+          - generic: Page 1
+    - row:
+      - gridcell:
+        - button:
+          - generic: Page 2
+  - slider
+  - heading [level=2]:
+    - button [expanded]:
+      - generic: Layers
+    - button:
+  - treegrid:
+    - row:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 2
+    - row [selected]:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 1
+    - row:
+      - gridcell:
+      - gridcell:
+        - generic: A drawn text box keeps the width and height that were drawn. This line checks wrapping and overflow.
+    - row [expanded]:
+      - button:
+      - gridcell:
+      - gridcell:
+        - generic: Frame 3
+    - row [level=1]:
+      - gridcell:
+      - gridcell:
+        - generic: Text tool comparison
+  - slider
+- button:
+- button:
+- button:
+- button: Share
+- tablist:
+  - tab [selected]:
+    - generic: Design
+    - generic: Design
+  - tab:
+    - generic: Prototype
+    - generic: Prototype
+- button:
+  - text: 125%
+- button:
+  - generic: Frame
+- checkbox
+- generic: Toggle ready for dev status
+- button:
+- checkbox
+- generic: Use as mask
+- heading [level=2]: Position
+- generic: Alignment
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- button [disabled]:
+- generic: Position
+- generic: X
+- spinbutton: "-99"
+- generic: "Y"
+- spinbutton: "-19"
+- generic: Rotation
+- spinbutton: 0°
+- button:
+- button:
+- button:
+- heading [level=2]: Layout
+- button:
+- checkbox
+- generic: Toggle auto layout
+- generic: Flow
+- radiogroup:
+  - generic: Layout
+  - radio [checked]
+  - generic: Freeform
+  - radio
+  - generic: Vertical
+  - radio
+  - generic: Horizontal
+  - radio
+  - generic: Grid
+- generic: Dimensions
+- generic: W
+- textbox: "150"
+- generic: H
+- textbox: "125"
+- checkbox
+- generic: Lock aspect ratio
+- checkbox [checked]
+- generic: Clip content
+- heading [level=2]: Appearance
+- checkbox
+- generic: Hide
+- button:
+- textbox: 100%
+- textbox: "0"
+- button:
+- heading [level=2]: Fill
+- button:
+- button:
+- grid:
+  - row:
+    - gridcell:
+      - button
+      - generic: Color
+      - generic: Autofill available. Type to see suggestions.
+      - combobox: FFFFFF
+      - textbox: "100"
+      - generic: "%"
+    - gridcell:
+      - checkbox [checked]
+      - generic: Toggle visibility
+    - gridcell:
+      - button:
+- button:
+  - heading [level=2]: Stroke
+- button:
+- button:
+- button:
+  - heading [level=2]: Effects
+- button:
+- button:
+- button:
+  - heading [level=2]: Layout guide
+- button:
+- button:
+- button:
+  - generic: Export
+- button:
+- slider
+- region:
+  - toolbar:
+    - button [pressed]:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - button:
+    - radiogroup:
+      - generic: Toolbelt Mode
+      - radio
+      - generic: Draw
+      - radio [checked]
+      - generic: Design
+      - radio
+      - generic: Motion
+      - radio
+      - generic: Dev Mode
+- region:
+  - toolbar:
+    - button:
+- alert
+- alert
+- menu:
+  - menuitem "Inner shadow" [active]:
+    - text: Inner shadow
+  - menuitem "Drop shadow":
+    - text: Drop shadow
+  - menuitem "Layer blur":
+    - text: Layer blur
+  - menuitem "Background blur":
+    - text: Background blur
+  - menuitem "Noise":
+    - text: Noise
+  - menuitem "Texture":
+    - text: Texture
+  - menuitem "Glass":
+    - text: Glass
+  - separator
+  - menuitem "Shader":
+    - text: Shader
+    - note:
+      - generic: Beta

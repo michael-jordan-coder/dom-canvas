@@ -32,9 +32,9 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Parent-child dependencies | Hug/Fill/Fixed availability, parent effects, child position, min/max, constraints | Enabled/disabled controls, mode badges, contextual menus | Partial: populated parent/child, Fill reflow, min width, Ignore layout |
 | Text | Resize modes, content editing, font family/style/weight/size, line height, spacing, paragraphs, decoration, case, alignment, direction | Font menus, mixed typography, type settings, resizing states | Partial: resizing and Undo |
 | Appearance | Visibility, opacity, blend modes, radii and individual corners | Shared row geometry, toggles, expanded corner controls | Measured basic inputs only |
-| Fills | Solid, gradient/image options exposed by UI, alpha, multiple fills, order, visibility, remove | Swatches, fields, picker layouts, handles, menus, previews | One color input measured |
+| Fills | Solid, gradient/image options exposed by UI, alpha, multiple fills, order, visibility, remove | Swatches, fields, picker layouts, handles, menus, previews | Partial: Solid/Gradient context and committed close; color input measured |
 | Strokes | Width, alignment, sides, joins/caps/dashes where available, multiple strokes | Rows, menus, advanced settings, unavailable states | Open |
-| Effects | Types exposed by UI, parameters, order, visibility, add/remove, preview/cancel | Effect rows, floating editors, icons, overflow behavior | Open |
+| Effects | Types exposed by UI, parameters, order, visibility, add/remove, preview/cancel | Effect rows, floating editors, icons, overflow behavior | Partial: Drop shadow add/edit/close/hide/remove |
 | Styles/variables | Binding, modes, source indicators, overrides, reset/detach where available | Menus, search, badges, linked/mixed states | Open |
 | Components/instances | Properties, variants, overrides, reset, instance-specific actions | Context header, property editors, unavailable actions | Open |
 | Other Design sections | Selection colors, layout guides, export, contextual sections discovered during research | Collapsed/expanded/empty/populated states | Inventory only |

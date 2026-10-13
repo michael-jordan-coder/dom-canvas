@@ -1,0 +1,12 @@
+{
+  "bg": "rgba(0, 0, 0, 0)",
+  "padding": "0px",
+  "radius": "0px",
+  "rect": {
+    "height": 489,
+    "width": 240,
+    "x": 269,
+    "y": 388
+  },
+  "shadow": "none"
+}
