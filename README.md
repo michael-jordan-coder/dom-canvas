@@ -109,3 +109,5 @@ Open http://localhost:5180.
 
 - Element rows also offer canvas locking. Locked elements and their descendants ignore canvas selection, dragging, resizing, double-click text editing, keyboard nudges and deletion/reordering. Select them in Layers to unlock or edit properties intentionally. Locks support Undo and survive reload; moving/removing an unlocked ancestor can still affect its locked children.
 - Imported links/buttons/forms are design elements on the canvas: native click, auxiliary-click, submit and reset activation are suppressed. Double-click editable text to edit it in place; ending the edit commits through normal history.
+
+- Each sidebar has its own hide button and a compact restore button at the canvas edge. Panel visibility lasts for the session; Fit and zoom use the available canvas area. Action search can show/hide either panel, and Rename reveals Layers automatically.

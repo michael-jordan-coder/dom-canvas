@@ -8,6 +8,7 @@ import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
 import { ActionSearch } from "@/features/canvas/ActionSearch";
 import { Toolbar } from "@/features/canvas/Toolbar";
 import { ZoomControl } from "@/features/canvas/ZoomControl";
+import { PanelToggle } from "@/features/canvas/PanelToggle";
 import type { Artboard, Camera, Selection, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
 import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
@@ -52,12 +53,15 @@ export function App() {
   const [htmlDraft, setHtmlDraft] = useState(emptyHtmlDraft);
   const closeActionSearch = useCallback(() => setActionSearchOpen(false), []);
   const [uiHidden, setUiHidden] = useState(false);
+  const [layersVisible, setLayersVisible] = useState(true);
+  const [inspectorVisible, setInspectorVisible] = useState(true);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [selectionMenu, setSelectionMenu] = useState<MenuAnchor | null>(null);
   const [renameRequest, setRenameRequest] = useState<{ target: Element | string } | null>(null);
   const renameSelection = useCallback(() => {
     if (selection.kind === "none") return;
     setUiHidden(false);
+    setLayersVisible(true);
     setRenameRequest({ target: selection.kind === "element" ? selection.element : selection.artboardId });
   }, [selection]);
   const closeSelectionMenu = useCallback(() => setSelectionMenu(null), []);
@@ -249,10 +253,10 @@ export function App() {
   }, [doc, selection, bump]);
 
   const viewport = useCallback(() => {
-    const inset = uiHidden ? 16 : PANEL_INSET;
-    const rightInset = uiHidden ? 16 : inspectorTab === "css" ? 396 : PANEL_INSET;
+    const inset = uiHidden || !layersVisible ? 16 : PANEL_INSET;
+    const rightInset = uiHidden || !inspectorVisible ? 16 : inspectorTab === "css" ? 396 : PANEL_INSET;
     return { left: inset, top: uiHidden ? 16 : 60, width: Math.max(80, window.innerWidth - inset - rightInset), height: Math.max(80, window.innerHeight - (uiHidden ? 16 : 60) - (uiHidden ? 16 : TOOLBAR_INSET)) };
-  }, [uiHidden, inspectorTab]);
+  }, [uiHidden, inspectorTab, layersVisible, inspectorVisible]);
 
   useLayoutEffect(() => {
     const id = pendingFocus.current;
@@ -465,8 +469,10 @@ export function App() {
     { label: "Redo", shortcut: "⇧ ⌘/Ctrl Z", disabled: !doc.canRedo, run: () => travel("redo") },
     ...selectionActions,
     ...inspectorActions,
-    { label: "Edit CSS", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
-    { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorTab("design"); } },
+    { label: "Edit CSS", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
+    { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("design"); } },
+    { label: layersVisible ? "Hide layers panel" : "Show layers panel", run: () => { setUiHidden(false); setLayersVisible(value => !value); } },
+    { label: inspectorVisible ? "Hide inspector panel" : "Show inspector panel", run: () => { setUiHidden(false); setInspectorVisible(value => !value); } },
     { label: "Fit all frames", shortcut: "⇧ 1", disabled: !artboards.length, run: zoomToFit },
     { label: "Zoom to 100%", shortcut: "⇧ 0", run: () => setZoom(1) },
     { label: uiHidden ? "Show interface" : "Hide interface", shortcut: "⌘/Ctrl \\", run: () => setUiHidden(value => !value) },
@@ -474,7 +480,7 @@ export function App() {
   ];
 
   return (
-    <div className={`app${uiHidden ? " ui-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
+    <div className={`app${uiHidden ? " ui-hidden" : ""}${!layersVisible ? " layers-hidden" : ""}${!inspectorVisible ? " inspector-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
       {fonts && <style>{fonts}</style>}
       <Canvas
         artboards={artboards}
@@ -502,6 +508,7 @@ export function App() {
             <small role="status" className={doc.saveStatus.startsWith("Not saved") ? "save-error" : ""}>{doc.saveStatus}</small>
           </div>
           <FileControls onSave={saveProject} onOpen={openProject} onError={setNotice} />
+          <PanelToggle side="left" visible onToggle={() => setLayersVisible(false)} />
         </div>
         <div className="section-label">Layers<div className="history-controls"><button title="Undo (⌘/Ctrl+Z)" disabled={!doc.canUndo} onClick={() => travel("undo")}>Undo</button><button title="Redo (⌘/Ctrl+Shift+Z)" disabled={!doc.canRedo} onClick={() => travel("redo")}>Redo</button></div></div>
         <Layers
@@ -535,6 +542,7 @@ export function App() {
         </div>
           <button className="copy-control" onClick={copyCode} disabled={!activeArtboard} title="Copy frame HTML and CSS" aria-label={copied ? "Copied" : "Copy frame"}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="8" rx="1.5"/><path d="M9.5 3H4A1.5 1.5 0 0 0 2.5 4.5V10"/></svg></button>
           <button className="inspector-icon" disabled={selection.kind === "none"} aria-label="Selection actions" aria-haspopup="menu" aria-expanded={!!selectionMenu} onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setSelectionMenu(selectionMenu ? null : { x: r.right - 208, y: r.bottom + 4, returnFocus: e.currentTarget }); }}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r=".75"/><circle cx="8" cy="8" r=".75"/><circle cx="13" cy="8" r=".75"/></svg></button>
+          <PanelToggle side="right" visible onToggle={() => setInspectorVisible(false)} />
         </div>
         {activeArtboard && <SelectionPath selection={selection} artboard={activeArtboard} onSelect={setSelection} />}
         {inspectorTab === "design" && activeArtboard && (cssDrafts[activeArtboard.id] !== undefined || hasElementCssDraft) && <div className="draft-notice">{hasElementCssDraft ? "Element CSS draft kept. Open CSS to apply or discard." : "Frame CSS draft kept. Open CSS to preview or apply."}</div>}
@@ -558,6 +566,8 @@ export function App() {
         <button title="Fit all frames (Shift+1)" disabled={!artboards.length} onClick={zoomToFit}>Fit all</button>
         <button title="Fit selection (Shift+2)" disabled={selection.kind === "none"} onClick={zoomToSelection}>Fit selection</button>
       </div>
+      {!layersVisible && <PanelToggle side="left" visible={false} onToggle={() => setLayersVisible(true)} />}
+      {!inspectorVisible && <PanelToggle side="right" visible={false} onToggle={() => setInspectorVisible(true)} />}
       {notice && <div className="toast" role="status">{notice}</div>}
       {selectionMenu && selection.kind !== "none" && <SelectionMenu anchor={selectionMenu} onClose={closeSelectionMenu} actions={[...selectionActions, ...inspectorActions]} />}
       {actionSearchOpen && <ActionSearch actions={searchActions} onClose={closeActionSearch} />}

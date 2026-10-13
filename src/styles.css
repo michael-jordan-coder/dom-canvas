@@ -1019,3 +1019,16 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .html-import-footer span { color: var(--text-secondary); font-size: 10px; }
 .html-import-footer button { flex-shrink: 0; }
 .html-import-error { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
+.app.layers-hidden .panel.left, .app.inspector-hidden .panel.right { display: none; }
+.panel-toggle { flex-shrink: 0; }
+.panel-restore { position: absolute; top: 8px; z-index: 4; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 7px; background: var(--panel); box-shadow: var(--shadow-panel); }
+.panel-restore.left { left: 8px; }
+.panel-restore.right { right: 8px; }
+.panel-restore:hover { background: var(--field); }
+.app.layers-hidden .canvas-navigation { left: 48px; }
+.app.inspector-hidden .canvas-navigation { right: 48px; }
+.app.ui-hidden .panel-restore { display: none; }
+.canvas-navigation { overflow-x: auto; justify-content: flex-start; scrollbar-width: none; }
+.canvas-navigation > :first-child { margin-left: auto; }
+.canvas-navigation > :last-child { margin-right: auto; }
+.canvas-navigation > * { flex-shrink: 0; }
