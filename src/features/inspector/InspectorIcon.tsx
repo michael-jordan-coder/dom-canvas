@@ -1,4 +1,7 @@
 const paths = {
+  italic: 'M6 3h7M3 13h7M10 3 6 13',
+  underline: 'M4 2v5a4 4 0 0 0 8 0V2M3 14h10',
+  strikethrough: 'M12 4c-1-3-8-3-8 1 0 2 3 2 4 3s4 1 4 3c0 3-7 4-9 1M2 8h12',
   rotation: 'M3 8a5 5 0 1 0 2-4M2 2v4h4',
   flowHorizontal: "M2 8h12M10 4l4 4-4 4",
   flowVertical: "M8 2v12M4 10l4 4 4-4",

@@ -146,3 +146,9 @@ Browser QA on port 5181: opened Position and individual padding, edited rotation
 Replaced the percent reset button with an editable spinbutton, supporting percent suffix input, validation, Enter/blur apply, Escape cancellation and keyboard increments. Uses existing 2–800% camera limits; Shift+0 remains the actual-size shortcut. Corrected Design viewport's stale 304px right inset to 257px, matching the compact panel.
 
 Browser QA on port 5181: 125% produced scale(1.25), invalid text was rejected, Escape restored the value, ArrowUp reached 135%, and 999 clamped to 800%. Fit selection centered the frame at x756, exactly the free-space midpoint in Design; CSS mode centered at x686.50003 against midpoint686.5. Screenshot: /tmp/dom-canvas-precise-zoom.png. Build and diff check passed.
+
+## Compact typography options
+
+Added a remembered Type options disclosure for HTML text, with independent italic, underline and strikethrough buttons, case/wrapping selectors and word spacing. The collapsed summary exposes active text styling. Decoration toggles preserve other computed line tokens. Expanded typography reset includes these new properties.
+
+Browser QA on port 5181: italic with underline and line-through computed correctly; toggling underline off preserved line-through, and Undo restored both. Uppercase left the source text unchanged, No wrap computed to nowrap and word spacing 3 computed to 3px. Typography reset restored normal/none/none/0px; Undo restored italic/underline/uppercase/3px. Screenshot: /tmp/dom-canvas-type-options.png. Build and diff check passed.

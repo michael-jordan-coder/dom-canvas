@@ -68,6 +68,7 @@ Open http://localhost:5180.
 - Open/closed sections, individual padding/corners/strokes, constraints and Layout options are remembered across selection changes, Undo, inspector tabs and reloads. Frame, HTML and SVG section preferences are separate and do not enter document history.
 - Width/height support CSS, Fixed, Hug and Fill, plus constraints and ratio locking.
 - Numeric labels scrub with one undo step. Colors, gradients, shadows and SVG properties have contextual controls.
+- HTML typography includes remembered Type options for italic, independent underline/strikethrough, case, wrapping and word spacing. Case changes appearance without rewriting the text content. Typography reset restores stylesheet values and supports Undo.
 - Position includes individual CSS rotation and transform origin. Bare angles use degrees; `deg`, `rad`, `grad`, `turn`, explicit axes and browser-supported CSS expressions are accepted. Rotation adds to any existing `transform` rule; invalid input leaves the element unchanged.
 - Selection outlines and resize handles follow affine 2D transforms. Rotated resizing keeps the opposite corner anchored; perspective and fragmented inline boxes use an axis-aligned fallback.
 - Selected-element CSS uses explicit Apply/Discard. If Design changes while a draft is open, the editor shows a comparison before an explicit replacement. Element drafts survive tab/selection changes for the same live DOM node, but not reloads or document remounts.

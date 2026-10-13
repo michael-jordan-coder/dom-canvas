@@ -95,6 +95,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const [individualStroke, setIndividualStroke] = useInspectorDisclosure("stroke-sides", false);
   const [showConstraints, setShowConstraints] = useInspectorDisclosure("constraints", false);
   const [layoutOptions, setLayoutOptions] = useInspectorDisclosure("layout-options", false);
+  const [typeOptions, setTypeOptions] = useInspectorDisclosure("type-options", false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.trim());
@@ -124,7 +125,12 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const isGrid = display.includes("grid");
   const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "justify-items", "align-items", "direction", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
   const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
-  const typographyProps = ["font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-align", "color"];
+  const typographyProps = ["font-family", "font-size", "font-weight", "font-style", "line-height", "letter-spacing", "word-spacing", "text-align", "text-transform", "text-decoration-line", "white-space", "color"];
+  const decorationLines = computed.textDecorationLine.split(/\s+/).filter(value => value !== "none");
+  const toggleDecoration = (line: string) => {
+    const next = decorationLines.includes(line) ? decorationLines.filter(value => value !== line) : [...decorationLines, line];
+    set("text-decoration-line", next.join(" ") || "none");
+  };
   const sizeField = (axis: SizeAxis) => {
     const label = axis === "width" ? "Width" : "Height";
     const mode = sizeMode(styled, axis);
@@ -236,6 +242,19 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       <Row>{property("Line height", "line-height", <InspectorIcon name="lineHeight" />, false)}{property("Letter spacing", "letter-spacing", <InspectorIcon name="tracking" />)}</Row>
       <Segmented label="Text alignment" value={read("text-align") === "left" ? (computed.direction === "rtl" ? "end" : "start") : read("text-align") === "right" ? (computed.direction === "rtl" ? "start" : "end") : read("text-align")} options={[{ value: "start", label: "Start", icon: <InspectorIcon name={computed.direction === "rtl" ? "end" : "start"} /> }, { value: "center", label: "Center", icon: <InspectorIcon name="center" /> }, { value: "end", label: "End", icon: <InspectorIcon name={computed.direction === "rtl" ? "start" : "end"} /> }, { value: "justify", label: "Justify", icon: <InspectorIcon name="justify" /> }]} onChange={(v) => set("text-align", v)} />
       <ColorField label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
+      <details className="layout-details" open={typeOptions} onToggle={(e) => setTypeOptions(e.currentTarget.open)}>
+        <summary><span>Type options</span><span className="layout-state">{[computed.fontStyle !== "normal" ? "Italic" : "", decorationLines.includes("underline") ? "Underline" : "", decorationLines.includes("line-through") ? "Strike" : "", computed.textTransform !== "none" ? computed.textTransform : ""].filter(Boolean).join(" · ")}</span></summary>
+        <div className="layout-details-body">
+          <div className="segmented" role="group" aria-label="Text style">
+            <button title="Italic" aria-label="Italic" aria-pressed={computed.fontStyle !== "normal"} onClick={() => set("font-style", computed.fontStyle === "normal" ? "italic" : "normal")}><InspectorIcon name="italic" /></button>
+            <button title="Underline" aria-label="Underline" aria-pressed={decorationLines.includes("underline")} onClick={() => toggleDecoration("underline")}><InspectorIcon name="underline" /></button>
+            <button title="Strikethrough" aria-label="Strikethrough" aria-pressed={decorationLines.includes("line-through")} onClick={() => toggleDecoration("line-through")}><InspectorIcon name="strikethrough" /></button>
+          </div>
+          <SelectField label="Case" value={read("text-transform")} options={[{ value: "none", label: "Original" }, { value: "uppercase", label: "UPPERCASE" }, { value: "lowercase", label: "lowercase" }, { value: "capitalize", label: "Title Case" }]} onCommit={(v) => set("text-transform", v)} />
+          <SelectField label="Wrapping" value={read("white-space")} options={[{ value: "normal", label: "Wrap" }, { value: "nowrap", label: "No wrap" }, { value: "pre-wrap", label: "Preserve breaks" }, { value: "break-spaces", label: "Preserve spaces" }]} onCommit={(v) => set("white-space", v)} />
+          {property("Word spacing", "word-spacing", "Words")}
+        </div>
+      </details>
       {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
     </Section>}
 
