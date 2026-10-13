@@ -143,3 +143,7 @@ Final Star18:79 again has no effects, D9D9D9 Fill100%, object opacity100%, origi
 Inner-shadow pass: Star18:79 and Ellipse18:77 shadow effects added/tested/removed.
 Both no effects, D9D9D9 Fill100%, object opacity100%, original geometry. Ellipse
 selected at240/50,100 ×100, zoom101%, editor closed. See topics/inner-shadow.md.
+
+Alignment pass: original coordinates individually restored after align/distribute/
+spacing tests: Star240/200, Polygon10/200, Ellipse240/50, all100 ×100 and no effects.
+Ellipse selected, canvas43%, no dialog. See topics/alignment.md.
