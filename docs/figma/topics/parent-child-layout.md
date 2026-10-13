@@ -133,3 +133,13 @@ its transient editor had closed; no CSS measurement is claimed for this field.
 Latest retained state supersedes PC03: Frame 3 is 80 Fixed × 50 Hug; its child
 is 100 Fill (min 100) × 30 Hug, Auto height, relative -10/10. Max constraints,
 removing limits, conflicting min/max, and Undo of limits remain open.
+
+
+## PC06 — Undo-min attempt remains inconclusive
+
+One global Meta+Z issued from the Move button resulted in the parent panel being
+selected, with parent 80 × 50 still present. Reselecting the child still showed
+100 Fill + min width and height 30. The attempt did not verify removal of the
+minimum. Do not infer history grouping or successful rollback from the shortcut
+alone. [Immediate state](../evidence/parent-child/23-undo-min.txt),
+[child reselected](../evidence/parent-child/24-min-after-undo-reselected.txt).

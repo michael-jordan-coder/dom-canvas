@@ -28,8 +28,8 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Selection context | None, single/multiple, homogeneous/mixed types, locked/hidden, editable/unsupported properties | Headers, icons, section order, visibility, disabled and Mixed states | Partial: frames and text |
 | Object types | Frame, text, primitive shape, vector, group, section, component, instance and variants where available | Contextual controls and actions per type | Partial: frame/text |
 | Position | X/Y, rotation, flip, alignment/distribution, constraints, absolute positioning | Fields, icons, alignment groups, menus, axis labels | Availability observed; actions mostly open |
-| Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: empty horizontal frame |
-| Parent-child dependencies | Hug/Fill/Fixed availability, parent effects, child position, min/max, constraints | Enabled/disabled controls, mode badges, contextual menus | Open |
+| Layout | Freeform, auto-layout directions, wrap, grid, padding, gap, container alignment, clipping | Section transitions, selectors, sizing controls, expandable options | Partial: empty/populated horizontal frame |
+| Parent-child dependencies | Hug/Fill/Fixed availability, parent effects, child position, min/max, constraints | Enabled/disabled controls, mode badges, contextual menus | Partial: populated parent/child, Fill reflow, min width, Ignore layout |
 | Text | Resize modes, content editing, font family/style/weight/size, line height, spacing, paragraphs, decoration, case, alignment, direction | Font menus, mixed typography, type settings, resizing states | Partial: resizing and Undo |
 | Appearance | Visibility, opacity, blend modes, radii and individual corners | Shared row geometry, toggles, expanded corner controls | Measured basic inputs only |
 | Fills | Solid, gradient/image options exposed by UI, alpha, multiple fills, order, visibility, remove | Swatches, fields, picker layouts, handles, menus, previews | One color input measured |
@@ -38,10 +38,10 @@ evidence, measured UI states and an explicit list of remaining uncertainties.
 | Styles/variables | Binding, modes, source indicators, overrides, reset/detach where available | Menus, search, badges, linked/mixed states | Open |
 | Components/instances | Properties, variants, overrides, reset, instance-specific actions | Context header, property editors, unavailable actions | Open |
 | Other Design sections | Selection colors, layout guides, export, contextual sections discovered during research | Collapsed/expanded/empty/populated states | Inventory only |
-| Numeric/text input lifecycle | Focus, select-all, typing, expressions, units, arrows/modifiers, scrub, Enter/blur/Escape, invalid input | Caret/selection, focus rings, hover cursors, errors, disabled presentation | Partial: committed dimensions |
+| Numeric/text input lifecycle | Focus, select-all, typing, expressions, units, arrows/modifiers, scrub, Enter/blur/Escape, invalid input | Caret/selection, focus rings, hover cursors, errors, disabled presentation | Partial: Width expressions, invalid input, arrows, Tab/Escape; other controls open |
 | Multi-edit transactions | Common/mixed, supported subsets, per-target restoration, undo/redo, picker preview/cancel | Mixed placeholders, shared fields, aggregate controls | Partial: shared frame width + Undo |
 | Canvas synchronization | Move/resize/text/layout changes reflected in panel, panel edits reflected on canvas | Live values, selection changes, feedback and retained focus | Reflow observed; broad matrix open |
-| Panel shell | Scroll, collapse, navigation, floating editors, keyboard traversal, narrow window | Width, spacing, dividers, typography, surfaces, border/radius, icon/hit areas, z-order | Partial: control CSS |
+| Panel shell | Scroll, collapse, navigation, floating editors, keyboard traversal, narrow window | Width, spacing, dividers, typography, surfaces, border/radius, icon/hit areas, z-order | Partial: control CSS and rest/focus wrapper measurements |
 
 Newly discovered contextual controls extend the inventory. A row is not complete
 merely because a Markdown file exists or one example succeeds.

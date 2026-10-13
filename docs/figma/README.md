@@ -17,6 +17,8 @@
 - [Parent-child layout](topics/parent-child-layout.md): positioning context,
   Constraints, Fill/text-mode coupling, Undo and Redo.
 - [Text](topics/text.md): click creation, drawn boxes, sizing modes.
+- [Input lifecycle](topics/input-lifecycle.md): expressions, invalid values, arrows,
+  Tab/Escape and measured focus wrappers.
 - [Inspector](topics/inspector.md): measured control density and panel structure.
 - [DevTools](topics/devtools.md): precise measurements without guessing from screenshots.
 - [Experiment template](templates/experiment.md): reusable record for future tests.
