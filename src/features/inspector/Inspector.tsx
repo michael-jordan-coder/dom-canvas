@@ -1,3 +1,13 @@
+import { TextMetricField } from "./TextMetricField";
+import { isLayerHidden, toggleLayerVisibility } from "@/features/layers/visibility";
+import { FrameStyleSections } from "./FrameStyleSections";
+import { TypeSettings } from "./TypeSettings";
+import { frameGeometry } from "./inspectorGeometry";
+import { propertyState, cssPropertyState, cornerRadiusState } from "./propertyState";
+import { paddingPairValues } from "./sizingPolicy";
+import { EditorTrigger } from "./FloatingEditor";
+import { SizeModeMenu } from "./SizeModeMenu";
+import { FilterEffects } from "./FilterEffects";
 import { useSelectionRefresh } from "./useSelectionRefresh";
 import { MultipleFramesInspector, type FramePatch } from "./MultipleFramesInspector";
 import { MultipleInspector } from "./MultipleInspector";
@@ -6,7 +16,6 @@ import { splitCss, remapCssLayers } from "./cssList";
 import { flippedScale } from "@/features/canvas/scale";
 import { InspectorIcon } from "./InspectorIcon";
 import { numericInput } from "./numeric";
-import { inspectorStyleValue } from "./styleValue";
 import { lockedAncestor } from "@/features/layers/locking";
 import { rotationField, rotationInput } from "@/features/canvas/rotation";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
@@ -18,7 +27,7 @@ import { LayoutItemControls } from "./LayoutItemControls";
 import { GradientEditor } from "./GradientEditor";
 import { ShadowEditor } from "./ShadowEditor";
 import { CssVariables } from "./CssVariables";
-import { isFlexMainAxis, setSizeMode, sizeMode, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
+import { isFlexMainAxis, setSizeMode, sizeMode, sizeModes, sizingProperties, type SizeAxis, type SizeMode } from "./sizing";
 import type { Artboard, Selection } from "@/features/canvas/types";
 import { layerName } from "@/features/layers/Layers";
 import { ColorField, Field, InspectorEdits, Row, Section, Segmented, SelectField, TextArea } from "./InspectorControls";
@@ -40,6 +49,7 @@ export function Inspector(props: Props) {
   useSelectionRefresh(props.selection, props.hosts);
   const session = useRef<{ dirty: boolean; restore: () => void } | null>(null);
   const begin = () => {
+    if (session.current) finish(false);
     const selection = props.selection;
     if (selection.kind === "multiple") {
       const snapshots = selection.items.flatMap(item => item.kind === "element" ? [{ element: item.element, attributes: Array.from(item.element.attributes).map(attribute => ({ name: attribute.name, value: attribute.value, namespace: attribute.namespaceURI })) }] : []);
@@ -71,8 +81,9 @@ export function Inspector(props: Props) {
     if (!current?.dirty) return;
     if (cancel) current.restore(); else props.onChange();
   };
+  const selectionKey = props.selection.kind === "none" ? "none" : props.selection.kind === "multiple" ? props.selection.items.map(item => item.kind === "element" ? elementKey(item.element) : item.artboardId).join(":") : props.selection.kind === "element" ? elementKey(props.selection.element) : props.selection.artboardId;
   const scope = props.selection.kind === "multiple" ? "multiple" : props.selection.kind === "artboard" ? "frame" : props.selection.kind === "element" && props.selection.element instanceof SVGElement ? "svg" : "html";
-  return <InspectorScope.Provider value={scope}><InspectorEdits.Provider value={{ begin, finish }}><InspectorContent {...props}
+  return <InspectorScope.Provider value={scope}><InspectorEdits.Provider value={{ begin, finish }}><InspectorContent key={selectionKey} {...props}
     onChange={() => { if (session.current) { session.current.dirty = true; props.onPreview(); } else props.onChange(); }}
     onUpdateArtboards={(patches) => { if (session.current) { session.current.dirty = true; props.onPreviewArtboards(patches); } else props.onUpdateArtboards(patches); }}
     onUpdateArtboard={(id, patch) => { if (session.current) { session.current.dirty = true; props.onPreviewArtboard(id, patch); } else props.onUpdateArtboard(id, patch); }}
@@ -82,7 +93,7 @@ export function Inspector(props: Props) {
 function InspectorContent({ selection, artboards, hosts, onUpdateArtboards, onUpdateArtboard, onChange }: Props) {
   if (selection.kind === "none") return <div className="inspector-empty"><strong>Nothing selected</strong><p>Select a frame or an element to edit its properties.</p><span>⌘/Ctrl-click selects the frame.<br />Alt-click selects a parent.</span></div>;
   if (selection.kind === "multiple" && selection.items.every(item => item.kind === "artboard")) return <MultipleFramesInspector frames={artboards.filter(frame => selection.items.some(item => item.artboardId === frame.id))} hosts={hosts} onUpdate={onUpdateArtboards} />;
-  if (selection.kind === "multiple") return <MultipleInspector items={selection.items} onChange={onChange} />;
+  if (selection.kind === "multiple") return <MultipleInspector items={selection.items} artboards={artboards} hosts={hosts} onUpdateFrames={onUpdateArtboards} onChange={onChange} />;
   if (selection.kind === "artboard") {
     const ab = artboards.find((item) => item.id === selection.artboardId);
     if (!ab) return null;
@@ -94,25 +105,31 @@ function InspectorContent({ selection, artboards, hosts, onUpdateArtboards, onUp
     };
     const frameHost = document.querySelector<HTMLElement>(`[data-artboard="${ab.id}"]`);
     const measuredHeight = frameHost?.offsetHeight ?? 100;
+    const frameState = (authored: string, computed: string) => propertyState([{ authored, computed, resettable: false }]);
     return <>
       <div className="selection-summary"><strong>{ab.name}</strong><span className="node-badge frame-badge">Frame</span></div>
       <Section title="Position">
-        <Row><Field prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
+        <Row><Field state={frameState(String(ab.x), String(ab.x))} prefix="X" label="Frame X" value={String(ab.x)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ x: n }); }} /><Field state={frameState(String(ab.y), String(ab.y))} prefix="Y" label="Frame Y" value={String(ab.y)} onCommit={(v) => { const n = numericInput(v); if (n === null) return false; update({ y: n }); }} /></Row>
       </Section>
-      <Section title="Frame">
-        <Field label="Frame name" value={ab.name} onCommit={(name) => update({ name: name || ab.name })} />
-        <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={(v) => update({ width: Number(v) })} />
-        <div className="sizing-row"><Row><Field prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<select className="size-mode" data-mode={ab.height === undefined ? "hug" : "fixed"} aria-label="Frame height sizing" value={ab.height === undefined ? "hug" : "fixed"} onChange={(e) => onUpdateArtboard(ab.id, { height: e.target.value === "hug" ? undefined : measuredHeight, aspectRatio: undefined })}><option value="hug">Hug</option><option value="fixed">Fixed</option></select>} /></Row><button className="inspector-icon" title="Lock frame aspect ratio" aria-label="Lock frame aspect ratio" aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}><InspectorIcon name="ratio" /></button></div>
-      </Section>
-      <FrameClipping artboard={ab} onUpdate={update} />
+      <Section title="Layout">
 
+        <div className="sizing-row"><Row><Field state={frameState(String(ab.width), String(ab.width))} prefix="W" label="Frame width" value={String(ab.width)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ width: Number(v) }); }} /><Field state={frameState(ab.height === undefined ? "" : String(ab.height), String(ab.height ?? measuredHeight))} prefix="H" label="Frame height" value={String(ab.height ?? measuredHeight)} onCommit={(v) => { if (!/^\d*\.?\d+$/.test(v) || Number(v) < 1) return false; update({ height: Number(v) }); }} trailing={<SizeModeMenu label="Frame height" value={ab.height === undefined ? "hug" : "fixed"} modes={["fixed", "hug"]} onChange={mode => onUpdateArtboard(ab.id, { height: mode === "hug" ? undefined : measuredHeight, aspectRatio: undefined })} />} /></Row><button className="inspector-icon" title="Lock frame aspect ratio" aria-label="Lock frame aspect ratio" disabled={measuredHeight <= 0 && !ab.aspectRatio} aria-pressed={!!ab.aspectRatio} onClick={() => onUpdateArtboard(ab.id, { aspectRatio: ab.aspectRatio ? undefined : ab.width / measuredHeight, ...(ab.aspectRatio ? {} : { height: measuredHeight }) })}><InspectorIcon name="ratio" /></button></div>
+        <FrameClipping artboard={ab} onUpdate={update} />
+      </Section>
+
+      <FrameStyleSections part="appearance" frame={ab} host={hosts.get(ab.id)} onUpdate={update} />
       <FrameFill artboard={ab} onUpdate={update} />
-      <div className="inspector-footnote">Frame size controls the canvas bounds. Select an element inside to edit its layout and appearance.</div>
+      <FrameStyleSections part="stroke" frame={ab} host={hosts.get(ab.id)} onUpdate={update} />
+      <FrameStyleSections part="effects" frame={ab} host={hosts.get(ab.id)} onUpdate={update} />
+      <Section title="CSS advanced" defaultOpen={false}>
+        <Field label="Frame name" value={ab.name} onCommit={name => update({ name: name || ab.name })} />
+        <Segmented label="Frame preset" value={String(ab.width)} options={[{ value: "390", label: "Mobile" }, { value: "768", label: "Tablet" }, { value: "1440", label: "Desktop" }]} onChange={v => update({ width: Number(v) })} />
+      </Section>
     </>;
   }
   const el = selection.element;
   if (!el.isConnected) return <div className="empty">Layer was removed.</div>;
-  if (el instanceof SVGElement) return <><SvgInspector key={elementKey(el)} element={el} onChange={onChange} /><CssVariables key={`variables-${elementKey(el)}`} element={el} onChange={onChange} /></>;
+  if (el instanceof SVGElement) return <SvgInspector key={elementKey(el)} element={el} onChange={onChange} />;
   return <ElementInspector key={elementKey(el)} element={el} onChange={onChange} />;
 }
 
@@ -138,7 +155,7 @@ function FrameFill({ artboard, onUpdate }: { artboard: Artboard; onUpdate: (patc
   });
   const reset = artboard.backgroundColor !== undefined ? () => onUpdate({ backgroundColor: undefined }) : undefined;
   return <Section title="Fill" onReset={reset}>
-    <ColorField label="Frame fill" value={color} onCommit={(value) => { if (!CSS.supports("background-color", value)) return false; onUpdate({ backgroundColor: value }); return true; }} onReset={reset} />
+    <ColorField state={propertyState([{ authored: artboard.backgroundColor ?? "", computed: color }])} label="Frame fill" value={color} onCommit={(value) => { if (!CSS.supports("background-color", value)) return false; onUpdate({ backgroundColor: value }); return true; }} onReset={reset} />
   </Section>;
 }
 
@@ -167,12 +184,12 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const [individualStroke, setIndividualStroke] = useInspectorDisclosure("stroke-sides", false);
   const [showConstraints, setShowConstraints] = useInspectorDisclosure("constraints", false);
   const [layoutOptions, setLayoutOptions] = useInspectorDisclosure("layout-options", false);
-  const [typeOptions, setTypeOptions] = useInspectorDisclosure("type-options", false);
   const [positionOptions, setPositionOptions] = useInspectorDisclosure("position-options", false);
   const styled = element as HTMLElement | SVGElement;
   const computed = getComputedStyle(element);
   const hasText = containsHtmlText(element);
-  const read = (prop: string) => inspectorStyleValue(styled.style.getPropertyValue(prop), computed.getPropertyValue(prop));
+  const state = (prop: string) => cssPropertyState([styled], prop);
+  const read = (prop: string) => state(prop).value;
   const set = (prop: string, value: string) => {
     if (!CSS.supports(prop, value)) return false;
     styled.style.setProperty(prop, value);
@@ -185,7 +202,7 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   };
   const resetGroup = (props: string[]) => props.some((prop) => styled.style.getPropertyValue(prop)) ? () => reset(props) : undefined;
   const resetProperty = (prop: string) => resetGroup([prop]);
-  const property = (label: string, prop: string, prefix?: ReactNode, length = true) => <Field label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={resetProperty(prop)} />;
+  const property = (label: string, prop: string, prefix?: ReactNode, length = true) => <Field state={prop === "border-radius" ? cornerRadiusState(styled) : state(prop)} label={label} prefix={prefix} value={length ? trimNumber(read(prop)) : read(prop)} onCommit={(v) => set(prop, length ? withPx(v) : v)} onReset={prop === "border-radius" ? resetGroup(["border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"]) : resetProperty(prop)} />;
   const hasLayoutBox = element.getClientRects().length > 0;
   const geometry = frameGeometry(element);
   const moveTo = (x: number, y: number) => {
@@ -194,7 +211,8 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
     setTranslate(styled, current.x + offset.x, current.y + offset.y);
     onChange();
   };
-  const backgroundImages = splitCss(read("background-image"), ",").some(layer => /^var\(/i.test(layer)) ? computed.backgroundImage : read("background-image");
+  const variableBackground = splitCss(read("background-image"), ",").some(layer => /^var\(/i.test(layer));
+  const backgroundImages = variableBackground ? computed.backgroundImage : read("background-image");
   const backgroundDefaults: Record<string, string> = { "background-size": "auto", "background-position": "0% 0%", "background-repeat": "repeat", "background-origin": "padding-box", "background-clip": "border-box", "background-attachment": "scroll", "background-blend-mode": "normal" };
   const backgroundList = (property: string) => {
     const authored = read(property);
@@ -233,25 +251,20 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
   const isGrid = display.includes("grid");
   const layoutProps = ["display", "flex-direction", "flex-wrap", "justify-content", "justify-items", "align-items", "direction", "gap", "row-gap", "column-gap", "grid-template-columns", "grid-template-rows", "overflow"];
   const paddingProps = ["padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left"];
-  const typographyProps = ["font-family", "font-size", "font-weight", "font-style", "line-height", "letter-spacing", "word-spacing", "text-align", "text-transform", "text-decoration-line", "white-space", "direction", "overflow-wrap", "color"];
-  const decorationLines = computed.textDecorationLine.split(/\s+/).filter(value => value !== "none");
-  const toggleDecoration = (line: string) => {
-    const next = decorationLines.includes(line) ? decorationLines.filter(value => value !== line) : [...decorationLines, line];
-    set("text-decoration-line", next.join(" ") || "none");
-  };
+  const typographyProps = ["font-family", "font-size", "font-weight", "font-style", "line-height", "letter-spacing", "word-spacing", "text-align", "text-transform", "text-decoration-line", "text-decoration-style", "text-decoration-thickness", "text-underline-offset", "text-decoration-skip-ink", "font-variation-settings", "white-space", "direction", "overflow-wrap", "color"];
   const sizeField = (axis: SizeAxis) => {
     const label = axis === "width" ? "Width" : "Height";
     const mode = sizeMode(styled, axis);
     const main = isFlexMainAxis(element, axis);
     const measured = getLayoutSize(element)[axis];
     const value = !hasLayoutBox ? read(axis) : mode === "custom" ? styled.style.getPropertyValue(axis) : String(measured);
-    return <Field prefix={axis === "width" ? "W" : "H"} label={label} value={value}
+    return <Field state={state(axis)} prefix={axis === "width" ? "W" : "H"} label={label} value={value}
       onReset={resetGroup(sizingProperties(element, axis))}
       onCommit={(v) => {
         if (/^\d*\.?\d+$/.test(v)) {
           const dimensions = getLayoutSize(element);
           const ratio = dimensions.width / dimensions.height;
-          setSizeMode(styled, axis, "fixed", Number(v));
+          if (setSizeMode(styled, axis, "fixed", Number(v)) === false) return false;
           if (read("aspect-ratio") !== "auto" && Number.isFinite(ratio) && ratio > 0) setSizeMode(styled, axis === "width" ? "height" : "width", "fixed", axis === "width" ? Number(v) / ratio : Number(v) * ratio);
           onChange(); return true;
         }
@@ -259,17 +272,15 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
         if (main) { styled.style.flexGrow = "0"; styled.style.flexBasis = "auto"; }
         return set(axis, v);
       }}
-      trailing={<select className="size-mode" data-mode={mode} aria-label={`${label} sizing`} value={mode} title={`${label}: ${mode === "css" ? "Stylesheet" : mode}. CSS follows the stylesheet. Fill uses available parent space.`} onChange={(e) => { setSizeMode(styled, axis, e.target.value as SizeMode, measured); if (e.target.value !== "fixed" && read("aspect-ratio") !== "auto") styled.style.aspectRatio = "auto"; onChange(); }}>
-        <option value="css">CSS</option><option value="fixed">Fixed</option><option value="hug">Hug</option><option value="fill">Fill</option>{mode === "custom" && <option value="custom">Custom</option>}
-      </select>} />;
+      trailing={<SizeModeMenu label={label} value={mode} modes={sizeModes(styled, axis)} onLimits={() => setShowConstraints(true)} onChange={next => { if (setSizeMode(styled, axis, next, measured) === false) return; if (next !== "fixed" && read("aspect-ratio") !== "auto") styled.style.aspectRatio = "auto"; onChange(); }} />} />;
   };
   const paddingPair = (axis: "horizontal" | "vertical") => {
     const sides = axis === "horizontal" ? ["padding-left", "padding-right"] : ["padding-top", "padding-bottom"];
     const values = sides.map(read);
-    return <Field label={`${axis === "horizontal" ? "Horizontal" : "Vertical"} padding`} prefix={<InspectorIcon name={axis} />} value={values[0] === values[1] ? trimNumber(values[0]) : "Mixed"} onReset={resetGroup(sides)} onCommit={(value) => {
-      const next = withPx(value);
-      if (!sides.every((side) => CSS.supports(side, next))) return false;
-      sides.forEach((side) => styled.style.setProperty(side, next));
+    return <Field label={`${axis === "horizontal" ? "Horizontal" : "Vertical"} padding`} prefix={<InspectorIcon name={axis} />} value={values[0] === values[1] ? trimNumber(values[0]) : values.map(trimNumber).join(", ")} onReset={resetGroup(sides)} onCommit={(value) => {
+      const pair = paddingPairValues(value)?.map(withPx);
+      if (!pair || !sides.every((side, index) => CSS.supports(side, pair[index]))) return false;
+      sides.forEach((side, index) => styled.style.setProperty(side, pair[index]));
       onChange(); return true;
     }} />;
   };
@@ -370,52 +381,31 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
       </>}
       {isGrid && <><Field label="Grid columns" prefix="Cols" value={read("grid-template-columns")} onCommit={(v) => set("grid-template-columns", v)} onReset={resetProperty("grid-template-columns")} /><Field label="Grid rows" prefix="Rows" value={read("grid-template-rows")} onCommit={(v) => set("grid-template-rows", v)} onReset={resetProperty("grid-template-rows")} /></>}
       {paddingControls}
-      <label className="property-checkbox"><input type="checkbox" checked={["hidden", "clip"].includes(read("overflow"))} onChange={(e) => set("overflow", e.target.checked ? "hidden" : "visible")} />Clip content</label>
+      <label className="property-checkbox"><input type="checkbox" checked={[computed.overflowX, computed.overflowY].every(axis => axis !== "visible")} onChange={(e) => set("overflow", e.target.checked ? "hidden" : "visible")} />Clip content</label>
     </Section>
 
-    <LayoutItemControls element={element as HTMLElement} onChange={onChange} />
-
-    <Section title="Spacing" defaultOpen={false} onReset={resetGroup(paddingProps.filter((p) => p.startsWith("margin")))}>
-      <div className="property-subheading"><span>Margin</span></div>
-      {property("Margin", "margin", "All")}
-      <Row>{property("Margin top", "margin-top", "T")}{property("Margin right", "margin-right", "R")}</Row>
-      <Row>{property("Margin bottom", "margin-bottom", "B")}{property("Margin left", "margin-left", "L")}</Row>
-    </Section>
-
-    {hasText && <Section title="Typography" onReset={resetGroup(typographyProps)}>
-      {element.children.length > 0 && <p className="property-note">Nested text inherits these styles unless it has its own overrides.</p>}
-      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
-      <Row><FontWeightField value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={resetProperty("font-weight")} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
-      <Row>{property("Line height", "line-height", <InspectorIcon name="lineHeight" />, false)}{property("Letter spacing", "letter-spacing", <InspectorIcon name="tracking" />)}</Row>
-      <Segmented label="Text alignment" value={read("text-align") === "left" ? (computed.direction === "rtl" ? "end" : "start") : read("text-align") === "right" ? (computed.direction === "rtl" ? "start" : "end") : read("text-align")} options={[{ value: "start", label: "Start", icon: <InspectorIcon name={computed.direction === "rtl" ? "end" : "start"} /> }, { value: "center", label: "Center", icon: <InspectorIcon name="center" /> }, { value: "end", label: "End", icon: <InspectorIcon name={computed.direction === "rtl" ? "start" : "end"} /> }, { value: "justify", label: "Justify", icon: <InspectorIcon name="justify" /> }]} onChange={(v) => set("text-align", v)} />
-      <ColorField label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
-      <details className="layout-details" open={typeOptions} onToggle={(e) => setTypeOptions(e.currentTarget.open)}>
-        <summary><span>Type options</span><span className="layout-state">{[computed.fontStyle !== "normal" ? "Italic" : "", decorationLines.includes("underline") ? "Underline" : "", decorationLines.includes("line-through") ? "Strike" : "", computed.textTransform !== "none" ? computed.textTransform : ""].filter(Boolean).join(" · ")}</span></summary>
-        <div className="layout-details-body">
-          <div className="segmented" role="group" aria-label="Text style">
-            <button title="Italic" aria-label="Italic" aria-pressed={computed.fontStyle !== "normal"} onClick={() => set("font-style", computed.fontStyle === "normal" ? "italic" : "normal")}><InspectorIcon name="italic" /></button>
-            <button title="Underline" aria-label="Underline" aria-pressed={decorationLines.includes("underline")} onClick={() => toggleDecoration("underline")}><InspectorIcon name="underline" /></button>
-            <button title="Strikethrough" aria-label="Strikethrough" aria-pressed={decorationLines.includes("line-through")} onClick={() => toggleDecoration("line-through")}><InspectorIcon name="strikethrough" /></button>
-          </div>
-          <SelectField label="Case" value={read("text-transform")} options={[{ value: "none", label: "Original" }, { value: "uppercase", label: "UPPERCASE" }, { value: "lowercase", label: "lowercase" }, { value: "capitalize", label: "Title Case" }]} onCommit={(v) => set("text-transform", v)} />
-          <SelectField label="Wrapping" value={read("white-space")} options={[{ value: "normal", label: "Wrap" }, { value: "nowrap", label: "No wrap" }, { value: "pre-wrap", label: "Preserve breaks" }, { value: "break-spaces", label: "Preserve spaces" }]} onCommit={(v) => set("white-space", v)} />
-          <SelectField label="Text direction" value={styled.style.direction || "default"} options={[{ value: "default", label: "Default" }, { value: "ltr", label: "Left to right" }, { value: "rtl", label: "Right to left" }]} onCommit={(v) => { if (v === "default") { reset(["direction"]); return; } return set("direction", v); }} />
-          <SelectField label="Long words" value={read("overflow-wrap")} options={[{ value: "normal", label: "Keep whole" }, { value: "break-word", label: "Break if needed" }, { value: "anywhere", label: "Fit width" }]} onCommit={(v) => set("overflow-wrap", v)} />
-          {property("Word spacing", "word-spacing", "Words")}
-        </div>
-      </details>
-      {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
-    </Section>}
-
-    <Section title="Appearance" actions={<button className="inspector-icon" title="Individual corners" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}><InspectorIcon name="corners" /></button>} onReset={resetGroup(["opacity", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"])}>
+    <Section title="Appearance" actions={<button className="inspector-icon" title="Individual corners" aria-label="Individual corners" aria-pressed={individualCorners} onClick={() => setIndividualCorners(!individualCorners)}><InspectorIcon name="corners" /></button>} onReset={resetGroup(["opacity", "visibility", "mix-blend-mode", "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"])}>
       <Row><Field label="Opacity" prefix={<InspectorIcon name="opacity" />} suffix="%" value={String(Math.round(Number(computed.opacity) * 100))} onCommit={(v) => { const n = numericInput(v, "%"); if (n === null) return false; const clamped = Math.min(100, Math.max(0, n)); return set("opacity", String(clamped / 100)) === false ? false : String(clamped); }} onReset={resetProperty("opacity")} />{property("Corner radius", "border-radius", <InspectorIcon name="radius" />)}</Row>
+      <Row><SelectField label="Blend mode" value={read("mix-blend-mode")} options={["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"]} onCommit={v => set("mix-blend-mode", v)} /><label className="property-checkbox"><input aria-label="Hide" type="checkbox" checked={isLayerHidden(element) || read("visibility") === "hidden"} onChange={e => { if (isLayerHidden(element) !== e.target.checked) toggleLayerVisibility(element); if (!e.target.checked && read("visibility") === "hidden") styled.style.visibility = "visible"; onChange(); }} />Hide</label></Row>
       {individualCorners && <><Row>{property("Top left radius", "border-top-left-radius", "TL")}{property("Top right radius", "border-top-right-radius", "TR")}</Row><Row>{property("Bottom left radius", "border-bottom-left-radius", "BL")}{property("Bottom right radius", "border-bottom-right-radius", "BR")}</Row></>}
     </Section>
 
+
+    {hasText && element.children.length === 0 && <Section title="Typography" actions={<EditorTrigger title="Type settings"><TypeSettings element={styled} onChange={onChange} /></EditorTrigger>} onReset={resetGroup(typographyProps)}>
+      {element.children.length > 0 && <p className="property-note">Nested text inherits these styles unless it has its own overrides.</p>}
+      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
+      <Row><FontWeightField state={state("font-weight")} value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={resetProperty("font-weight")} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
+      <Row><TextMetricField element={styled} property="line-height" onChange={onChange} onReset={resetProperty("line-height")} /><TextMetricField element={styled} property="letter-spacing" onChange={onChange} onReset={resetProperty("letter-spacing")} /></Row>
+      <Segmented label="Text alignment" value={read("text-align") === "left" ? (computed.direction === "rtl" ? "end" : "start") : read("text-align") === "right" ? (computed.direction === "rtl" ? "start" : "end") : read("text-align")} options={[{ value: "start", label: "Start", icon: <InspectorIcon name={computed.direction === "rtl" ? "end" : "start"} /> }, { value: "center", label: "Center", icon: <InspectorIcon name="center" /> }, { value: "end", label: "End", icon: <InspectorIcon name={computed.direction === "rtl" ? "start" : "end"} /> }, { value: "justify", label: "Justify", icon: <InspectorIcon name="justify" /> }]} onChange={(v) => set("text-align", v)} />
+      <ColorField state={state("color")} label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
+      {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
+    </Section>}
+
+
     <Section title="Fill" onReset={resetGroup(["background", "background-color", "background-image", ...Object.keys(backgroundDefaults)])}>
-      <ColorField label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
+      <ColorField state={state("background-color")} label="Fill color" value={computed.backgroundColor} onCommit={(v) => set("background-color", v)} onReset={resetProperty("background-color")} />
       <div className="property-subheading"><span>Image or gradient</span></div>
-      <GradientEditor value={backgroundImages} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} onLayersChange={changeBackgroundLayers} renderLayerSettings={backgroundLayerSettings} />
+      {variableBackground ? <><Field label="Background image variable" state={state("background-image")} value={read("background-image")} onCommit={value => set("background-image", value)} /><button className="small-toggle" onClick={() => set("background-image", computed.backgroundImage)}>Detach background variable</button></> : <GradientEditor value={backgroundImages} computedValue={computed.backgroundImage} onCommit={(v) => set("background-image", v)} onLayersChange={changeBackgroundLayers} renderLayerSettings={backgroundLayerSettings} />}
     </Section>
 
     <Section title="Stroke" defaultOpen={false} onReset={resetGroup(["border", "border-width", "border-style", "border-color", ...["top", "right", "bottom", "left"].flatMap((side) => [`border-${side}`, `border-${side}-width`, `border-${side}-style`, `border-${side}-color`])])}>
@@ -441,24 +431,36 @@ function ElementInspector({ element, onChange }: { element: Element; onChange: (
 
 
 
-    <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "overflow"])}>
+    <Section title="Effects" defaultOpen={false} onReset={resetGroup(["box-shadow", "filter", "backdrop-filter"])}>
       <ShadowEditor value={read("box-shadow")} computedValue={computed.boxShadow} onCommit={(v) => set("box-shadow", v)} />
-      <SelectField label="Overflow" value={read("overflow")} options={["visible", "hidden", "clip", "auto", "scroll"]} onCommit={(v) => set("overflow", v)} />
+      <FilterEffects element={styled} onChange={onChange} />
     </Section>
-    <CssVariables element={styled} onChange={onChange} />
+    <Section title="CSS advanced" defaultOpen={false}>
+    {hasText && element.children.length > 0 && <Section title="Typography" actions={<EditorTrigger title="Type settings"><TypeSettings element={styled} onChange={onChange} /></EditorTrigger>} onReset={resetGroup(typographyProps)}>
+      {element.children.length > 0 && <p className="property-note">Nested text inherits these styles unless it has its own overrides.</p>}
+      <Field label="Font family" value={read("font-family")} onCommit={(v) => set("font-family", v)} onReset={resetProperty("font-family")} suggestions={["Arial, sans-serif", "Helvetica, sans-serif", "Inter, sans-serif", "Geist, sans-serif", "Georgia, serif", "system-ui", "monospace"].map((value) => ({ value }))} />
+      <Row><FontWeightField state={state("font-weight")} value={read("font-weight")} onCommit={(v) => set("font-weight", v)} onReset={resetProperty("font-weight")} /><Field label="Font size" prefix="Size" value={trimNumber(read("font-size"))} suggestions={[10,11,12,13,14,16,18,20,24,28,32,36,40,48,64,72,96,128].map((size) => ({ value: String(size) }))} onCommit={(v) => set("font-size", withPx(v))} onReset={resetProperty("font-size")} /></Row>
+      <Row><TextMetricField element={styled} property="line-height" onChange={onChange} onReset={resetProperty("line-height")} /><TextMetricField element={styled} property="letter-spacing" onChange={onChange} onReset={resetProperty("letter-spacing")} /></Row>
+      <Segmented label="Text alignment" value={read("text-align") === "left" ? (computed.direction === "rtl" ? "end" : "start") : read("text-align") === "right" ? (computed.direction === "rtl" ? "start" : "end") : read("text-align")} options={[{ value: "start", label: "Start", icon: <InspectorIcon name={computed.direction === "rtl" ? "end" : "start"} /> }, { value: "center", label: "Center", icon: <InspectorIcon name="center" /> }, { value: "end", label: "End", icon: <InspectorIcon name={computed.direction === "rtl" ? "start" : "end"} /> }, { value: "justify", label: "Justify", icon: <InspectorIcon name="justify" /> }]} onChange={(v) => set("text-align", v)} />
+      <ColorField state={state("color")} label="Text color" value={computed.color} onCommit={(v) => set("color", v)} onReset={resetProperty("color")} />
+      {element.children.length === 0 && <TextArea value={element.textContent ?? ""} onCommit={(v) => { element.textContent = v; onChange(); }} />}
+    </Section>}
+
+
+    <LayoutItemControls element={element as HTMLElement} onChange={onChange} />
+
+    <Section title="Margin" defaultOpen={false} onReset={resetGroup(paddingProps.filter((p) => p.startsWith("margin")))}>
+      <div className="property-subheading"><span>Margin</span></div>
+      {property("Margin", "margin", "All")}
+      <Row>{property("Margin top", "margin-top", "T")}{property("Margin right", "margin-right", "R")}</Row>
+      <Row>{property("Margin bottom", "margin-bottom", "B")}{property("Margin left", "margin-left", "L")}</Row>
+    </Section>
+
+      <CssVariables element={styled} onChange={onChange} />
+    </Section>
     <div className="inspector-footnote">↑ ↓ to adjust values · Shift for 10 · Alt for 0.1<br />Blue markers show inline overrides. Reset returns to the stylesheet.</div>
   </>;
 }
 
-function frameGeometry(element: Element) {
-  const root = element.getRootNode();
-  const host = root instanceof ShadowRoot ? (root.host as HTMLElement) : null;
-  const rect = element.getBoundingClientRect();
-  if (!host) return { x: 0, y: 0, width: rect.width, height: rect.height, zoom: 1, frameWidth: 0, frameHeight: 0, hasFrame: false };
-  const parent = host.getBoundingClientRect();
-  const zoom = parent.width / host.offsetWidth || 1;
-  const round = (n: number) => Math.round(n * 100) / 100;
-  return { zoom, frameWidth: parent.width / zoom, frameHeight: parent.height / zoom, hasFrame: true, x: round((rect.left - parent.left) / zoom), y: round((rect.top - parent.top) / zoom), width: round(rect.width / zoom), height: round(rect.height / zoom) };
-}
 function trimNumber(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+px$/.test(part) ? String(Math.round(parseFloat(part) * 100) / 100) : part).join(" "); }
 function withPx(value: string) { return value.split(/\s+/).map((part) => /^-?\d*\.?\d+$/.test(part) ? `${part}px` : part).join(" "); }

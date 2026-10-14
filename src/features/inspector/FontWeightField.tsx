@@ -1,3 +1,4 @@
+import type { PropertyState } from "./propertyState";
 import { Field } from "./InspectorControls";
 
 const weights = [
@@ -12,10 +13,10 @@ const weights = [
   { value: "900", label: "Black · 900" },
 ];
 
-export function FontWeightField({ value, onCommit, onReset }: {
-  value: string;
+export function FontWeightField({ value, state, onCommit, onReset }: {
+  value: string; state?: PropertyState;
   onCommit: (value: string) => boolean | void;
   onReset?: () => void;
 }) {
-  return <Field label="Font weight" value={value} suggestions={weights} onCommit={onCommit} onReset={onReset} />;
+  return <Field state={state} label="Font weight" value={value} suggestions={weights} onCommit={onCommit} onReset={onReset} />;
 }

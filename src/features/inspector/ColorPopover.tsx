@@ -16,15 +16,17 @@ const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
 function RgbChannel({ label, value, onCommit, onInvalid }: { label: string; value: number; onCommit: (value: number) => void; onInvalid: (invalid: boolean) => void }) {
   const [draft, setDraft] = useState(String(value));
+  const dirty = useRef(false);
   const [invalid, setInvalid] = useState(false);
-  useEffect(() => { setDraft(String(value)); setInvalid(false); onInvalid(false); }, [value]);
+  useEffect(() => { if (!dirty.current) { setDraft(String(value)); setInvalid(false); onInvalid(false); } }, [value]);
   const commit = () => {
+    if (!dirty.current) return;
     const number = Number(draft);
     if (!draft.trim() || !Number.isFinite(number)) { setInvalid(true); onInvalid(true); return; }
     const next = Math.max(0, Math.min(255, Math.round(number)));
-    setDraft(String(next)); setInvalid(false); onInvalid(false); onCommit(next);
+    dirty.current = false; setDraft(String(next)); setInvalid(false); onInvalid(false); onCommit(next);
   };
-  return <label>{label[0]}<input aria-label={`Picker ${label}`} aria-invalid={invalid || undefined} type="number" min="0" max="255" step="1" value={draft} onChange={e => { setDraft(e.target.value); setInvalid(false); onInvalid(false); }} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commit(); } }} /></label>;
+  return <label>{label[0]}<input aria-label={`Picker ${label}`} aria-invalid={invalid || undefined} type="number" min="0" max="255" step="1" value={draft} onChange={e => { dirty.current = true; setDraft(e.target.value); setInvalid(false); onInvalid(false); }} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commit(); } }} /></label>;
 }
 
 type Props = { label: string; value: string; anchor: HTMLElement; onPreview: (value: string) => void; onClose: (cancel: boolean) => void };
@@ -91,7 +93,7 @@ export function ColorPopover({ label, value, anchor, onPreview, onClose }: Props
   const rect = anchor.getBoundingClientRect();
   const left = Math.max(8, Math.min(window.innerWidth - 248, rect.left - 248));
   const top = Math.max(8, Math.min(rect.top - 8, window.innerHeight - 380));
-  return createPortal(<div ref={dialog} className="color-popover" role="dialog" aria-label={`${label} picker`} style={{ left, top }} onKeyDown={(event) => {
+  return createPortal(<div ref={dialog} className="color-popover" data-inspector-overlay role="dialog" aria-label={`${label} picker`} style={{ left, top }} onKeyDown={(event) => {
     event.stopPropagation();
     if (event.key !== "Tab") return;
     const controls = Array.from(dialog.current!.querySelectorAll<HTMLElement>('input:not(:disabled), select:not(:disabled), button:not(:disabled)'));

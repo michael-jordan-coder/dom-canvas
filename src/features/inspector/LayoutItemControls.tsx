@@ -1,3 +1,4 @@
+import { cssPropertyState } from "./propertyState";
 import { Field, Row, Section, SelectField } from "./InspectorControls";
 import { layoutItemKind } from "./sizing";
 
@@ -5,15 +6,14 @@ const alignment = ["auto", "start", "center", "end", "stretch", "baseline"];
 export function LayoutItemControls({ element, onChange }: { element: HTMLElement; onChange: () => void }) {
   const kind = layoutItemKind(element);
   if (!kind) return null;
-  const computed = getComputedStyle(element);
-  const read = (property: string) => element.style.getPropertyValue(property) || computed.getPropertyValue(property);
+  const read = (property: string) => cssPropertyState([element], property).value;
   const set = (property: string, value: string) => {
     if (!CSS.supports(property, value)) return false;
     element.style.setProperty(property, value); onChange(); return true;
   };
   const reset = (properties: string[]) => properties.some(property => element.style.getPropertyValue(property)) ? () => { properties.forEach(property => element.style.removeProperty(property)); onChange(); } : undefined;
   const properties = ["order", "align-self", ...(kind === "flex" ? ["flex-grow", "flex-shrink", "flex-basis"] : ["grid-column", "grid-row", "justify-self"])];
-  const field = (label: string, property: string, prefix: string) => <Field label={label} prefix={prefix} value={read(property)} onCommit={value => set(property, value)} onReset={reset([property])} />;
+  const field = (label: string, property: string, prefix: string) => <Field state={cssPropertyState([element], property)} label={label} prefix={prefix} value={read(property)} onCommit={value => set(property, value)} onReset={reset([property])} />;
   return <Section title={kind === "flex" ? "Flex item" : "Grid item"} preferenceKey="layout-item" defaultOpen={false} onReset={reset(properties)}>
     {kind === "flex" ? <>
       <Row>{field("Flex grow", "flex-grow", "Grow")}{field("Flex shrink", "flex-shrink", "Shrink")}</Row>

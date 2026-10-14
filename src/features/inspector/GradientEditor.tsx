@@ -1,3 +1,4 @@
+import { FloatingEditor } from "./FloatingEditor";
 import { InspectorIcon } from "./InspectorIcon";
 import { useState, type ReactNode } from "react";
 import { ColorField, Field } from "./InspectorControls";
@@ -38,6 +39,7 @@ function serialize({ angle, stops }: Gradient) {
 }
 
 export function GradientEditor({ value, computedValue, onCommit, onLayersChange, renderLayerSettings }: { value: string; computedValue: string; onCommit: (value: string) => boolean; onLayersChange: (layers: string[], order: (number | null)[]) => boolean; renderLayerSettings: (index: number) => ReactNode }) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [advanced, setAdvanced] = useState(false);
   const [selectedStop, setSelectedStop] = useState(0);
   const [expandedLayer, setExpandedLayer] = useState<number | null>(null);
@@ -73,8 +75,9 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
           </>}
           <button className="inspector-icon" title="Remove background layer" aria-label={`Remove background layer ${index + 1}`} onClick={() => { if (onLayersChange(layers.filter((_, i) => i !== index), layers.map((_, i) => i).filter(i => i !== index))) setExpandedLayer(current => current === null || current === index ? null : current > index ? current - 1 : current); }}><InspectorIcon name="remove" /></button>
         </div>
-        <button className="gradient-summary" aria-label={gradient ? `Edit gradient ${index + 1}` : `Edit background layer ${index + 1}`} aria-expanded={expandedLayer === index} onClick={() => { setExpandedLayer(expandedLayer === index ? null : index); setSelectedStop(0); }}><span className="gradient-summary-swatch" style={{ backgroundImage: layer }} /><span>{gradient ? `${gradient.stops.length} colors · ${Math.round(gradient.angle)}°` : "Image / custom CSS"}</span><span className="gradient-disclosure">{expandedLayer === index ? "⌃" : "⌄"}</span></button>
-        {gradient && expandedLayer === index ? <>
+        <button className="gradient-summary" aria-label={gradient ? `Edit gradient ${index + 1}` : `Edit background layer ${index + 1}`} aria-expanded={expandedLayer === index} onClick={event => { setAnchor(event.currentTarget); setExpandedLayer(expandedLayer === index ? null : index); setSelectedStop(0); }}><span className="gradient-summary-swatch" style={{ backgroundImage: layer }} /><span>{gradient ? `${gradient.stops.length} colors · ${Math.round(gradient.angle)}°` : "Image / custom CSS"}</span><span className="gradient-disclosure">{expandedLayer === index ? "⌃" : "⌄"}</span></button>
+        {expandedLayer === index && anchor && <FloatingEditor title={`Background layer ${index + 1}`} anchor={anchor} onClose={() => setExpandedLayer(null)}>
+        {gradient ? <>
           {positions ? <GradientStopTrack positions={positions} colors={gradient.stops.map((stop, i) => resolved?.stops[i]?.color ?? stop.color)} selected={Math.min(selectedStop, gradient.stops.length - 1)} label={`Gradient ${index + 1} selected stop position`} onChange={next => update(index, { ...gradient, stops: gradient.stops.map((stop, i) => ({ ...stop, position: `${next[i]}%` })) })} /> : <div className="gradient-preview" style={{ backgroundImage: layer }} />}
           <Field label={`Gradient ${index + 1} angle`} prefix="Angle" suffix="°" value={String(Math.round(gradient.angle * 100) / 100)} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) ? update(index, { ...gradient, angle: Number(v) }) : false} />
           <div className="gradient-stop-selector" role="group" aria-label={`Gradient ${index + 1} color stops`}>
@@ -91,16 +94,17 @@ export function GradientEditor({ value, computedValue, onCommit, onLayersChange,
             if (update(index, { ...gradient, stops: [...gradient.stops.slice(0, -1), { color: "#FFFFFF", position }, last] })) setSelectedStop(gradient.stops.length - 1);
           }}>+ Add color stop</button>
         </> : null}
-        {expandedLayer === index && <>
+        <>
           {!gradient && <Field label={`Background layer ${index + 1} CSS`} value={layer} onCommit={next => splitCss(next, ",").length === 1 && onCommit(layers.map((item, i) => i === index ? next : item).join(", "))} />}
           <details className="layout-details" open={!gradient || undefined}>
             <summary>Size & position</summary>
             <div className="layout-details-body">{renderLayerSettings(index)}</div>
           </details>
-        </>}
+        </>
+        </FloatingEditor>}
       </div>;
     })}
-    <div className="effect-actions"><button className="add-property" onClick={() => { if (onLayersChange(["linear-gradient(135deg, #6366F1 0%, #EC4899 100%)", ...layers], [null, ...layers.map((_, i) => i)])) { setExpandedLayer(0); setSelectedStop(0); } }}>+ Add gradient</button><button className="small-toggle" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>CSS value</button></div>
+    <div className="effect-actions"><button className="add-property" onClick={event => { setAnchor(event.currentTarget); if (onLayersChange(["linear-gradient(135deg, #6366F1 0%, #EC4899 100%)", ...layers], [null, ...layers.map((_, i) => i)])) { setExpandedLayer(0); setSelectedStop(0); } }}>+ Add gradient</button><button className="small-toggle" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>CSS value</button></div>
     {advanced && <Field label="Background image or gradient" value={value} onCommit={onCommit} />}
   </>;
 }

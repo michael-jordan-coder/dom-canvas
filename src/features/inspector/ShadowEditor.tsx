@@ -1,4 +1,5 @@
 import { splitCss } from "./cssList";
+import { FloatingEditor } from "./FloatingEditor";
 import { useState } from "react";
 import { ColorField, Field, Row, SelectField } from "./InspectorControls";
 import { InspectorIcon } from "./InspectorIcon";
@@ -18,6 +19,7 @@ function serialize(shadow: Shadow) {
 }
 
 export function ShadowEditor({ value, computedValue, onCommit }: { value: string; computedValue: string; onCommit: (value: string) => boolean }) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [advanced, setAdvanced] = useState(false);
   const [expandedLayer, setExpandedLayer] = useState<number | null>(null);
   const layers = value === "none" ? [] : splitCss(value, ",");
@@ -45,12 +47,12 @@ export function ShadowEditor({ value, computedValue, onCommit }: { value: string
     {layers.map((layer, index) => {
       const resolved = rendered.length === layers.length ? parseShadow(rendered[index] ?? "") : null;
       const authored = parseShadow(layer);
-      const shadow = authored ? { ...authored, color: resolved?.color ?? authored.color } : resolved;
+      const shadow = authored; // Preserve authored color variables when changing geometry.
       return <div className="effect-layer shadow-layer" key={index}>
         <div className="effect-heading">
-          <button className="effect-summary" aria-label={`Edit shadow ${index + 1}`} aria-expanded={expandedLayer === index} onClick={() => setExpandedLayer(expandedLayer === index ? null : index)}>
+          <button className="effect-summary" aria-label={`Edit shadow ${index + 1}`} aria-expanded={expandedLayer === index} onClick={event => { setAnchor(event.currentTarget); setExpandedLayer(expandedLayer === index ? null : index); }}>
             <span className={`section-chevron${expandedLayer === index ? " open" : ""}`} aria-hidden="true" />
-            <span className="effect-swatch" style={{ background: shadow?.color ?? "transparent" }} />
+            <span className="effect-swatch" style={{ background: resolved?.color ?? shadow?.color ?? "transparent" }} />
             <span>{shadow ? shadow.inset ? "Inner shadow" : "Drop shadow" : "Custom shadow"}</span>
           </button>
           <button className="inspector-icon" title="Duplicate shadow" aria-label={`Duplicate shadow ${index + 1}`} onClick={() => duplicate(index)}><InspectorIcon name="duplicate" /></button>
@@ -60,15 +62,15 @@ export function ShadowEditor({ value, computedValue, onCommit }: { value: string
           </>}
           <button className="inspector-icon" title="Remove shadow" aria-label={`Remove shadow ${index + 1}`} onClick={() => remove(index)}><InspectorIcon name="remove" /></button>
         </div>
-        {expandedLayer === index && (shadow ? <>
+        {expandedLayer === index && anchor && <FloatingEditor title={`Shadow ${index + 1}`} anchor={anchor} onClose={() => setExpandedLayer(null)}>{shadow ? <>
           <SelectField label="Type" value={shadow.inset ? "inset" : "drop"} options={[{ value: "drop", label: "Drop shadow" }, { value: "inset", label: "Inner shadow" }]} onCommit={(v) => change(index, { inset: v === "inset" }, shadow)} />
           <Row>{(["x", "y"] as const).map((key) => <Field key={key} prefix={key.toUpperCase()} label={`Shadow ${index + 1} ${key.toUpperCase()}`} value={String(shadow[key])} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) ? change(index, { [key]: Number(v) }, shadow) : false} />)}</Row>
           <Row>{(["blur", "spread"] as const).map((key) => <Field key={key} prefix={key === "blur" ? "Blur" : "Spread"} label={`Shadow ${index + 1} ${key}`} value={String(shadow[key])} onCommit={(v) => v.trim() && Number.isFinite(Number(v)) && (key !== "blur" || Number(v) >= 0) ? change(index, { [key]: Number(v) }, shadow) : false} />)}</Row>
-          <ColorField label={`Shadow ${index + 1} color`} value={shadow.color} onCommit={(color) => change(index, { color }, shadow)} />
-        </> : <p className="property-note">Edit this effect with the CSS field below.</p>)}
+          <ColorField label={`Shadow ${index + 1} color`} value={resolved?.color ?? shadow.color} onCommit={(color) => change(index, { color }, shadow)} />
+        </> : <Field label={`Shadow ${index + 1} CSS`} value={layer} onCommit={next => splitCss(next, ",").length === 1 && onCommit(layers.map((item, i) => i === index ? next : item).join(", "))} />}</FloatingEditor>}
       </div>;
     })}
-    <div className="effect-actions"><button className="add-property" onClick={() => { if (onCommit([...layers, "0px 4px 16px 0px #00000026"].join(", "))) setExpandedLayer(layers.length); }}>+ Add shadow</button><button className="small-toggle" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>CSS value</button></div>
-    {(advanced || layers.some((layer, i) => !parseShadow(layer) && !(rendered.length === layers.length && parseShadow(rendered[i] ?? "")))) && <Field label="Box shadow" value={value} onCommit={onCommit} />}
+    <div className="effect-actions"><button className="add-property" onClick={event => { setAnchor(event.currentTarget); if (onCommit([...layers, "0px 4px 4px 0px #00000040"].join(", "))) setExpandedLayer(layers.length); }}>+ Add shadow</button><button className="small-toggle" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>CSS value</button></div>
+    {(advanced || layers.some(layer => !parseShadow(layer))) && <Field label="Box shadow" value={value} onCommit={onCommit} />}
   </>;
 }

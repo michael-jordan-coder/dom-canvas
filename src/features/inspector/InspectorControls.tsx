@@ -1,9 +1,11 @@
+import { FieldOptions } from "./FieldOptions";
 import { ColorPopover } from "./ColorPopover";
 import { useInspectorDisclosure } from "./InspectorPreferences";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { colorWithAlpha, parseColor, rememberRecentColor } from "./color";
 import { numericExpression } from "./arithmetic";
+import type { PropertyState } from "./propertyState";
 
 export const InspectorEdits = createContext<{ begin: () => void; finish: (cancel: boolean) => void } | null>(null);
 
@@ -30,12 +32,18 @@ export function Row({ single, children }: { single?: boolean; children: ReactNod
   return <div className={`property-row${single ? " single" : ""}`}>{children}</div>;
 }
 
-export function Field({ value, label, prefix, suffix, onCommit, onReset, trailing, suggestions }: {
+export function Field({ value, state, mixed = false, disabled = false, label, prefix, suffix, onCommit, onReset, trailing, suggestions }: {
   value: string; label: string; prefix?: ReactNode; suffix?: string; onCommit: (value: string) => boolean | void | string; onReset?: () => void; trailing?: ReactNode; suggestions?: { value: string; label?: string }[];
+  state?: PropertyState; mixed?: boolean; disabled?: boolean;
 }) {
+  mixed = state?.mixed ?? (mixed || value === "Mixed");
+  disabled = disabled || state?.available === false;
+  if (mixed) value = "";
   const listId = useId();
   const edits = useContext(InspectorEdits);
   const input = useRef<HTMLInputElement>(null);
+  const editing = useRef(false);
+  const dirty = useRef(false);
   const [scrubbing, setScrubbing] = useState(false);
   const drag = useRef<{ x: number; value: number; unit: string; initial: string; last: string; lastX: number; moved: boolean } | null>(null);
   const latestEdits = useRef(edits);
@@ -70,8 +78,6 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [optionIndex, setOptionIndex] = useState(-1);
   const [filterOptions, setFilterOptions] = useState(false);
-  const [optionsAbove, setOptionsAbove] = useState(false);
-  useEffect(() => { if (optionsOpen && input.current) setOptionsAbove(window.innerHeight - input.current.getBoundingClientRect().bottom < 210); }, [optionsOpen]);
   useEffect(() => { if (optionsOpen && optionIndex >= 0) document.getElementById(`${listId}-${optionIndex}`)?.scrollIntoView({ block: "nearest" }); }, [optionIndex, optionsOpen, listId]);
   const options = (suggestions ?? []).filter((option) => !filterOptions || `${option.value} ${option.label ?? ""}`.toLowerCase().includes(draft.toLowerCase()));
   // A setter may return the canonical value after clamping or normalization.
@@ -86,10 +92,10 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
   const chooseOption = (next: string) => { setDraft(next); submit(next); setOptionsOpen(false); setFilterOptions(false); input.current?.focus(); };
   const cancelled = useRef(false);
   // Parent renders (for example, canvas panning) must not erase an edit in progress.
-  useEffect(() => { setDraft(value); setInvalid(false); }, [value]);
+  useEffect(() => { if (!editing.current || !dirty.current) { setDraft(value); setInvalid(false); } }, [value]);
   const commit = () => {
     if (cancelled.current) { cancelled.current = false; return true; }
-    if (draft === value) { setInvalid(false); return true; }
+    if (!dirty.current || draft === value) { setInvalid(false); return true; }
     const numericValue = value.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
     const expression = numericValue ? numericExpression(draft) : null;
     if (expression && "error" in expression) { setInvalid(true); return false; }
@@ -104,8 +110,8 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
     edits?.finish(cancel);
     if (cancel) { setDraft(initial); setInvalid(false); }
   };
-  const numeric = /^(-?\d*\.?\d+)([a-z%]*)$/i.test(value);
-  return <div className={`property-shell${onReset ? " overridden" : ""}`}>
+  const numeric = !disabled && /^(-?\d*\.?\d+)([a-z%]*)$/i.test(value);
+  return <div className={`property-shell${onReset ? " overridden" : ""}${mixed ? " mixed" : ""}${state?.bound ? " bound" : ""}`} data-source={state?.bound ? "variable" : state?.authored ? "authored" : "computed"}>
     <div className={`field${prefix ? "" : " no-prefix"}${invalid ? " invalid" : ""}`} title={invalid ? `Invalid value for ${label}` : numeric ? `${label} · Calculate with + − * / and parentheses` : label}>
       {prefix && <span className={`prefix${numeric && edits ? " scrub-label" : ""}`} title={numeric && edits ? `Drag to adjust ${label}. Shift: 10× · Alt: 0.1× · Escape: cancel` : undefined}
         tabIndex={numeric && edits ? 0 : undefined} role={numeric && edits ? "button" : undefined} aria-label={numeric && edits ? `Adjust ${label}` : undefined}
@@ -137,8 +143,8 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
         onPointerCancel={() => finishScrub(true)} onLostPointerCapture={() => finishScrub(false)}
         onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finishScrub(true); } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.focus(); } }}
       >{prefix}</span>}
-      <input ref={input} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} aria-describedby={invalid ? `${listId}-error` : undefined} value={draft}
-        onChange={(e) => { finishKeys(false); setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { setOptionsOpen(false); if (!finishKeys(false)) commit(); }} onFocus={(e) => e.target.select()}
+      <input ref={input} disabled={disabled} placeholder={mixed ? "Mixed" : undefined} role={suggestions ? "combobox" : undefined} aria-autocomplete={suggestions ? "list" : undefined} aria-expanded={suggestions ? optionsOpen : undefined} aria-controls={suggestions && optionsOpen ? listId : undefined} aria-activedescendant={optionsOpen && optionIndex >= 0 && options[optionIndex] ? `${listId}-${optionIndex}` : undefined} aria-label={label} aria-invalid={invalid || undefined} aria-describedby={invalid ? `${listId}-error` : undefined} value={draft}
+        onChange={(e) => { dirty.current = true; finishKeys(false); setDraft(e.target.value); setInvalid(false); if (suggestions) { setOptionsOpen(true); setFilterOptions(true); setOptionIndex(-1); } }} onBlur={() => { editing.current = false; setOptionsOpen(false); if (!finishKeys(false)) commit(); dirty.current = false; }} onFocus={(e) => { editing.current = true; dirty.current = false; e.target.select(); }}
         onKeyUp={(e) => { if (e.key === keyAdjustment.current?.key) finishKeys(false); }}
         onKeyDown={(e) => {
           if (e.nativeEvent.isComposing) return;
@@ -161,7 +167,7 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
             if (commit()) { cancelled.current = true; e.currentTarget.blur(); }
             return;
           }
-          if (e.key === "Escape") { e.preventDefault(); cancelled.current = true; setDraft(value); setInvalid(false); e.currentTarget.blur(); }
+          if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); cancelled.current = true; setDraft(value); setInvalid(false); e.currentTarget.blur(); }
           if (e.key === "ArrowUp" || e.key === "ArrowDown") {
             if (e.metaKey || e.ctrlKey) return;
             const match = draft.match(/^(-?\d*\.?\d+)([a-z%]*)$/i);
@@ -180,18 +186,18 @@ export function Field({ value, label, prefix, suffix, onCommit, onReset, trailin
       {suggestions && <button type="button" className="suggestion-toggle" aria-label={`Show ${label} options`} tabIndex={-1} onMouseDown={(e) => e.preventDefault()} onClick={() => { setOptionsOpen(!optionsOpen); setFilterOptions(false); setOptionIndex(-1); input.current?.focus(); }}>⌄</button>}
       {trailing}
     </div>
-    {suggestions && optionsOpen && <div className={`field-options${optionsAbove ? " above" : ""}`} role="listbox" id={listId} aria-label={`${label} options`}>
+    {suggestions && optionsOpen && input.current && <FieldOptions anchor={input.current} id={listId} label={`${label} options`}>
       {options.length ? options.map((option, index) => <button type="button" role="option" tabIndex={-1} id={`${listId}-${index}`} aria-selected={index === optionIndex} key={option.value} onMouseDown={(e) => e.preventDefault()} onClick={() => chooseOption(option.value)}>{option.label ?? option.value}</button>) : <div className="field-options-empty">Press Enter to use this value</div>}
-    </div>}
+    </FieldOptions>}
     {onReset && <button className="reset-value" title={`Reset ${label} to stylesheet`} aria-label={`Reset ${label} to stylesheet`} onMouseDown={(e) => e.preventDefault()} onClick={() => { setDraft(value); setInvalid(false); onReset(); }}>↺</button>}
     {invalid && <span id={`${listId}-error`} className="invalid-value" role="alert">Invalid value · Esc to revert</span>}
   </div>;
 }
 
-export function SelectField({ label, value, options, onCommit }: { label: string; value: string; options: (string | { value: string; label: string })[]; onCommit: Commit }) {
+export function SelectField({ label, value, options, onCommit, disabled = false }: { label: string; value: string; options: (string | { value: string; label: string })[]; onCommit: Commit; disabled?: boolean }) {
   const normalized = options.map((option) => typeof option === "string" ? { value: option, label: option } : option);
   const choices = normalized.some((option) => option.value === value) ? normalized : [{ value, label: value }, ...normalized];
-  return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
+  return <label className="select-field"><span>{label}</span><select disabled={disabled} aria-label={label} value={value} onChange={(e) => onCommit(e.target.value)}>{choices.map((option) => <option disabled={option.value === "Mixed"} key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
 }
 
 export function Segmented({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string; icon?: ReactNode }[]; onChange: (value: string) => void }) {
@@ -201,11 +207,13 @@ export function Segmented({ label, value, options, onChange }: { label: string; 
 export function TextArea({ value, onCommit }: { value: string; onCommit: Commit }) {
   const [draft, setDraft] = useState(value);
   const cancelled = useRef(false);
-  useEffect(() => setDraft(value), [value]);
-  return <textarea className="content-input" aria-label="Text content" rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={() => { if (cancelled.current) { cancelled.current = false; return; } if (draft !== value) onCommit(draft); }} onKeyDown={(e) => { if (e.key === "Escape") { cancelled.current = true; setDraft(value); e.currentTarget.blur(); } }} />;
+  const dirty = useRef(false);
+  useEffect(() => { if (!dirty.current) setDraft(value); }, [value]);
+  return <textarea className="content-input" aria-label="Text content" rows={2} value={draft} onChange={(e) => { dirty.current = true; setDraft(e.target.value); }} onBlur={() => { const edited = dirty.current; dirty.current = false; if (cancelled.current) { cancelled.current = false; return; } if (edited && draft !== value) onCommit(draft); }} onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); cancelled.current = true; setDraft(value); e.currentTarget.blur(); } }} />;
 }
 
-export function ColorField({ value, label, onCommit, onReset, mixed = false }: { value: string; label: string; onCommit: Commit; onReset?: () => void; mixed?: boolean }) {
+export function ColorField({ value, state, label, onCommit, onReset, mixed = false }: { value: string; label: string; onCommit: Commit; onReset?: () => void; mixed?: boolean; state?: PropertyState }) {
+  mixed = state?.mixed ?? mixed;
   const parsed = parseColor(value);
   const edits = useContext(InspectorEdits);
   const swatch = useRef<HTMLButtonElement>(null);
@@ -216,7 +224,7 @@ export function ColorField({ value, label, onCommit, onReset, mixed = false }: {
       <span style={{ background: mixed ? undefined : value }}>{mixed ? "—" : null}</span>
     </button>
     {open && swatch.current && <ColorPopover label={label} value={value} anchor={swatch.current} onPreview={onCommit} onClose={(cancel) => { edits?.finish(cancel); setOpen(false); }} />}
-    <Field label={label} value={mixed ? "Mixed" : parsed?.hex ?? value} onCommit={(v) => {
+    <Field state={state} label={label} value={state?.bound ? state.authored : mixed ? "Mixed" : parsed?.hex ?? value} onCommit={(v) => {
       const next = /^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : v;
       const color = parseColor(next);
       return onCommit(color && /^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(next) ? colorWithAlpha(color.hex, mixed ? 1 : parsed?.alpha ?? 1) : next);
