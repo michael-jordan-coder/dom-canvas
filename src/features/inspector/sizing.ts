@@ -1,7 +1,8 @@
 import { setSize, type Styled } from "@/features/canvas/elementStyle";
+import { availableSizeModes, type SizeMode } from "./sizingPolicy";
+export type { SizeMode } from "./sizingPolicy";
 
 export type SizeAxis = "width" | "height";
-export type SizeMode = "css" | "fixed" | "hug" | "fill" | "custom";
 
 export function layoutParent(element: Element): Element | null {
   const parentOf = (node: Element) => node.parentElement ?? (node.getRootNode() instanceof ShadowRoot ? (node.getRootNode() as ShadowRoot).host : null);
@@ -21,13 +22,23 @@ export function layoutItemKind(element: Element): "flex" | "grid" | null {
 
 export function isFlexMainAxis(element: Element, axis: SizeAxis) {
   const parent = layoutParent(element);
-  if (!parent || layoutItemKind(element) !== "flex") return false;
+  if (!parent || ["absolute", "fixed"].includes(getComputedStyle(element).position) || getComputedStyle(element).display === "contents") return false;
   const style = getComputedStyle(parent);
   return style.display.includes("flex") && style.flexDirection.startsWith("column") === (axis === "height");
 }
 
 export function sizingProperties(element: Element, axis: SizeAxis) {
-  return [axis, `min-${axis}`, ...(isFlexMainAxis(element, axis) ? ["flex-grow", "flex-shrink", "flex-basis"] : [])];
+  return [axis, ...(isFlexMainAxis(element, axis) ? ["flex-grow", "flex-shrink", "flex-basis"] : [])];
+}
+
+export function sizeModes(element: Styled, axis: SizeAxis) {
+  const parent = layoutParent(element);
+  const style = getComputedStyle(element);
+  // Typed OM retains "auto" where getComputedStyle reports a used pixel height.
+  const typedParent = parent as (HTMLElement & { computedStyleMap?: () => Map<string, { toString(): string }> }) | null;
+  let parentSize = parent ? getComputedStyle(parent).getPropertyValue(axis) : "auto";
+  try { parentSize = typedParent?.computedStyleMap?.().get(axis)?.toString() ?? parentSize; } catch { /* CSSOM fallback */ }
+  return availableSizeModes({ box: style.display !== "contents" && (element instanceof HTMLElement || element.tagName.toLowerCase() === "svg"), inline: style.display === "inline", parentLayout: layoutItemKind(element), parentDefinite: parentSize !== "auto" && parentSize !== "max-content" && parentSize !== "fit-content" });
 }
 
 export function sizeMode(element: Styled, axis: SizeAxis): SizeMode {
@@ -41,11 +52,12 @@ export function sizeMode(element: Styled, axis: SizeAxis): SizeMode {
 }
 
 export function setSizeMode(element: Styled, axis: SizeAxis, mode: SizeMode, measured: number) {
+  if (mode !== "custom" && !sizeModes(element, axis).includes(mode)) return false;
   if (mode === "css") {
     sizingProperties(element, axis).forEach((property) => element.style.removeProperty(property));
-    return;
+    return true;
   }
-  if (mode === "custom") return;
+  if (mode === "custom") return false;
   const main = isFlexMainAxis(element, axis);
   if (getComputedStyle(element).display === "inline") element.style.display = "inline-block";
   if (main) {
@@ -57,6 +69,8 @@ export function setSizeMode(element: Styled, axis: SizeAxis, mode: SizeMode, mea
   else if (mode === "hug") element.style.setProperty(axis, "max-content");
   else {
     element.style.setProperty(axis, main ? "0px" : CSS.supports(axis, "stretch") ? "stretch" : "100%");
-    element.style.setProperty(`min-${axis}`, "0px");
+    // Existing min/max bounds (including stylesheet bounds) remain authoritative.
+    if (main && getComputedStyle(element).getPropertyValue(`min-${axis}`) === "auto" && !element.style.getPropertyValue(`min-${axis}`)) element.style.setProperty(`min-${axis}`, "0px");
   }
+  return true;
 }
