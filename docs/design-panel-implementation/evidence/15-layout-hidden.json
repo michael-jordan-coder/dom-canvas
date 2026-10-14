@@ -1,0 +1,12 @@
+{
+  "gridLayout": {
+    "columns": "174px 174px",
+    "gap": "12px"
+  },
+  "hiddenSizing": {
+    "display": "block",
+    "outer": 78.9468994140625,
+    "style": "flex: 0 0 auto; width: 110px;",
+    "width": "110px"
+  }
+}

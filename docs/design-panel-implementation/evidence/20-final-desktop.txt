@@ -1,0 +1,161 @@
+- button "Select frame Sample": Sample
+- generic: New
+- heading "Paste code, get layers" [level=1]
+- paragraph: Every element here is a live DOM node on the canvas. Click one to select it, drag it to move it, and edit it in the inspector.
+- button "Get started"
+- button "Learn more"
+- button "Select frame Design panel QA" [pressed]: Design panel QA
+- generic: Alpha
+- generic: Beta
+- paragraph: Grid one
+- paragraph: Grid two
+- paragraph: Panel label
+- button "Select frame Design panel QA copy": Design panel QA copy
+- generic: Alpha
+- generic: Beta
+- paragraph: Grid one
+- paragraph: Grid two
+- paragraph: Panel label
+- generic: Frame
+- generic: 640 × 410
+- complementary:
+  - button "Rename document": Untitled
+  - status: Saved locally
+  - button "Save canvas file":
+  - button "Open canvas file":
+  - button "Hide layers panel":
+  - text: Layers
+  - button "Undo"
+  - button "Redo"
+  - textbox "Search layers"
+  - tree "Layers":
+    - treeitem "Sample" [expanded] [level=1]:
+      - generic: Sample
+    - treeitem "card" [level=2]:
+      - generic: card
+      - button "Lock card":
+      - button "Hide card":
+    - treeitem "Design panel QA" [expanded] [level=1] [selected]:
+      - generic: Design panel QA
+    - treeitem "flex" [level=2]:
+      - generic: flex
+      - button "Lock flex":
+      - button "Hide flex":
+    - treeitem "grid" [level=2]:
+      - generic: grid
+      - button "Lock grid":
+      - button "Hide grid":
+    - treeitem "Panel label" [level=2]:
+      - generic: Panel label
+      - button "Lock Panel label":
+      - button "Hide Panel label":
+    - treeitem "vector" [level=2]:
+      - generic: vector
+      - button "Lock vector":
+      - button "Hide vector":
+    - treeitem "Design panel QA copy" [expanded] [level=1]:
+      - generic: Design panel QA copy
+    - treeitem "flex" [level=2]:
+      - generic: flex
+      - button "Lock flex":
+      - button "Hide flex":
+    - treeitem "grid" [level=2]:
+      - generic: grid
+      - button "Lock grid":
+      - button "Hide grid":
+    - treeitem "Panel label" [level=2]:
+      - generic: Panel label
+      - button "Lock Panel label":
+      - button "Hide Panel label":
+    - treeitem "vector" [level=2]:
+      - generic: vector
+      - button "Lock vector":
+      - button "Hide vector":
+- complementary:
+  - tablist "Inspector mode":
+    - tab "Design" [selected]
+    - tab "CSS"
+  - button "Copy frame":
+  - button "Selection actions":
+  - button "Hide inspector panel":
+  - navigation "Selection hierarchy":
+    - button "Design panel QA"
+  - tabpanel "Design":
+    - strong: Design panel QA
+    - generic: Frame
+    - region "Position":
+      - button "Position" [expanded]: Position
+      - generic "Frame X · Calculate with + − * / and parentheses":
+        - button "Adjust Frame X": X
+        - textbox "Frame X": "800"
+      - generic "Frame Y · Calculate with + − * / and parentheses":
+        - button "Adjust Frame Y": "Y"
+        - textbox "Frame Y": "80"
+    - region "Layout":
+      - button "Layout" [expanded]: Layout
+      - generic "Frame width · Calculate with + − * / and parentheses":
+        - button "Adjust Frame width": W
+        - textbox "Frame width": "640"
+      - generic "Frame height · Calculate with + − * / and parentheses":
+        - button "Adjust Frame height": H
+        - textbox "Frame height": "410"
+        - button "Frame height sizing":
+          - text: ↔
+          - generic: ⌄
+      - button "Lock frame aspect ratio":
+      - checkbox "Clip frame content" [checked]
+      - text: Clip content
+    - region "Appearance":
+      - button "Appearance" [expanded]: Appearance
+      - button "Individual corners":
+      - button "Reset appearance overrides": Reset
+      - generic "Frame opacity · Calculate with + − * / and parentheses":
+        - button "Adjust Frame opacity": ◒
+        - textbox "Frame opacity": "100"
+        - generic: "%"
+      - generic "Frame corner radius · Calculate with + − * / and parentheses":
+        - button "Adjust Frame corner radius": R
+        - textbox "Frame corner radius": "12"
+      - button "Reset Frame corner radius to stylesheet": ↺
+      - generic: Blend mode
+      - combobox "Blend mode":
+        - option "normal" [selected]
+        - option "multiply"
+        - option "screen"
+        - option "overlay"
+        - option "darken"
+        - option "lighten"
+        - option "difference"
+        - option "exclusion"
+    - region "Fill":
+      - button "Fill" [expanded]: Fill
+      - button "Pick Frame fill"
+      - generic "Frame fill":
+        - textbox "Frame fill": "#FFFFFF"
+      - generic "Frame fill opacity · Calculate with + − * / and parentheses":
+        - textbox "Frame fill opacity": "100"
+        - generic: "%"
+    - region "Stroke":
+      - button "Stroke" [active]: Stroke
+    - region "Effects":
+      - button "Effects": Effects
+    - region "CSS advanced":
+      - button "CSS advanced": CSS advanced
+- generic "Canvas navigation":
+  - button "Zoom out": −
+  - generic "Zoom 2–800%. Shift+0 for actual size.":
+    - spinbutton "Zoom percentage": "107.72"
+    - generic: "%"
+  - button "Zoom in": +
+  - button "Fit all"
+  - button "Fit selection"
+- toolbar:
+  - button "Move (V)" [pressed]:
+  - button "Frame (F)":
+  - button "Rectangle (R)":
+  - button "Text (T)":
+  - button "Hand tool (H)":
+  - button "Paste HTML":
+  - button "Find an action":
+  - button "Keyboard shortcuts":
+  - button "Import website":

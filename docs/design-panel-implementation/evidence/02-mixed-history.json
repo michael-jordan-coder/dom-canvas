@@ -1,0 +1,38 @@
+{
+  "paintBefore": [
+    {
+      "color": "rgb(170, 51, 85)",
+      "id": "a",
+      "style": null
+    },
+    {
+      "color": "rgb(51, 102, 255)",
+      "id": "b",
+      "style": null
+    }
+  ],
+  "paintAfter": [
+    {
+      "color": "rgb(18, 52, 86)",
+      "id": "a",
+      "style": "background-color: rgb(18, 52, 86);"
+    },
+    {
+      "color": "rgb(18, 52, 86)",
+      "id": "b",
+      "style": "background-color: rgb(18, 52, 86);"
+    }
+  ],
+  "paintUndo": [
+    {
+      "color": "rgb(170, 51, 85)",
+      "id": "a",
+      "style": null
+    },
+    {
+      "color": "rgb(51, 102, 255)",
+      "id": "b",
+      "style": null
+    }
+  ]
+}

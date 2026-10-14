@@ -1,0 +1,34 @@
+{
+  "field": {
+    "fontSize": "11px",
+    "height": 24,
+    "lineHeight": "16px",
+    "padding": "0px",
+    "radius": "5px",
+    "width": 88
+  },
+  "heading": {
+    "fontSize": "11px",
+    "height": 40,
+    "lineHeight": "16px",
+    "padding": "0px 8px 0px 16px",
+    "radius": "0px",
+    "width": 240
+  },
+  "input": {
+    "fontSize": "11px",
+    "height": 22,
+    "lineHeight": "16px",
+    "padding": "0px",
+    "radius": "0px",
+    "width": 38
+  },
+  "panel": {
+    "fontSize": "11px",
+    "height": 884,
+    "lineHeight": "16px",
+    "padding": "0px",
+    "radius": "13px",
+    "width": 240
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "heterogeneous": {
+    "card": "rgb(85, 0, 17)",
+    "frame": "rgb(85, 0, 17)"
+  },
+  "heterogeneousUndo": {
+    "card": "rgb(255, 255, 255)",
+    "frame": "rgb(255, 255, 255)"
+  }
+}

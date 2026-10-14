@@ -1,0 +1,144 @@
+- button "Select frame Sample": Sample
+- generic: New
+- heading "Paste code, get layers" [level=1]
+- paragraph: Every element here is a live DOM node on the canvas. Click one to select it, drag it to move it, and edit it in the inspector.
+- button "Get started"
+- button "Learn more"
+- button "Select frame Design panel QA": Design panel QA
+- generic: Alpha
+- generic: Beta
+- paragraph: Grid one
+- paragraph: Grid two
+- paragraph: Panel label
+- complementary:
+  - button "Rename document": Untitled
+  - status: Saved locally
+  - button "Save canvas file":
+  - button "Open canvas file":
+  - button "Hide layers panel":
+  - text: Layers
+  - button "Undo" [disabled]
+  - button "Redo"
+  - textbox "Search layers"
+  - tree "Layers":
+    - treeitem "Sample" [expanded] [level=1]:
+      - generic: Sample
+    - treeitem "card" [level=2]:
+      - generic: card
+      - button "Lock card":
+      - button "Hide card":
+    - treeitem "Design panel QA" [expanded] [level=1]:
+      - generic: Design panel QA
+    - treeitem "flex" [expanded] [level=2]:
+      - generic: flex
+      - button "Lock flex":
+      - button "Hide flex":
+    - treeitem "a" [level=3] [selected]:
+      - generic: a
+      - button "Lock a":
+      - button "Hide a":
+    - treeitem "b" [active] [level=3] [selected]:
+      - generic: b
+      - button "Lock b":
+      - button "Hide b":
+    - treeitem "grid" [level=2]:
+      - generic: grid
+      - button "Lock grid":
+      - button "Hide grid":
+    - treeitem "Panel label" [level=2]:
+      - generic: Panel label
+      - button "Lock Panel label":
+      - button "Hide Panel label":
+    - treeitem "vector" [level=2]:
+      - generic: vector
+      - button "Lock vector":
+      - button "Hide vector":
+- complementary:
+  - tablist "Inspector mode":
+    - tab "Design" [selected]
+    - tab "CSS"
+  - button "Copy frame" [disabled]:
+  - button "Selection actions":
+  - button "Hide inspector panel":
+  - tabpanel "Design":
+    - strong: 2 selected
+    - generic: Mixed
+    - region "Position":
+      - button "Position" [expanded]: Position
+      - generic "X":
+        - generic: X
+        - textbox "X":
+          - /placeholder: Mixed
+      - generic "Y · Calculate with + − * / and parentheses":
+        - button "Adjust Y": "Y"
+        - textbox "Y": "30"
+    - region "Layout":
+      - button "Layout" [expanded]: Layout
+      - generic "Width":
+        - generic: W
+        - textbox "Width":
+          - /placeholder: Mixed
+      - generic "Height · Calculate with + − * / and parentheses":
+        - button "Adjust Height": H
+        - textbox "Height": "140"
+    - region "Appearance":
+      - button "Appearance" [expanded]: Appearance
+      - generic "Opacity · Calculate with + − * / and parentheses":
+        - button "Adjust Opacity": ◒
+        - textbox "Opacity": "100"
+        - generic: "%"
+      - generic "Corner radius · Calculate with + − * / and parentheses":
+        - button "Adjust Corner radius": R
+        - textbox "Corner radius": "0"
+    - region "Typography":
+      - button "Typography" [expanded]: Typography
+      - generic "Font family":
+        - textbox "Font family": Inter, Arial, sans-serif
+      - generic "Font weight · Calculate with + − * / and parentheses":
+        - combobox "Font weight": "400"
+        - button "Show Font weight options": ⌄
+      - generic "Font size · Calculate with + − * / and parentheses":
+        - button "Adjust Font size": Size
+        - textbox "Font size": "16"
+      - generic "Line height":
+        - generic: LH
+        - textbox "Line height": normal
+      - generic "Letter spacing":
+        - generic: LS
+        - textbox "Letter spacing": normal
+      - button "Pick Text color"
+      - generic "Text color":
+        - textbox "Text color": "#FFFFFF"
+      - generic "Text color opacity · Calculate with + − * / and parentheses":
+        - textbox "Text color opacity": "100"
+        - generic: "%"
+      - paragraph: Typography applies to 2 of 2 selected layers.
+    - region "Fill":
+      - button "Fill" [expanded]: Fill
+      - button "Pick Fill":
+        - generic: —
+      - generic "Fill":
+        - textbox "Fill":
+          - /placeholder: Mixed
+    - region "Stroke":
+      - button "Stroke": Stroke
+    - region "Effects":
+      - button "Effects": Effects
+- generic "Canvas navigation":
+  - button "Zoom out": −
+  - generic "Zoom 2–800%. Shift+0 for actual size.":
+    - spinbutton "Zoom percentage": "107.72"
+    - generic: "%"
+  - button "Zoom in": +
+  - button "Fit all"
+  - button "Fit selection"
+- toolbar:
+  - button "Move (V)" [pressed]:
+  - button "Frame (F)":
+  - button "Rectangle (R)":
+  - button "Text (T)":
+  - button "Hand tool (H)":
+  - button "Paste HTML":
+  - button "Find an action":
+  - button "Keyboard shortcuts":
+  - button "Import website":

@@ -1,0 +1,20 @@
+{
+  "frameBatch": [
+    {
+      "opacity": "0.8",
+      "width": 689.4000244140625
+    },
+    {
+      "opacity": "0.8",
+      "width": 689.400146484375
+    }
+  ],
+  "frameBatchUndo": [
+    "1",
+    "1"
+  ],
+  "widthBatch": [
+    "500px",
+    "500px"
+  ]
+}

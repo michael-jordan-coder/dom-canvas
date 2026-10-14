@@ -1,0 +1,23 @@
+{
+  "vectorEdit": {
+    "bounds": {
+      "width": 86.175048828125,
+      "x": 343.7734375
+    },
+    "sections": [
+      "Position",
+      "Layout",
+      "Appearance",
+      "Fill",
+      "Stroke",
+      "Effects",
+      "CSS advanced"
+    ],
+    "style": "x: 25px;",
+    "x": "25px"
+  },
+  "vectorUndo": {
+    "style": null,
+    "x": "10px"
+  }
+}

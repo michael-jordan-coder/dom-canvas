@@ -1,0 +1,4 @@
+{
+  "opacity": "0.5",
+  "rule": "0px;margin:12px 0} @media(max-width:1000px){#label{font-size:20px}}\n/* dom-canvas:frame-style */\n:host { opacity: 0.5; }\n/* /dom-canvas:frame-style */"
+}

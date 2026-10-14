@@ -1,0 +1,36 @@
+{
+  "redo": [
+    {
+      "card": "3px",
+      "frame": "0px",
+      "id": "ab-d5333d13"
+    },
+    {
+      "card": null,
+      "frame": "3px",
+      "id": "ab-298dbfce"
+    },
+    {
+      "card": null,
+      "frame": "0px",
+      "id": "ab-801e55e4"
+    }
+  ],
+  "undo": [
+    {
+      "card": "0px",
+      "frame": "0px",
+      "id": "ab-d5333d13"
+    },
+    {
+      "card": null,
+      "frame": "0px",
+      "id": "ab-298dbfce"
+    },
+    {
+      "card": null,
+      "frame": "0px",
+      "id": "ab-801e55e4"
+    }
+  ]
+}

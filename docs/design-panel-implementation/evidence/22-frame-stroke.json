@@ -1,0 +1,36 @@
+{
+  "beforeUndo": [
+    {
+      "border": "0px",
+      "id": "ab-d5333d13",
+      "style": "none"
+    },
+    {
+      "border": "2px",
+      "id": "ab-298dbfce",
+      "style": "solid"
+    },
+    {
+      "border": "0px",
+      "id": "ab-801e55e4",
+      "style": "none"
+    }
+  ],
+  "afterUndo": [
+    {
+      "border": "0px",
+      "id": "ab-d5333d13",
+      "style": "none"
+    },
+    {
+      "border": "0px",
+      "id": "ab-298dbfce",
+      "style": "none"
+    },
+    {
+      "border": "0px",
+      "id": "ab-801e55e4",
+      "style": "none"
+    }
+  ]
+}
