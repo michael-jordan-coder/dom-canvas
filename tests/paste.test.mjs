@@ -20,3 +20,8 @@ test('rem becomes px at the 16px browser default', () => {
   assert.equal(scopeCss('.a { padding: 4rem 0.5rem; width: calc(100% - 1.25rem); }'), '.a { padding: 64px 8px; width: calc(100% - 20px); }');
   assert.equal(scopeCss('.a { margin: -2rem; }'), '.a { margin: -32px; }');
 });
+test('only known font hosts move to the document', () => {
+  const { css, fonts } = extractFonts('@import url("https://fonts.googleapis.com/css2?family=Inter");\n@import "https://cdn.example.com/fonts/theme.css";\n.a {}');
+  assert.equal(fonts, '@import url("https://fonts.googleapis.com/css2?family=Inter");');
+  assert.match(css, /cdn\.example\.com/);
+});

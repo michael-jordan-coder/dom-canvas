@@ -102,9 +102,14 @@ export function extractFonts(css: string, links: string[] = []) {
 // Decides whether an external stylesheet is moved out of the frame into the
 // app document. Moved sheets apply to the whole app, so only sheets that
 // carry nothing but @font-face are safe to move.
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.bunny.net", "use.typekit.net", "api.fontshare.com"];
+
 export function isFontStylesheet(href: string): boolean {
-  // TODO(human)
-  return false;
+  try {
+    return FONT_HOSTS.includes(new URL(href).hostname);
+  } catch {
+    return false;
+  }
 }
 
 // The artboard is the document: html/body/:root selectors become :host and
