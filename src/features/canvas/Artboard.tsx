@@ -20,14 +20,13 @@ const BASE_CSS = `
 
 type Props = {
   artboard: ArtboardData;
-  previewCss?: string;
   selected: boolean;
   onSelect: (additive: boolean) => void;
   zoom: number;
   onMount: (id: string, host: HTMLDivElement | null) => void;
 };
 
-export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, onSelect }: Props) {
+export function ArtboardView({ artboard, selected, zoom, onMount, onSelect }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
@@ -54,8 +53,8 @@ export function ArtboardView({ artboard, previewCss, selected, zoom, onMount, on
   }, [artboard.id, onMount]);
 
   useLayoutEffect(() => {
-    styleRef.current!.textContent = BASE_CSS + (previewCss ?? artboard.css);
-  }, [artboard.css, previewCss]);
+    styleRef.current!.textContent = BASE_CSS + artboard.css;
+  }, [artboard.css]);
 
   // After a commit the DOM already matches html, and replacing it would
   // destroy the element references that selection holds. Only undo, redo

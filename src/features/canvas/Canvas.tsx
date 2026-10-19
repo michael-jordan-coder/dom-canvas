@@ -9,7 +9,6 @@ import type { Artboard, Camera, Selection, SelectionItem, Tool } from "./types";
 type Props = {
   surfaceRef: RefObject<HTMLDivElement | null>;
   artboards: Artboard[];
-  cssPreview: { id: string; css: string } | null;
   camera: Camera;
   onCameraChange: (camera: Camera) => void;
   tool: Tool;
@@ -56,7 +55,7 @@ const DRAG_THRESHOLD = 2;
 
 export function Canvas(props: Props) {
   const {
-    artboards, cssPreview, camera, onCameraChange, tool, onToolChange, selection, onSelect,
+    artboards, camera, onCameraChange, tool, onToolChange, selection, onSelect,
     hosts, onHostMount, onUpdateArtboard, onCreateArtboard, externalHover, version, onChange, onCommit,
   } = props;
 
@@ -524,7 +523,7 @@ export function Canvas(props: Props) {
       selected: selectedEl?.getClientRects().length ? selectionOutline(selectedEl, canvas) : null,
       hover: hoverTarget && hoverTarget.isConnected && hoverTarget.getClientRects().length && hoverTarget !== selectedEl ? elementRectInCanvas(hoverTarget, canvas) : null,
     });
-  }, [camera, version, selection, hoverTarget, hosts, artboards, cssPreview]);
+  }, [camera, version, selection, hoverTarget, hosts, artboards]);
   useLayoutEffect(() => {
     const elements = selectionItems(selection).flatMap(item => {
       const element = selectedElement(item, hosts); return element ? [element] : [];
@@ -587,7 +586,7 @@ export function Canvas(props: Props) {
       {multipleRects.map((rect, index) => <div key={index} className="outline selected multiple-outline" style={{ ...rectStyle(rect), transform: rect.transform, transformOrigin: "0 0" }} />)}
       <div className="world" style={{ transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.z})` }}>
         {artboards.map((ab) => (
-          <ArtboardView key={ab.id} artboard={ab} previewCss={cssPreview?.id === ab.id ? cssPreview.css : undefined} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
+          <ArtboardView key={ab.id} artboard={ab} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
         ))}
       </div>
 

@@ -41,11 +41,9 @@ Open http://localhost:5180.
 - Six compact alignment buttons move an HTML element to the frame’s left, center, right, top, middle or bottom using its visual bounds. They preserve CSS flow and support Undo; hidden elements cannot be aligned.
 - Position and rotation sit at the top of the Design panel. Expand CSS positioning for flow mode, insets and transform origin; the disclosure remembers your preference.
 - Edit Flex/Grid layout, position, overflow, size, fill and typography in the Design panel. "Copy code" exports the frame back to HTML and CSS.
-- Open the CSS tab to edit the selected element’s inline declarations or its frame stylesheet, including selectors, custom properties, nested rules and keyframes supported by the browser. Use `:host` to target the frame. Existing imported styles have already been scoped to it.
-- CSS drafts preview live without entering history. Apply CSS (Cmd/Ctrl+Enter) saves one undo step; Discard restores the saved stylesheet. Drafts are kept per frame while switching tabs and selections during the current session. Refreshing the page discards unapplied drafts. Inline styles from Design may override stylesheet rules; invalid CSS is ignored by the browser.
-- In either CSS editor, Tab/Shift+Tab indent, Enter continues indentation, and Cmd/Ctrl+Z undoes draft edits locally. Press Escape then Tab to leave the editor. CSS help and keyboard shortcuts expand below the editor; Position help is available from its info button.
+- Open the CSS tab to read the selection as a standalone HTML file with syntax highlighting: an element shows its HTML and only the stylesheet rules that reach it or its descendants; a frame shows its whole stylesheet. Frame-scoped CSS is shown as document CSS (`body`, `@media`, `vw`/`vh`), so the copied file works on its own. The tab is read-only; edit through Design. Position help is available from its info button.
 - The document and camera are saved to localStorage automatically.
-- Save canvas file (download icon above Layers) exports all frames, applied HTML/CSS, font CSS and camera to `.domcanvas.json`. Open canvas file replaces the document; Undo restores its previous content. Unapplied CSS drafts and undo history are not included. External images/fonts remain URL references, so the file is not an offline asset bundle. Imported executable markup is removed.
+- Save canvas file (download icon above Layers) exports all frames, applied HTML/CSS, font CSS and camera to `.domcanvas.json`. Open canvas file replaces the document; Undo restores its previous content. Undo history is not included. External images/fonts remain URL references, so the file is not an offline asset bundle. Imported executable markup is removed.
 - Pasting the text of a DOM Canvas JSON file onto the canvas also opens it. Invalid project data is rejected without changing the document; ordinary HTML/CSS paste keeps its existing behavior.
 
 | Shortcut | Action |
@@ -85,7 +83,7 @@ Open http://localhost:5180.
 - Search layers by name, direct text, tag, class or ID. Matching layers retain their ancestor paths; Enter/Down from search selects the first visible match, and Escape or Clear restores the unfiltered tree. Search expansion is separate from the normal tree.
 - Right-click a layer or open the inspector’s Selection actions menu to duplicate, delete, zoom to selection or select its parent. Arrow keys and Home/End navigate the menu; Escape returns focus to its trigger. Duplicate and Delete support Undo.
 - Element actions also move a layer earlier/later or first/last among its siblings. These change HTML order, so normal flow, Flex/Grid and order-dependent selectors update naturally; explicit CSS `order` and `z-index` still apply. Undo/Redo restores both order and selection.
-- Copy frame exports the selected frame with applied CSS. Pending CSS drafts are not exported. Save status reports successful local storage writes or storage failures.
+- Copy frame exports the selected frame with its CSS. Save status reports successful local storage writes or storage failures.
 
 ## Editing behavior
 
@@ -104,7 +102,6 @@ Open http://localhost:5180.
 - Typography is available when text is nested inside child tags, such as spans in a heading or button. Parent edits use normal CSS inheritance and preserve child overrides and markup; direct content editing is available only for text without child elements.
 - Position includes individual CSS rotation and transform origin. Bare angles use degrees; `deg`, `rad`, `grad`, `turn`, explicit axes and browser-supported CSS expressions are accepted. Rotation adds to any existing `transform` rule; invalid input leaves the element unchanged.
 - Selection outlines and resize handles follow affine 2D transforms. Rotated resizing keeps the opposite corner anchored; perspective and fragmented inline boxes use an axis-aligned fallback.
-- Selected-element CSS uses explicit Apply/Discard. If Design changes while a draft is open, the editor shows a comparison before an explicit replacement. Element drafts survive tab/selection changes for the same live DOM node, but not reloads or document remounts.
 - See [inspector verification notes](docs/INSPECTOR_PARITY.md) for browser evidence and remaining QA limits.
 
 - Element rows also offer canvas locking. Locked elements and their descendants ignore canvas selection, dragging, resizing, double-click text editing, keyboard nudges and deletion/reordering. Select them in Layers to unlock or edit properties intentionally. Locks support Undo and survive reload; moving/removing an unlocked ancestor can still affect its locked children.
