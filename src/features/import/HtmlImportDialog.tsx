@@ -9,7 +9,7 @@ export const emptyHtmlDraft: HtmlDraft = { source: "", name: "", width: "640" };
 
 export function HtmlImportDialog({ draft, onDraft, onCreate, onClose }: {
   draft: HtmlDraft; onDraft: (draft: HtmlDraft) => void;
-  onCreate: (content: { html: string; css: string; width: number; name?: string }) => void;
+  onCreate: (content: { html: string; css: string; fonts?: string; width: number; name?: string }) => void;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -31,7 +31,7 @@ export function HtmlImportDialog({ draft, onDraft, onCreate, onClose }: {
     if (!html.trim()) { setError("Include content inside the HTML body."); return; }
     const title = new DOMParser().parseFromString(draft.source, "text/html").title;
     const name = (draft.name.trim() || title.trim()).slice(0, 120);
-    onCreate({ html, css: parsed.css, width, ...(name ? { name } : {}) });
+    onCreate({ html, css: parsed.css, fonts: parsed.fonts, width, ...(name ? { name } : {}) });
   };
   return createPortal(<dialog ref={dialog} className="html-import-dialog" role="dialog" aria-modal="true" aria-labelledby="html-import-title" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={event => event.stopPropagation()}>
     <div className="html-import-heading"><div><strong id="html-import-title">Paste HTML</strong><p>Turn a snippet or a full HTML document into an editable frame.</p></div><button className="inspector-icon" aria-label="Close HTML import" title="Close; keep draft" onClick={onClose}>×</button></div>

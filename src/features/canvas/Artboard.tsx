@@ -11,6 +11,7 @@ const BASE_CSS = `
   color: #111;
   background: #fff;
   container-type: inline-size;
+  container-name: frame;
   contain: layout style;
   overflow: hidden;
 }

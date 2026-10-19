@@ -5,6 +5,7 @@ import { Canvas, isTyping, isInteractiveControl, isPopupControl } from "@/featur
 import { getTranslate, setTranslate, screenDeltaToLocal } from "@/features/canvas/elementStyle";
 import { fitCamera, unionBounds, zoomAround, type Bounds } from "@/features/canvas/geometry";
 import { parseClipboard, scopeCss } from "@/features/canvas/paste";
+import { looksLikeReact } from "@/features/import/reactDetect";
 import { SAMPLE_CSS, SAMPLE_HTML } from "@/features/canvas/sample";
 import { ActionSearch } from "@/features/canvas/ActionSearch";
 import { Toolbar } from "@/features/canvas/Toolbar";
@@ -210,14 +211,22 @@ export function App() {
         void importSite(plain.trim());
         return;
       }
+      if (looksLikeReact(plain)) {
+        e.preventDefault();
+        void import("@/features/import/react")
+          .then(({ renderReact }) => renderReact(plain))
+          .then(content => addArtboard(content))
+          .catch(error => setNotice(`Could not render React code: ${error instanceof Error ? error.message : String(error)}`));
+        return;
+      }
       const pasted = parseClipboard(plain, rich);
       if (!pasted) return;
       e.preventDefault();
       if (pasted.kind === "document") {
-        addArtboard({ html: pasted.html, css: pasted.css });
+        addArtboard({ html: pasted.html, css: pasted.css, fonts: pasted.fonts });
       } else if (selection.kind !== "none" && selection.kind !== "multiple") {
         const ab = artboards.find((a) => a.id === selection.artboardId);
-        if (ab) commitArtboard(ab.id, { css: `${ab.css}\n${scopeCss(pasted.css)}` });
+        if (ab) commitArtboard(ab.id, { css: `${ab.css}\n${scopeCss(pasted.css)}`, ...(pasted.fonts ? { fonts: [ab.fonts, pasted.fonts].filter(Boolean).join("\n") } : {}) });
       }
     };
     window.addEventListener("paste", onPaste);
@@ -485,7 +494,6 @@ export function App() {
 
   const hasElementCssDraft = selection.kind === "element" && elementCssDrafts.current.has(selection.element);
   const activeArtboard = selection.kind === "none" || selection.kind === "multiple" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
-  const fonts = artboards.map((ab) => ab.fonts ?? "").filter(Boolean).join("\n");
   const inspectorScope = selection.kind === "multiple" ? "multiple" : selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
   const inspectorActions: SelectionAction[] = [
     { label: "Collapse Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
@@ -532,7 +540,8 @@ export function App() {
 
   return (
     <div className={`app${uiHidden ? " ui-hidden" : ""}${!layersVisible ? " layers-hidden" : ""}${!inspectorVisible ? " inspector-hidden" : ""}${inspectorTab === "css" ? " css-mode" : ""}`}>
-      {fonts && <style>{fonts}</style>}
+      {/* One sheet per frame: @import is only valid at the top of a sheet. */}
+      {artboards.map((ab) => ab.fonts ? <style key={ab.id}>{ab.fonts}</style> : null)}
       <Canvas
         surfaceRef={canvasSurface}
         artboards={artboards}
