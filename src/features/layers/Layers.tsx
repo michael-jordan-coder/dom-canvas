@@ -48,7 +48,7 @@ export function Layers(props: Props) {
     if (ab.name.toLocaleLowerCase().includes(needle)) matchingFrames.add(ab.id);
     const root = hosts.get(ab.id)?.shadowRoot;
     for (const el of Array.from(root?.querySelectorAll("*") ?? [])) {
-      if (el.tagName === "STYLE") continue;
+      if (!isLayer(el)) continue;
       const directText = Array.from(el.childNodes).filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join(" ");
       const searchable = [layerName(el), el.tagName, el.id, el.id ? `#${el.id}` : "", ...Array.from(el.classList).flatMap(name => [name, `.${name}`]), directText].join(" ");
       if (!searchable.toLocaleLowerCase().includes(needle)) continue;
@@ -132,7 +132,7 @@ export function Layers(props: Props) {
     const isSelected = selectionItems(selection).some(item => item.kind === "element" && item.element === el);
     const hidden = isLayerHidden(el);
     const lockOwner = lockedAncestor(el);
-    const children = Array.from(el.children).filter(child => !needle || visible.has(child));
+    const children = Array.from(el.children).filter(child => isLayer(child) && (!needle || visible.has(child)));
     const open = needle ? !searchCollapsed.has(el) : expanded.has(el);
     const Icon = layerIcon(el);
     return (
@@ -195,7 +195,7 @@ export function Layers(props: Props) {
         const root = hosts.get(ab.id)?.shadowRoot;
         const isSelected = selectionItems(selection).some(item => item.kind === "artboard" && item.artboardId === ab.id);
         const open = needle ? !searchCollapsed.has(ab.id) : !collapsedArtboards.has(ab.id);
-        const children = root ? Array.from(root.children).filter((el) => el.tagName !== "STYLE" && (!needle || visible.has(el))) : [];
+        const children = root ? Array.from(root.children).filter((el) => isLayer(el) && (!needle || visible.has(el))) : [];
         if (needle && !matchingFrames.has(ab.id) && !children.length) return null;
         return (
           <div key={ab.id}>
@@ -290,4 +290,9 @@ export function layerName(el: Element) {
   const cls = Array.from(el.classList).find((c) => !GENERATED_CLASS.test(c));
   if (cls) return cls;
   return el.tagName.toLowerCase();
+}
+
+// Stylesheets and kept scripts are part of the frame but not of its design.
+function isLayer(el: Element) {
+  return el.tagName !== "STYLE" && el.tagName !== "SCRIPT";
 }

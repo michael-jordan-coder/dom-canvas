@@ -24,6 +24,7 @@ import { IMPORT_WIDTH, importUrl, isUrl } from "@/features/import/importUrl";
 import { Inspector } from "@/features/inspector/Inspector";
 import { useInspectorSectionActions, useInspectorSectionNavigation } from "@/features/inspector/InspectorPreferences";
 import { ElementCode } from "@/features/inspector/ElementCode";
+import { playDocument } from "@/features/document/exportHtml";
 import { SelectionPath } from "@/features/inspector/SelectionPath";
 import { Layers } from "@/features/layers/Layers";
 import { SelectionMenu, type MenuAnchor, type SelectionAction } from "@/features/layers/SelectionMenu";
@@ -78,6 +79,9 @@ export function App() {
   const [inspectorTab, setInspectorTab] = useState<"design" | "css">("design");
   const [appearanceClipboard, setAppearanceClipboard] = useState<Appearance | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [play, setPlay] = useState<{ id: string; srcDoc: string } | null>(null);
+  const playing = useRef(false);
+  playing.current = play !== null;
   const pendingFocus = useRef<string | null>(null);
   const [layerHover, setLayerHover] = useState<Element | null>(null);
   const [version, setVersion] = useState(0);
@@ -430,6 +434,7 @@ export function App() {
       if (!e.defaultPrevented && !isPopupControl(e) && mod && key === "k") { e.preventDefault(); setActionSearchOpen(true); return; }
       const rangeHistory = mod && (key === "z" || key === "y") && target instanceof HTMLInputElement && target.type === "range";
       if (e.defaultPrevented || (isTyping(e) && !rangeHistory) || isPopupControl(e)) return;
+      if (e.key === "Escape" && playing.current) { setPlay(null); return; }
 
       if (mod && key === "z") { e.preventDefault(); travel(e.shiftKey ? "redo" : "undo"); return; }
       if (mod && key === "y") { e.preventDefault(); travel("redo"); return; }
@@ -478,6 +483,14 @@ export function App() {
   };
 
   const activeArtboard = selection.kind === "none" || selection.kind === "multiple" ? undefined : artboards.find((ab) => ab.id === selection.artboardId);
+  // Play snapshots the frame once; edits made while it runs apply on the next Play.
+  const togglePlay = (id = activeArtboard?.id) => {
+    if (play && (!id || play.id === id)) { setPlay(null); return; }
+    const frame = artboards.find(ab => ab.id === id);
+    if (!frame) return;
+    setPlay({ id: frame.id, srcDoc: playDocument(frame, hostsRef.current.get(frame.id)?.shadowRoot) });
+    setSelection({ kind: "none" });
+  };
   const inspectorScope = selection.kind === "multiple" ? "multiple" : selection.kind === "artboard" ? "frame" : selection.kind === "element" && selection.element instanceof SVGElement ? "svg" : "html";
   const inspectorActions: SelectionAction[] = [
     { label: "Collapse Design sections", disabled: selection.kind === "none" || inspectorTab !== "design", run: () => setInspectorSections?.(inspectorScope, false), separator: true },
@@ -512,6 +525,7 @@ export function App() {
       label: `Go to ${target.title}`,
       run: () => { setUiHidden(false); setInspectorVisible(true); sectionNavigation.reveal?.(target); },
     })),
+    { label: play ? "Stop playing" : "Play frame", disabled: !play && !activeArtboard, run: () => togglePlay() },
     { label: "Show code", disabled: !activeArtboard, run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("css"); if (activeArtboard) pendingFocus.current = activeArtboard.id; } },
     { label: "Open Design panel", run: () => { setUiHidden(false); setInspectorVisible(true); setInspectorTab("design"); } },
     { label: layersVisible ? "Hide layers panel" : "Show layers panel", run: () => { setUiHidden(false); setLayersVisible(value => !value); } },
@@ -529,6 +543,8 @@ export function App() {
       <Canvas
         surfaceRef={canvasSurface}
         artboards={artboards}
+        play={play}
+        onTogglePlay={togglePlay}
         camera={camera}
         onCameraChange={setCamera}
         tool={tool}

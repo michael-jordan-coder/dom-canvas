@@ -1,5 +1,5 @@
 import { makeSelection, selectionItems, sameItem, toggleSelection } from "./selection";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { ArtboardView } from "./Artboard";
 import { lockedAncestor } from "@/features/layers/locking";
 import { affineBorderBox, inverseLinearDelta, getTranslate, screenDeltaToLocal, isResizable, isTextEditable, setSize, setTranslate, type Styled } from "./elementStyle";
@@ -16,6 +16,8 @@ type Props = {
   selection: Selection;
   onSelect: (selection: Selection) => void;
   hosts: Map<string, HTMLDivElement>;
+  play?: { id: string; srcDoc: string } | null;
+  onTogglePlay?: (id: string) => void;
   onHostMount: (id: string, host: HTMLDivElement | null) => void;
   onUpdateArtboard: (id: string, patch: Partial<Artboard>) => void;
   onCreateArtboard: (bounds: Bounds) => string;
@@ -56,7 +58,7 @@ const DRAG_THRESHOLD = 2;
 export function Canvas(props: Props) {
   const {
     artboards, camera, onCameraChange, tool, onToolChange, selection, onSelect,
-    hosts, onHostMount, onUpdateArtboard, onCreateArtboard, externalHover, version, onChange, onCommit,
+    hosts, play, onTogglePlay, onHostMount, onUpdateArtboard, onCreateArtboard, externalHover, version, onChange, onCommit,
   } = props;
 
   const canvasRef = props.surfaceRef;
@@ -569,6 +571,10 @@ export function Canvas(props: Props) {
   const canResize = !editing && (selection.kind === "artboard" || (selection.kind === "element" && !lockedAncestor(selection.element) && isResizable(selection.element)));
   const toolCursor = handMode ? " hand" : tool === "text" ? " text-tool" : tool === "frame" || tool === "rect" ? " draw-tool" : "";
 
+  // The playing frame is unselected, so its Stop control is placed here.
+  const playHost = play ? hosts.get(play.id) : undefined;
+  const playRect = playHost && canvasRef.current ? elementRectInCanvas(playHost, canvasRef.current) : null;
+
   return (
     <div
       ref={canvasRef}
@@ -586,7 +592,18 @@ export function Canvas(props: Props) {
       {multipleRects.map((rect, index) => <div key={index} className="outline selected multiple-outline" style={{ ...rectStyle(rect), transform: rect.transform, transformOrigin: "0 0" }} />)}
       <div className="world" style={{ transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.z})` }}>
         {artboards.map((ab) => (
-          <ArtboardView key={ab.id} artboard={ab} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
+          <Fragment key={ab.id}>
+          <ArtboardView artboard={ab} selected={ab.id === selectedArtboardId || (selection.kind === "multiple" && selection.items.some(item => item.kind === "artboard" && item.artboardId === ab.id))} zoom={camera.z} onMount={onHostMount} onSelect={(additive) => { const item = { kind: "artboard" as const, artboardId: ab.id }; onSelect(additive ? toggleSelection(selection, item) : item); }} />
+          {play?.id === ab.id && <iframe
+            className="play-frame"
+            title={`${ab.name} (playing)`}
+            // Scripts run, but without the app's origin: no access to the
+            // canvas, its storage or the user's data.
+            sandbox="allow-scripts allow-forms allow-modals allow-popups"
+            srcDoc={play.srcDoc}
+            style={{ left: ab.x, top: ab.y, width: ab.width, height: hosts.get(ab.id)?.offsetHeight ?? ab.height ?? 600 }}
+          />}
+          </Fragment>
         ))}
       </div>
 
@@ -599,13 +616,18 @@ export function Canvas(props: Props) {
             ))}
           </div>
           <div className={`selection-labels ${selection.kind === "artboard" ? "frame-selection" : "element-selection"}`} style={rectStyle(selectedRect.visualBounds ?? selectedRect)}>
-            <div className="selection-caption">{selection.kind === "artboard" ? "Frame" : selection.kind === "element" ? selection.element.tagName.toLowerCase() : ""}</div>
+            {selection.kind === "artboard" && onTogglePlay
+              ? <button className="selection-caption play-chip" aria-label={`Play ${artboards.find(ab => ab.id === selection.artboardId)?.name ?? "frame"}`} onPointerDown={e => e.stopPropagation()} onClick={() => onTogglePlay(selection.artboardId)}><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><path d="M2 1.2v7.6L8.5 5z"/></svg>Play</button>
+              : <div className="selection-caption">{selection.kind === "element" ? selection.element.tagName.toLowerCase() : "Frame"}</div>}
             <div className="size-pill">
               {Math.round(selectedRect.layoutWidth ?? selectedRect.width / camera.z)} × {Math.round(selectedRect.layoutHeight ?? selectedRect.height / camera.z)}
             </div>
           </div>
         </>}
         {drawPreview && <div className="outline draw" style={rectStyle(drawPreview)} />}
+        {playRect && play && onTogglePlay && <div className="selection-labels frame-selection" style={rectStyle(playRect)}>
+          <button className="selection-caption play-chip" aria-label="Stop playing" title="Stop (Esc)" onPointerDown={e => e.stopPropagation()} onClick={() => onTogglePlay(play.id)}><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><rect x="1.5" y="1.5" width="7" height="7" rx="1"/></svg>Stop</button>
+        </div>}
       </div>
 
       {artboards.length === 0 && (

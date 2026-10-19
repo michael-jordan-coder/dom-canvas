@@ -1119,3 +1119,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .tok-property { color: var(--code-property); }
 .tok-value { color: var(--code-value); }
 .tok-at { color: var(--code-at); }
+
+.play-frame { position: absolute; border: 0; background: #fff; outline: 2px solid var(--accent); outline-offset: 0; z-index: 1; }
+.play-chip { display: flex; align-items: center; gap: 4px; border: 0; font: inherit; font-weight: 600; cursor: pointer; pointer-events: auto; }
+.frame-selection .play-chip:hover { background: #6d28d9; }

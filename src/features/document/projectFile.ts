@@ -27,17 +27,19 @@ export function decodeProject(source: string): ProjectFile {
 }
 
 /** Imported project markup is editable content, not executable behavior. */
+import { makeInert } from "./inert.ts";
+
 export function inertProjectHtml(html: string) {
   const template = document.createElement("template");
   template.innerHTML = html;
   const clean = (root: DocumentFragment) => {
-    root.querySelectorAll("script, noscript, iframe, object, embed, base, meta").forEach(el => el.remove());
+    root.querySelectorAll("noscript, iframe, object, embed, base, meta").forEach(el => el.remove());
     for (const element of Array.from(root.querySelectorAll("*"))) {
-      for (const attribute of Array.from(element.attributes)) {
-        if (/^on/i.test(attribute.name) || attribute.name === "srcdoc" || (/^(?:href|src|action|formaction|xlink:href)$/i.test(attribute.name) && /^(?:javascript|vbscript):/i.test(attribute.value.replace(/[\u0000-\u0020]/g, "")))) element.removeAttributeNode(attribute);
-      }
+      element.removeAttribute("srcdoc");
       if (element instanceof HTMLTemplateElement) clean(element.content);
     }
+    // Scripts and handlers stay for Play, but cannot run on the canvas.
+    makeInert(root);
   };
   clean(template.content);
   return template.innerHTML;

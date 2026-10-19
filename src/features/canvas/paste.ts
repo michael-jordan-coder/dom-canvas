@@ -1,3 +1,5 @@
+import { makeInert } from "../document/inert.ts";
+
 export type PastedCode =
   | { kind: "document"; html: string; css: string; fonts: string }
   | { kind: "stylesheet"; css: string; fonts: string };
@@ -32,7 +34,11 @@ function looksLikeCss(text: string) {
 function splitDocument(source: string): PastedCode {
   const doc = new DOMParser().parseFromString(source, "text/html");
 
-  doc.querySelectorAll("script, noscript, meta, title, base").forEach((n) => n.remove());
+  doc.querySelectorAll("noscript, meta, title, base").forEach((n) => n.remove());
+  // Scripts are kept for Play. Head scripts would be dropped with the head,
+  // so they move to the start of the body in their original order.
+  doc.body.prepend(...Array.from(doc.querySelectorAll("head script")));
+  makeInert(doc.body);
 
   const css = Array.from(doc.querySelectorAll("style"))
     .map((style) => {
