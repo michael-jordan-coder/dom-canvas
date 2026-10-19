@@ -15,7 +15,7 @@ const BASE_CSS = `
   contain: layout style;
   overflow: hidden;
 }
-[contenteditable] { outline: none; cursor: text; }
+[contenteditable] { outline: none; cursor: text; -webkit-user-select: text; user-select: text; }
 `;
 
 type Props = {

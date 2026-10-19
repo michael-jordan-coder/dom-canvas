@@ -130,6 +130,10 @@ button:disabled {
   overflow: clip;
   background: var(--canvas-bg);
   outline: none;
+  /* Drags on the canvas would otherwise start a native text selection that
+     spreads across frame content. Text being edited opts back in. */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .canvas.hand {
