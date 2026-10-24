@@ -14,7 +14,8 @@ import { KeyboardHelp } from "@/features/canvas/KeyboardHelp";
 import { PanelToggle } from "@/features/canvas/PanelToggle";
 import type { Artboard, Camera, Selection, SelectionItem, Tool } from "@/features/canvas/types";
 import { pathOf, resolvePath, serializeRoot } from "@/features/document/serialize";
-import { loadCamera, saveCamera, useDocument } from "@/features/document/useDocument";
+import { useDocument } from "@/features/document/useDocument";
+import type { DocumentStore } from "@/features/document/store";
 import { DocumentName } from "@/features/document/DocumentTitle";
 import { FileControls } from "@/features/document/FileControls";
 import { projectFilename, decodeProject, encodeProject, inertProjectHtml, isProjectClipboard, type ProjectFile } from "@/features/document/projectFile";
@@ -40,17 +41,17 @@ const sampleDocument = (): Artboard[] => [
   { id: newId(), name: "Sample", x: 80, y: 80, width: 640, html: SAMPLE_HTML, css: scopeCss(SAMPLE_CSS) },
 ];
 
-export function App() {
+export function App({ store }: { store: DocumentStore }) {
   const setInspectorSections = useInspectorSectionActions();
   const sectionNavigation = useInspectorSectionNavigation();
   const hostsRef = useRef(new Map<string, HTMLDivElement>());
-  const doc = useDocument(hostsRef.current, sampleDocument);
+  const doc = useDocument(hostsRef.current, sampleDocument, store);
   const { artboards } = doc;
 
   useEffect(() => { document.title = `${doc.name} — DOM Canvas`; }, [doc.name]);
 
   // Start offset so the first artboard clears the floating layers panel.
-  const [camera, setCamera] = useState<Camera>(() => loadCamera() ?? { x: 200, y: 20, z: 1 });
+  const [camera, setCamera] = useState<Camera>(() => store.camera ?? { x: 200, y: 20, z: 1 });
   const [tool, setTool] = useState<Tool>("move");
   const canvasSurface = useRef<HTMLDivElement>(null);
   const activateTool = useCallback((next: Tool) => {
@@ -98,9 +99,9 @@ export function App() {
   const bump = useCallback(() => setVersion((v) => v + 1), []);
 
   useEffect(() => {
-    const t = setTimeout(() => saveCamera(camera), 300);
+    const t = setTimeout(() => store.saveCamera(camera), 300);
     return () => clearTimeout(t);
-  }, [camera]);
+  }, [camera, store]);
 
   const onHostMount = useCallback((id: string, host: HTMLDivElement | null) => {
     if (host) hostsRef.current.set(id, host);
