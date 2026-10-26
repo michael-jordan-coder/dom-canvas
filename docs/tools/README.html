@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>איך כלי עיצוב-לקוד מציירים ומנהלים קנבס</title>
+<style>
+:root{--bg:#fbfaf8;--fg:#1d1d1f;--muted:#6b6b70;--line:#e4e2dd;--accent:#4b4bd6;--code:#f1efea;
+--doc:#e3f0e6;--doc-fg:#1f6b33;--codet:#e6ecfa;--code-fg:#2d4ea3;--inf:#fbeedd;--inf-fg:#8a5413}
+@media (prefers-color-scheme:dark){:root{--bg:#18181a;--fg:#ececee;--muted:#9a9aa1;--line:#2f2f33;--accent:#9d9dff;--code:#242428;
+--doc:#1d3324;--doc-fg:#8fd6a2;--codet:#1f2840;--code-fg:#a8bdf5;--inf:#3a2b17;--inf-fg:#f0bf7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,"Segoe UI","Arial Hebrew",Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:40px 16px 80px}
+nav{max-width:820px;margin:0 auto;padding:16px 16px 0;font-size:14px}
+h1{font-size:32px;line-height:1.2;margin:0 0 16px}
+h2{font-size:21px;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:24px 0 6px}
+a{color:var(--accent);text-decoration:none;overflow-wrap:anywhere}a:hover{text-decoration:underline}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font:13.5px ui-monospace,SFMono-Regular,Menlo,monospace;direction:ltr;unicode-bidi:isolate}
+pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto}pre code{padding:0;background:none}
+ul,ol{padding-inline-start:22px}li{margin:4px 0}
+blockquote{margin:12px 0;padding:4px 14px;border-inline-start:3px solid var(--line);color:var(--muted)}
+main:has(.table.wide){max-width:1240px}
+.table{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;font-size:14px;min-width:100%}
+.table.wide table{min-width:960px}
+.table.wide td:first-child{white-space:nowrap}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:start;vertical-align:top}
+th{background:var(--code);font-weight:600;position:sticky;top:0}
+.tag{display:inline-block;font-size:12px;line-height:1.5;padding:0 6px;border-radius:10px;font-weight:600;margin-inline-end:2px}
+.tag.doc{background:var(--doc);color:var(--doc-fg)}.tag.code{background:var(--codet);color:var(--code-fg)}.tag.inf{background:var(--inf);color:var(--inf-fg)}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+</style>
+</head>
+<body>
+
+<main>
+<h1>איך כלי עיצוב-לקוד מציירים ומנהלים קנבס</h1>
+<p>מחקר על חמישה כלים: Figma, Framer, Paper, Pen.dev ו-Magic Patterns. המטרה היא להחליט איך לבנות את הקנבס של Sketchpad על בסיס DOM Canvas: רכיבים אמיתיים מהקוד, כשכבות HTML בתוך shadow roots, ו-Claude שכותב את הפריימים.</p>
+<p>כל קובץ כלי בנוי לפי אותם תשעה סעיפים, וכל טענה בו מסומנת לפי המקור שלה: <span class="tag doc">תיעוד</span> כתוב אצלם, <span class="tag code">קוד</span> נראה בקוד, בחבילה או בסכמה, <span class="tag inf">הסקה</span> מסקנה שלנו. מה שלא נמצא כתוב כ"לא פורסם". המחקר נעשה ב-25.10.2026.</p>
+<ul><li><a href="figma.html">Figma</a>
+</li><li><a href="framer.html">Framer</a>
+</li><li><a href="paper.html">Paper</a>
+</li><li><a href="pen-dev.html">Pen.dev</a>
+</li><li><a href="magic-patterns.html">Magic Patterns</a>
+</li><li><a href="adopted-decisions.html">החלטות שאנחנו מאמצים</a>: ההחלטות שהתקבלו מתוך המחקר הזה.
+</li><li><a href="figma-interface/README.md">מחקר הממשק והפאנל של Figma</a>: מחקר נפרד וקודם, על התנהגות פאנל העיצוב ולא על הקנבס.
+</li></ul>
+<h2>טבלת השוואה</h2>
+<p>השורה האחרונה היא DOM Canvas כמו שהוא היום, לנקודת השוואה.</p>
+<div class="table wide"><table><thead><tr><th>כלי</th><th>1. מי מצייר</th><th>3. בידוד בין פריימים</th><th>4. מודל המסמך</th><th>5. הלוך ושוב לקוד</th><th>6. ממשק לסוכן</th></tr></thead><tbody><tr><td><strong>Figma</strong></td><td>מנוע משלה: C++ ב-WebAssembly, מצייר ב-WebGL ועכשיו WebGPU. פריסת טקסט משלה. הדפדפן לא מצייר כלום</td><td>לא רלוונטי, הכול מודל פנימי אחד. משתנים יורשים mode מההורה ("Auto")</td><td>עץ אובייקטים, כל אחד מפה של מאפיינים. קומפוננטות ומופעים עם מאפייני טקסט, מתג, החלפת מופע, וריאנט ו-slot. משתנים עם modes</td><td>Code Connect: טבלת מיפוי שנכתבת בקוד ומצביעה על קומפוננטה ב-Figma. אין סנכרון כשהקוד משתנה</td><td>MCP מרוחק עם כתיבה מלאה: <code>use_figma</code> מריץ JavaScript של Plugin API בתוך הקובץ. גם HTML לשכבות וצילום UI חי</td></tr><tr><td><strong>Framer</strong></td><td>React על DOM, לפי הסקה. רכיבי קוד מצוירים ישירות על הקנבס</td><td>אין בידוד לרכיבי קוד, רק כללים ("לא לגעת ב-body"). תוספים רצים ב-iframe</td><td>מודל פנימי בשרת: צמתים, וריאנטים שיורשים מהראשי, נקודות שבירה שיורשות מהראשית. פורמט הקובץ לא פורסם</td><td>אין חזרה לריפו. Code Link מסנכרן רק את קבצי הקוד של הפרויקט מול תיקייה מקומית</td><td>MCP רשמי, CLI ו-Server API. שפת פקודות קצרה (<code>applyChanges</code>) שמחזירה מלבנים, לינטר וצילום. הסוכן עובד על ענף</td></tr><tr><td><strong>Paper</strong></td><td>הדפדפן: כל צומת הוא קומפוננטת React שמציירת אלמנט DOM. שיידרים ב-WebGL. ציור ל-canvas רק בייצוא</td><td>אין בידוד: כל הפריימים באותו מסמך, בתוך div אחד שזז ב-transform. לא נדרש, כי יש רק סגנונות inline. פונטים ברמת המסמך. אין תמיכה ב-vw ו-media queries</td><td>עץ צמתים עם סגנונות inline, נשמר כ-JSON בשרת ומסונכרן ב-WebSocket. טוקנים הם משתני CSS. אין קומפוננטות ומופעים</td><td>אין. הסוכן קורא JSX מהפריים וכותב קוד בעצמו. לשכבה אין קישור לקובץ</td><td>MCP מקומי מתוך האפליקציה, כ-35 כלים: כתיבת HTML, עדכון סגנונות, קריאת JSX וסגנונות, טוקנים, צילום</td></tr><tr><td><strong>Pen.dev</strong></td><td>מנוע משלה: Skia ב-WASM על WebGL. רק דף אינטרנט חי מוצג ב-webview נפרד מעל הקנבס</td><td>לא רלוונטי, מודל פנימי. אין ירושה מהורה לילד. במקום media queries יש "themes" עם צירים. פונטים לכל מסמך</td><td>קובץ <code>.pen</code>: JSON רגיל ולא מוצפן, עם פריסה דמוית flexbox שאינה CSS. קומפוננטות, מופעים, דריסות לפי נתיב, slots, משתנים לפי theme</td><td>רק כשמבקשים מהסוכן, או ייצוא HTML. ביבוא מאתר נשמר רק שם הקומפוננטה, בלי קובץ ושורה</td><td>MCP עם כלי מרכזי אחד, <code>execute</code>: קטע JS מול API קטן. קריאה שנכשלת מתבטלת כולה. בדיקת מידות וחיתוך בלי צילום</td></tr><tr><td><strong>Magic Patterns</strong></td><td>הדפדפן. כל מסך הוא iframe עם מסמך HTML מלא ואפליקציית React מקומפלת</td><td>iframe לכל מסך: viewport אמיתי, פונטים ו-CSS לכל מסמך. כל תקשורת דרך <code>postMessage</code></td><td>גרסאות של סט קבצי קוד. מסך הוא route. פריסת הקנבס נשמרת כקובץ קוד (<code>manifest</code>)</td><td>עריכה ויזואלית חוזרת לקוד של ה-prototype לפי <code>data-id</code>. לא לקוד של המוצר: "the codebase wins"</td><td>MCP ו-REST: לבקש מה-AI שלהם, או לכתוב קבצים ישירות ואז לקמפל ולפרסם. שגיאה ברורה בכשל, בדיקת התנגשות בגרסה</td></tr><tr><td><strong>DOM Canvas היום</strong></td><td>הדפדפן, HTML ו-CSS אמיתיים</td><td>shadow root לכל פריים באותו מסמך. <code>:root</code> ל-<code>:host</code>, יחידות viewport ליחידות container, פונטים ברמת המסמך</td><td>HTML ו-CSS של כל פריים נשמרים כמחרוזות. אין קומפוננטות</td><td>אין עדיין</td><td>אין עדיין</td></tr></tbody></table></div>
+<h2>מה זה אומר ל-DOM Canvas ול-Sketchpad</h2>
+<h3>1. אף כלי לא מציג את הרכיבים האמיתיים של הפרויקט כמו שהם</h3>
+<ul><li><strong>ארבעה מחמישה מציגים מודל משלהם.</strong> Figma ו-Pen.dev מציירים בעצמם. Framer ו-Paper נותנים לדפדפן לצייר, אבל מתוך מודל פנימי. בכולם הקוד הוא תרגום שנוצר אחר כך, ו-Pen.dev אפילו מבקשים מהסוכן לבדוק בצילום שהתרגום תואם.
+</li><li><strong>Magic Patterns מריצים קוד אמיתי, אבל לא של המוצר.</strong> זה קוד של prototype שמישהו יכתוב מחדש. רכיבים אמיתיים מהמוצר דורשים אצלם מסלול ארגוני עם onboarding.
+</li><li><strong>המתחרה הקרוב ביותר הוא Figma Make</strong> עם הריפו המקומי, שעדיין ב-beta. הוא מריץ את ה-dev server של הפרויקט, אבל מציג אפליקציה אחת ולא כמה פריימים זה לצד זה.
+</li><li><strong>מסקנה:</strong> "רכיבים אמיתיים מהריפו, כמה פריימים חיים זה לצד זה" הוא בדיוק מה שאין לאחרים. זה מה שצריך לבנות ראשון ולהראות למשתמשים, לפני כל ליטוש.
+</li></ul>
+<h3>2. להשאיר את shadow root, ולסגור את הפער של media queries</h3>
+<ul><li><strong>Paper הוא הכלי הכי דומה לנו בציור,</strong> DOM באותו מסמך עם מצלמה אחת שזזה ב-transform. אבל הם מוותרים על בידוד כי הם מקבלים רק סגנונות inline: בייבוא HTML הם זורקים class וגיליונות סגנונות. רכיבים אמיתיים לא יעברו את זה.
+</li><li><strong>Framer הוא ההוכחה למה צריך בידוד.</strong> רכיבי קוד אצלם רצים באותו DOM בלי שום בידוד, וזה עובד רק כי הם שולטים בכל ה-CSS ומגבילים ייבוא. רכיבים מריפו זר מביאים CSS גלובלי ו-<code>:root</code>, כך שבלי shadow root הם ידלפו זה לזה.
+</li><li><strong>Magic Patterns מראים את המחיר של iframe.</strong> הם בנו גשר <code>postMessage</code> עם יותר מ-20 סוגי הודעות, והעברה ידנית של גלגלת, קליק ימני ו-Escape לקנבס. אצלנו כל זה מיותר, כי הכול באותו מסמך.
+</li><li><strong>מה ש-iframe נותן בחינם ואצלנו לא:</strong> viewport אמיתי לכל מסך. היום אנחנו משכתבים רק <code>@media</code> שתלוי ברוחב ויחידות <code>vw</code>/<code>vh</code>. כדאי לבדוק על רכיבים אמיתיים מהריפו שהשכתוב מספיק, ושגם selectors כמו <code>body.dark</code> עובדים. זה הסיכון הטכני הגדול ביותר במעבר.
+</li></ul>
+<h3>3. מאיפה בא כל אלמנט: אף אחד לא פתר את זה, וזה קל לנו</h3>
+<ul><li><strong>אף כלי לא יודע קובץ ושורה לשכבה.</strong> Pen.dev מוצאים רק את שם הקומפוננטה דרך React fiber. Magic Patterns מזהים אלמנטים לפי <code>data-id</code>, ולא פרסמו איך המזהה הופך למקום בקוד.
+</li><li><strong>אצלנו Claude כותב את הפריים מהקוד,</strong> אז הוא יכול לכתוב גם את המקור: מאפיין על כל רכיב עם הקובץ ושם הקומפוננטה, למשל <code>data-sp-src</code>. זה פותח עריכה שחוזרת לקובץ הנכון ובחירה בקנבס שמובילה לקוד.
+</li><li><strong>מסקנה:</strong> להגדיר את המאפיין הזה עכשיו, כחלק מפורמט הפריים, גם אם הפעולות שמשתמשות בו יבואו אחר כך.
+</li></ul>
+<h3>4. ממשק הכתיבה של Claude: לקחת את הדפוסים הטובים</h3>
+<ul><li><strong>כלי כתיבה אחד שמחזיר מידות.</strong> Pen.dev ו-Framer מחזירים לסוכן מלבנים, מזהים חדשים ובעיות חיתוך אחרי כל כתיבה. זה זול בהרבה מצילום מסך. אצלנו המידות באות ישר מ-<code>getBoundingClientRect</code>.
+</li><li><strong>כתיבה שנכשלת מתבטלת כולה.</strong> כך אצל Pen.dev. אצל Magic Patterns הפרסום מקמפל קודם ומחזיר שגיאה ברורה אם הקומפילציה נכשלת. כך Claude לא משאיר פריים חצי שבור על הקנבס.
+</li><li><strong>קודם תקציר, אחר כך תוכן.</strong> Figma מפרידים בין <code>get_metadata</code> הקל לבין ההקשר המלא, עם תקרה לכל קריאה. זה חוסך טוקנים כשיש הרבה פריימים.
+</li><li><strong>הגנה מדריסה.</strong> Magic Patterns בודקים שהגרסה לא השתנתה מאז הקריאה, ומחזירים שגיאה אם כן. זה חשוב כשגם המשתמש וגם Claude עורכים את אותו פריים.
+</li><li><strong>אפשרות לבטל סשן שלם.</strong> Framer מריצים כל סשן של סוכן על ענף. אצלנו מספיקה גרסה פשוטה: תמונת מצב לפני ש-Claude מתחיל, וכפתור אחד לביטול.
+</li></ul>
+<h3>5. פריסת הקנבס כקובץ ש-Claude קורא וכותב</h3>
+<ul><li><strong>Magic Patterns שומרים את סידור המסכים כקובץ קוד:</strong> אילו מסכים, באיזה route ובאיזה state, איפה הם על הקנבס ובאיזה רוחב.
+</li><li><strong>ל-Sketchpad זה מתאים במיוחד.</strong> פריים הוא "רכיב X עם props Y ברוחב Z", לא עותק של HTML. Claude יכול לכתוב קובץ כזה ישירות, והוא נשמר בגיט.
+</li></ul>
+<h3>מה לא לאמץ, לפחות לא עכשיו</h3>
+<ul><li><strong>מנוע ציור או מודל מסמך משלנו.</strong> זה מה שמכריח את Figma ו-Pen.dev לתרגם ולבדוק התאמה. היתרון שלנו הוא שהדפדפן מצייר את הקוד עצמו.
+</li><li><strong>מערכת קומפוננטות כמו של Figma.</strong> מאפייני קומפוננטה צריכים לבוא מהטיפוסים של הרכיב בקוד, לא ממודל נפרד. זה שלב מאוחר יותר.
+</li><li><strong>ביצועים ו-culling.</strong> אף כלי שמצייר ב-DOM לא פרסם מספרים, אבל בקוד של Paper רואים מה הם עושים. פריים מחוץ למסך מקבל <code>visibility:hidden</code> ונשאר ב-DOM. בזום רחוק הם מסתירים אלמנטים קטנים ומכבים אפקטים כבדים. Magic Patterns מקפיאים אנימציות, ו-Figma טוענת רק את מה שנראה. אלה פתרונות זולים יחסית אצלנו, אבל כדאי לחזור אליהם כשיהיו עשרות פריימים אמיתיים על הקנבס, לא לפני.
+</li></ul>
+<h3>הסדר המומלץ למעבר של Sketchpad</h3>
+<ol><li><strong>רכיב אמיתי אחד מהריפו מוצג נכון בתוך shadow root:</strong> CSS, פונטים, ערכת נושא ו-media queries.
+</li><li><strong>כלי כתיבה אחד ל-Claude:</strong> מחזיר מידות ומזהים, ומתבטל כולו בכשל.
+</li><li><strong>מאפיין מקור על כל רכיב,</strong> כבר מהפריים הראשון.
+</li><li><strong>רק אחרי שמשתמשים ראו את זה עובד:</strong> קובץ פריסה, ביטול סשן, מאפייני קומפוננטה מהטיפוסים.
+</li></ol>
+<h2>איכות המחקר</h2>
+<ul><li><strong>כלים שנבדקו מבפנים:</strong> Pen.dev נבדק מתוך האפליקציה המותקנת, בלי להריץ אותה. Paper נבדק כשהוא רץ: דרך כלי הקריאה של ה-MCP שלו, ומקוד העורך. האפליקציה היא רק מעטפת שטוענת את העורך מהאתר שלהם.
+</li><li><strong>כלים שנבדקו מבחוץ:</strong> Framer ו-Magic Patterns נבדקו מתיעוד ציבורי, מחבילות npm ומקוד ה-JavaScript הציבורי של האתר. Figma נבדקה מהבלוג ההנדסי, מתיעוד המפתחים ומסכמות כלי ה-MCP.
+</li><li><strong>מה לא פורסם באף כלי:</strong> מספרים אמיתיים על כמות פריימים וזום, ואיך שכבה יודעת מאיזה קובץ היא באה.
+</li><li><strong>בדיקת קישורים:</strong> כל הקישורים במקורות נבדקו ב-25.10.2026. הם עונים, חוץ מכתובות MCP שדורשות התחברות ו-npm שחוסם בקשות אוטומטיות.
+</li></ul>
+</main>
+</body>
+</html>

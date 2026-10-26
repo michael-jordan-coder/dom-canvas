@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Framer</title>
+<style>
+:root{--bg:#fbfaf8;--fg:#1d1d1f;--muted:#6b6b70;--line:#e4e2dd;--accent:#4b4bd6;--code:#f1efea;
+--doc:#e3f0e6;--doc-fg:#1f6b33;--codet:#e6ecfa;--code-fg:#2d4ea3;--inf:#fbeedd;--inf-fg:#8a5413}
+@media (prefers-color-scheme:dark){:root{--bg:#18181a;--fg:#ececee;--muted:#9a9aa1;--line:#2f2f33;--accent:#9d9dff;--code:#242428;
+--doc:#1d3324;--doc-fg:#8fd6a2;--codet:#1f2840;--code-fg:#a8bdf5;--inf:#3a2b17;--inf-fg:#f0bf7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,"Segoe UI","Arial Hebrew",Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:40px 16px 80px}
+nav{max-width:820px;margin:0 auto;padding:16px 16px 0;font-size:14px}
+h1{font-size:32px;line-height:1.2;margin:0 0 16px}
+h2{font-size:21px;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:24px 0 6px}
+a{color:var(--accent);text-decoration:none;overflow-wrap:anywhere}a:hover{text-decoration:underline}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font:13.5px ui-monospace,SFMono-Regular,Menlo,monospace;direction:ltr;unicode-bidi:isolate}
+pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto}pre code{padding:0;background:none}
+ul,ol{padding-inline-start:22px}li{margin:4px 0}
+blockquote{margin:12px 0;padding:4px 14px;border-inline-start:3px solid var(--line);color:var(--muted)}
+main:has(.table.wide){max-width:1240px}
+.table{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;font-size:14px;min-width:100%}
+.table.wide table{min-width:960px}
+.table.wide td:first-child{white-space:nowrap}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:start;vertical-align:top}
+th{background:var(--code);font-weight:600;position:sticky;top:0}
+.tag{display:inline-block;font-size:12px;line-height:1.5;padding:0 6px;border-radius:10px;font-weight:600;margin-inline-end:2px}
+.tag.doc{background:var(--doc);color:var(--doc-fg)}.tag.code{background:var(--codet);color:var(--code-fg)}.tag.inf{background:var(--inf);color:var(--inf-fg)}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+</style>
+</head>
+<body>
+<nav><a href="README.html">→ חזרה לטבלת ההשוואה</a></nav>
+<main>
+<h1>Framer</h1>
+<p><strong>בקצרה:</strong> Framer הוא עורך אתרים שהקנבס שלו בנוי ב-React, ולכן הוא יכול לצייר על הקנבס כל רכיב React, כולל רכיבי קוד שהמשתמש כותב. אבל מה שמוצג על הקנבס הוא <strong>מודל עיצוב פנימי</strong> (עץ של שכבות, וריאנטים ונקודות שבירה), לא קוד של פרויקט. המודל הזה הופך ל-HTML/CSS/React רק בפרסום, ונשמר בשרתים של Framer. רכיבי קוד הם קבצים בודדים בתוך הפרויקט, עם רשימה סגורה של ספריות מותרות. אין להם קשר לריפו שלך, חוץ מסנכרון קבצים דרך Code Link. בצד הסוכן Framer הלכו רחוק: יש MCP רשמי (<code>mcp.framer.com/mcp</code>), CLI (<code>@framer/agent</code>) ו-Server API (<code>framer-api</code>). שלושתם מריצים את אותו מנוע עורך בלי ממשק, בשרת. הסוכן כותב לקנבס בשפת פקודות קצרה משלהם (<code>applyChanges</code>), קורא את הפרויקט בשאילתות, ובודק את עצמו לפי מלבנים, לינטר וצילום מסך מדפדפן בשרת. הסוכן עובד על ענף (branch) ולא על האתר החי.</p>
+<p>תגיות: <strong><span class="tag doc">תיעוד</span></strong> כתוב בתיעוד או בבלוג של Framer. <strong><span class="tag code">קוד</span></strong> ראיתי בקוד, בחבילת npm או בהגדרות טיפוסים. <strong><span class="tag inf">הסקה</span></strong> מסקנה שלי.</p>
+<h2>1. מודל הציור</h2>
+<ul><li><span class="tag doc">תיעוד</span> לפי Koen Bok (מייסד Framer), הקנבס החופשי "נבנה ב-React, ולכן הוא יכול לצייר כל רכיב React". באותו פוסט הוא כותב שהקוד ב-Framer בנוי כולו על ES modules, ושהעורך משתמש ב-swc וב-wasm כדי להציג שינויים מיד. (<a href="https://dev.to/koen/code-on-canvas-develop-and-design-at-the-same-time-258l" target="_blank" rel="noopener">Koen Bok, dev.to</a>)
+</li><li><span class="tag doc">תיעוד</span> רכיבי קוד מוצגים "ישירות על הקנבס, בתצוגה המקדימה ובאתר המפורסם". (<a href="https://www.framer.com/developers/components-introduction" target="_blank" rel="noopener">Code Components</a>)
+</li><li><span class="tag doc">תיעוד</span> רכיב קוד יכול לדעת איפה הוא מצויר דרך <code>RenderTarget</code>: <code>canvas</code>, <code>export</code>, <code>thumbnail</code> או <code>preview</code>. על הקנבס ובייצוא Framer מבקשים שרכיב מונפש יישאר סטטי (<code>useIsStaticRenderer</code>), כדי לא להאט את הקנבס. (<a href="https://www.framer.com/developers/components-reference" target="_blank" rel="noopener">API Reference</a>, <a href="https://www.framer.com/help/articles/prepare-component-review/" target="_blank" rel="noopener">Prepare component for review</a>)
+</li><li><span class="tag doc">תיעוד</span> במדריך הבדיקה של רכיבים כתוב ש"ייתכן שממשקי הדפדפן זמינים גם על הקנבס", ומבקשים לא לגעת ב-<code>document.body</code>/<code>head</code> ולא להחיל סגנונות גלובליים, כי רכיבים חולקים את העמוד עם אלמנטים אחרים. (<a href="https://www.framer.com/help/articles/prepare-component-review/" target="_blank" rel="noopener">Prepare component for review</a>)
+</li><li><span class="tag doc">תיעוד</span> על הקנבס Framer "מודד במדויק כל תוכן", ועוטף רכיב בגודל קבוע במיכל. (<a href="https://www.framer.com/developers/auto-sizing" target="_blank" rel="noopener">Auto-Sizing</a>)
+</li><li><span class="tag inf">הסקה</span> יחד, כל הסימנים האלה מצביעים על כך שהדפדפן מצייר את הקנבס כ-DOM רגיל, דרך React. אין סימן ל-WebGL או ל-Canvas2D בתוכן העיצוב, ואין סימן לכך שרכיבי קוד רצים ב-iframe. מבנה פנימי מפורט של הקנבס <strong>לא פורסם</strong>. בפוסט על Rolldown כתוב רק שאחת המטרות של 2026 היא "לשפר את ביצועי הקנבס". (<a href="https://www.framer.com/blog/framer-rolldown/" target="_blank" rel="noopener">Rolldown</a>)
+</li><li><span class="tag code">קוד</span> השם הפנימי של מנוע העורך הוא "Vekter". הוא מופיע בהערה בטיפוסים של <code>framer-api</code>: "resolves when Vekter's plugin handler answers". (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api index.d.ts</a>)
+</li><li>שפה: TypeScript/React בצד הלקוח, ו-swc/wasm לקומפילציה של קוד (<a href="https://dev.to/koen/code-on-canvas-develop-and-design-at-the-same-time-258l" target="_blank" rel="noopener">dev.to</a>). מעבר לזה <strong>לא פורסם</strong>.
+</li></ul>
+<h2>2. מה מוצג על הקנבס</h2>
+<ul><li><span class="tag doc">תיעוד</span> מה שמוצג הוא <strong>מודל עיצוב של Framer</strong>: שכבות, Stacks, רכיבים עם וריאנטים ונקודות שבירה. הפוסט על הסוכנים מתאר את עץ הפרויקט כעץ "מפורט ודומה ל-HTML" של צמתים עם מאפיינים. (<a href="https://www.framer.com/blog/building-framer-agents/" target="_blank" rel="noopener">Building Agents for Framer</a>)
+</li><li><span class="tag doc">תיעוד</span> קוד אמיתי מופיע רק כ"רכיבי קוד" (Code Components) ו"עוקפי קוד" (Code Overrides) שנכתבים בתוך Framer. Override הוא React Higher-Order Component. הוא מוצמד לשכבה על הקנבס, אבל <strong>פעיל רק בתצוגה המקדימה ובאתר המפורסם</strong>. (<a href="https://www.framer.com/developers/overrides-introduction" target="_blank" rel="noopener">Overrides</a>)
+</li><li><span class="tag code">קוד</span> לרכיב קוד יש מגבלות חזקות: קובץ אחד עם export ברירת מחדל, ייבוא רק מ-<code>react</code>, <code>react-dom</code>, <code>framer</code> ו-<code>framer-motion</code>, בלי <code>position: fixed</code>, ושמירה מגישה ל-<code>window</code> בגלל SSR. אלה הכללים שכתובים בסקיל שמגיע עם <code>@framer/agent</code>. (<a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer-code-components/SKILL.md" target="_blank" rel="noopener">SKILL.md בחבילה</a>) באותו קובץ יש גם דוגמה שמייבאת מ-URL (<code>https://jspm.dev/...</code>). כלומר ייבוא ESM מכתובת עובד בפועל.
+</li><li><span class="tag code">קוד</span> האתר המפורסם (נבדק על framer.com עצמו) הוא HTML מרונדר מראש, עם מחלקות שנוצרות אוטומטית (<code>framer-7Nc6N framer-v-140pdlc</code>), מאפייני <code>data-framer-name</code> (1,738 מופעים), <code>data-framer-component-type</code> ו-<code>data-framer-hydrate-v2</code>, <code>@media</code> לפי נקודות השבירה, ומודולי ‎<code>.mjs</code> מ-<code>framerusercontent.com/sites/...</code> (react, framer, rolldown-runtime). (<a href="https://www.framer.com/" target="_blank" rel="noopener">framer.com, HTML גולמי</a>)
+</li><li><span class="tag inf">הסקה</span> "מה שאתה רואה זה מה שעולה לאוויר" נכון ברמת <strong>הפיקסלים</strong>, כי גם הקנבס וגם האתר הם React+DOM. זה <strong>לא</strong> נכון ברמת <strong>הקוד</strong>: הקוד שמתפרסם נוצר אוטומטית מהמודל, לא נכתב בידי אדם, ואינו קוד של פרויקט קיים. שאר התוכן (שכבות, טקסט, תמונות) הוא מודל ש"מתורגם" לקוד בפרסום.
+</li></ul>
+<h2>3. בידוד בין פריימים</h2>
+<ul><li><span class="tag inf">הסקה</span> אין בידוד אמיתי במובן שלנו. הפריימים הם חלק ממודל אחד, ו-Framer שולט בכל ה-CSS שנוצר. לכן לא צריך לבודד, חוץ מאשר את רכיבי הקוד.
+</li><li><span class="tag doc">תיעוד</span> את רכיבי הקוד מבודדים בעזרת <strong>כללי התנהגות</strong>, לא בעזרת iframe או shadow root: "תחום את פעולות ה-DOM לרכיב שלך", לא לשנות body/head, לא לשים סגנונות גלובליים, ולנקות מאזינים. (<a href="https://www.framer.com/help/articles/prepare-component-review/" target="_blank" rel="noopener">Prepare component for review</a>)
+</li><li><span class="tag code">קוד</span> תוספים (Plugins), לעומת זאת, רצים ב-iframe ומדברים עם העורך דרך <code>window.parent.postMessage</code>. (<a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.js" target="_blank" rel="noopener">framer-plugin index.js</a>)
+</li><li><strong>נקודות שבירה</strong> <span class="tag doc">תיעוד</span>: כל נקודת שבירה "יורשת מנקודת השבירה הראשית", ובכל אחת אפשר לדרוס רק את המאפיינים שצריך. הרוחב על הקנבס הוא "רוחב ה-viewport המינימלי שבו נקודת השבירה נכנסת לפעולה". (<a href="https://framer.com/academy/lessons/breakpoints" target="_blank" rel="noopener">Breakpoints</a>) <span class="tag code">קוד</span> באתר המפורסם זה הופך ל-<code>@media (min-width:810px) and (max-width:1199.98px)</code> וכדומה (<a href="https://www.framer.com/" target="_blank" rel="noopener">framer.com HTML</a>). <span class="tag inf">הסקה</span> מכאן שעל הקנבס כל נקודת שבירה היא פריים ברוחב קבוע, ו-Framer מחליט בעצמו איזה layout להציג. הוא לא מריץ media query אמיתי לפי גודל הפריים. המנגנון המדויק <strong>לא פורסם</strong>.
+</li><li><strong>פונטים</strong> <span class="tag code">קוד</span>: בתוך המודל יש <code>getFonts</code>/<code>getFont</code>, ורכיבי קוד מקבלים פונט דרך <code>ControlType.Font</code>. את משפחת הפונט אי אפשר לקבוע בברירת מחדל, רק המשתמש בוחר אותה. (<a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts" target="_blank" rel="noopener">framer-plugin d.ts</a>, <a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer-code-components/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>) איך הפונטים נטענים לקנבס <strong>לא פורסם</strong>.
+</li><li><strong>משתנים</strong> <span class="tag code">קוד</span>: Color Styles ו-Text Styles הם אובייקטים במודל (<code>createColorStyle</code>, <code>createTextStyle</code>). אין בהם CSS custom properties חופשיים מהקוד.
+</li><li><strong>ירושה מהעמוד</strong>: <strong>לא פורסם</strong> ל-Framer, ובמודל שלהם זה כנראה לא רלוונטי.
+</li></ul>
+<h2>4. מודל המסמך</h2>
+<ul><li><span class="tag code">קוד</span> סוגי הצמתים לפי ה-Plugin API: <code>FrameNode</code>, <code>TextNode</code>, <code>SVGNode</code>, <code>ComponentNode</code>, <code>ComponentInstanceNode</code>, <code>WebPageNode</code>, <code>DesignPageNode</code>, ו-<code>UnknownNode</code>. (<a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts" target="_blank" rel="noopener">framer-plugin d.ts</a>) מאפייני הצמתים בנויים מ-"traits": מיקום, pins, גודל, layout, grid item, רקע, גבול, פונט, <code>WithComponentVariantTrait</code>, <code>WithBreakpointTrait</code> ועוד. (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api d.ts</a>)
+</li><li><span class="tag code">קוד</span> לרכיב יש <code>componentIdentifier</code> ו-<code>insertURL</code>. מופע (instance) מחזיק <code>controls</code>, כלומר הערכים של המאפיינים שלו. יש <code>addVariant</code>, <code>addGestureVariant</code> (וריאנט לריחוף או לחיצה), ו-<code>getVariables</code>/<code>addVariables</code> לרכיב. (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api d.ts</a>)
+</li><li><span class="tag doc">תיעוד</span> וריאנטים: כל וריאנט יורש מבנה ומאפיינים מהוריאנט הראשי. שינוי בוריאנט אחר הופך ל-override, שמסומן בסגול וניתן לאיפוס. (<a href="https://www.framer.com/academy/lessons/component-variants-in-framer" target="_blank" rel="noopener">Component Variants</a>) Component Variables חושפים מאפיינים כ"בקרים" בכל מופע. (<a href="https://www.framer.com/academy/lessons/component-variables-in-framer" target="_blank" rel="noopener">Component Variables</a>)
+</li><li><span class="tag code">קוד</span> סוגי משתנים: Boolean, Number, String, FormattedText, Enum, Color, Image, File, Link, Date, Border. (<a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts" target="_blank" rel="noopener">framer-plugin d.ts</a>)
+</li><li><span class="tag doc">תיעוד</span> רכיב קוד מגדיר את המאפיינים שלו בעזרת <code>addPropertyControls</code>, ואת הגודל שלו בהערות JSDoc: <code>@framerSupportedLayoutWidth/Height</code> עם הערכים <code>auto</code>/<code>fixed</code>/<code>any</code>/<code>any-prefer-fixed</code>, ו-<code>@framerIntrinsicWidth/Height</code>. (<a href="https://www.framer.com/developers/auto-sizing" target="_blank" rel="noopener">Auto-Sizing</a>)
+</li><li>Slots <span class="tag code">קוד</span>: בקר <code>ControlType.ComponentInstance</code> מאפשר לרכיב לקבל רכיבים אחרים מהקנבס כ-React node. זה הדבר הקרוב ביותר ל-slot. (<a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer-code-components/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>)
+</li><li>פורמט הקובץ ואיך שינויים נשמרים: <strong>לא פורסם</strong>. <span class="tag inf">הסקה</span> הפרויקט חי בשרת ולא כקובץ שאפשר לפתוח. העריכות נשמרות כמאפיינים על הצמתים במודל, לא כ-CSS ולא כ-stylesheet. יש ענפים (branches), גרסאות לקבצי קוד (<code>CodeFile.getVersions</code>), ו-<code>getChangedPaths</code>/<code>getChangeContributors</code>.
+</li></ul>
+<h2>5. הלוך ושוב לקוד</h2>
+<ul><li><span class="tag doc">תיעוד</span> אין דרך להחזיר עריכה מהקנבס לקוד של ריפו. הכיוון היחיד הוא מודל → אתר מפורסם.
+</li><li><span class="tag code">קוד</span> קבצי קוד: Framer מחזיק קבצי קוד בתוך הפרויקט (<code>createCodeFile</code>, <code>CodeFile.setFileContent</code>, <code>getVersions</code>, <code>typecheck</code>, <code>lint</code>). (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api d.ts</a>)
+</li><li><span class="tag code">קוד</span> <strong>Code Link</strong>, תוסף רשמי ו-CLI בקוד פתוח, מסנכרן את קבצי הקוד של הפרויקט לתיקייה מקומית בשני הכיוונים. ה-CLI מרים שרת WSS מקומי, והתוסף (שרץ ב-iframe בעורך) מתחבר אליו. ההודעות כוללות <code>file-change</code>, <code>file-delete</code>, <code>file-rename</code>, ו-<code>conflicts-detected</code> עם תוכן מקומי מול תוכן מרוחק. (<a href="https://github.com/framer/plugins/blob/main/plugins/code-link/README.md" target="_blank" rel="noopener">README</a>, <a href="https://github.com/framer/plugins/blob/main/packages/code-link-shared/src/types.ts" target="_blank" rel="noopener">types.ts</a>, <a href="https://github.com/framer/plugins/blob/main/packages/code-link-cli/src/helpers/connection.ts" target="_blank" rel="noopener">connection.ts</a>) <span class="tag inf">הסקה</span> זה סנכרון של קבצים, לא חיבור בין אלמנט לקוד. אלמנט רגיל על הקנבס לא יודע מאיזה קובץ הוא בא, כי הוא לא בא מקובץ.
+</li><li><span class="tag code">קוד</span> הקשר בין מופע לרכיב קוד הוא דרך <code>insertURL</code>/<code>componentIdentifier</code>, כלומר כתובת מודול. (<a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts" target="_blank" rel="noopener">framer-plugin d.ts</a>) <span class="tag doc">תיעוד</span> רכיבים משותפים דרך "URL ייחודי עם גרסה". (<a href="https://www.framer.com/developers/components-introduction" target="_blank" rel="noopener">Code Components</a>)
+</li><li><span class="tag doc">תיעוד</span> כשהקוד משתנה, התצוגה מתעדכנת בשמירה ("live preview updates when you save"). (<a href="https://www.framer.com/developers/components-introduction" target="_blank" rel="noopener">Code Components</a>) <span class="tag code">קוד</span> יש <code>getRuntimeError()</code> על מופע של רכיב קוד, כדי לקרוא שגיאת ריצה. (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api d.ts</a>)
+</li></ul>
+<h2>6. ממשק לסוכן</h2>
+<p>שלוש שכבות, וכולן מריצות את אותו מנוע:</p>
+<ul><li><strong>MCP רשמי</strong> <span class="tag doc">תיעוד</span>: <code>https://mcp.framer.com/mcp</code>, מרוחק ומחובר ב-OAuth. בלשונם "There's no local Framer bridge to install". הסוכן עובד על "הקנבס, רכיבים, הגדרות פרויקט נתמכות ו-CMS". השינויים נשארים בפרויקט או בענף עד פרסום מפורש. (<a href="https://www.framer.com/developers/mcp" target="_blank" rel="noopener">Framer MCP</a>, <a href="https://github.com/framer/agent-plugins" target="_blank" rel="noopener">framer/agent-plugins</a>) רשימת הכלים של ה-MCP <strong>לא פורסמה</strong> בתיעוד. הסקיל הישן מזכיר כלי בשם <code>open_project</code>.
+</li><li><strong>CLI <code>@framer/agent</code></strong> <span class="tag code">קוד</span>: <code>session new &lt;url&gt;</code>, <code>project list/new/remix</code>, <code>exec -s &lt;id&gt;</code> (מריץ JS מול האובייקט <code>framer</code>, עם <code>state</code> שנשמר בין קריאות), <code>apply-changes</code>, <code>docs</code>. לכל פרויקט הוא יוצר קבצי הקשר: <code>index.md</code>, <code>project-inventory.md</code>, <code>recipes.md</code>. (<a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>)
+</li><li><strong>Server API <code>framer-api</code></strong> <span class="tag code">קוד</span>: מתחבר ב-WebSocket ל-<code>wss://api.framer.com/channel/headless-plugin</code> (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.js" target="_blank" rel="noopener">index.js</a>), כלומר "תוסף בלי ממשק". <span class="tag doc">תיעוד</span> הקוד רץ "ב-v8 sandbox בשרת" עם "DOM API מלא", יש cold start של שנייה או שתיים, ו"הסקריפטים אינם טרנזקציוניים". (<a href="https://www.framer.com/developers/server-api-faq" target="_blank" rel="noopener">Server API FAQ</a>)
+</li><li><strong>הפעולות של הסוכן</strong> (<code>framer.agent.*</code>) <span class="tag code">קוד</span> (<a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">framer-api d.ts</a>):
+<ul><li><code>getSystemPrompt()</code>: הפרומפט הקבוע, שכולל את תחביר הפקודות, כללי עיצוב ודוגמאות. בלשונם "This is the sole documentation for the command syntax".
+</li><li><code>getContext()</code>: פונטים, טוקנים של צבע, סגנונות טקסט ואייקונים של הפרויקט.
+</li><li><code>readProject(queries[], {pagePath})</code>: שאילתות קריאה.
+</li><li><code>applyChanges(dsl, {pagePath})</code>: מחרוזת פקודות מופרדות ב-<code>;</code> ליצירה, עדכון, מחיקה, הזזה ושכפול. פקודה שנכשלת לא עוצרת את השאר. מחזיר את המזהים של הצמתים החדשים.
+</li><li><code>replaceText</code>, <code>listComponents</code>, <code>readComponentControls</code>, <code>listIconSets</code>/<code>readIcons</code>, <code>readLayoutTemplateControls</code>, <code>readShaderControls</code>, <code>queryImages</code>, <code>publish</code> (preview / confirm_publish / deploy_to_production), שאילתות analytics.
+</li><li>ענפים: <code>getBranches</code>, <code>createBranch</code>, <code>switchBranch</code>, <code>mergeBranch</code>, <code>getBranchChanges</code> ועוד.
+</li><li>קריאת עץ: <code>getNode</code>, <code>getNodes</code>, <code>getDescendantsOfTypes</code>, <code>getRect</code>, <code>serialize</code>, <code>paginate</code>, <code>flattenComponentInstance</code>.
+</li><li>מחוץ ל-agent: <code>screenshot(nodeId)</code>, <code>exportSVG(nodeId)</code>, <code>TextNode.setHTML</code> (alpha), ניהול קבצי קוד.
+</li></ul>
+</li><li><span class="tag doc">תיעוד</span> שפת הפקודות: שמות מאפיינים מקוצרים (<code>bg</code> במקום <code>backgroundColor</code>) ובלי ערכי ברירת מחדל, כדי ש"כל טוקן ינוצל". הסוכן מקבל משוב כמלבנים של מיקום, כלינטר (layout, טיפוגרפיה, ניגודיות, נגישות), ולפי בקשה גם כצילום "בדפדפן על שרת". כל סשן רץ על עותק של הפרויקט, וכל הודעה ניתנת לביטול. (<a href="https://www.framer.com/blog/building-framer-agents/" target="_blank" rel="noopener">Building Agents</a>)
+</li><li><span class="tag doc">תיעוד</span> הכלים מבקשים להעדיף <code>applyChanges</code> על פני API נמוך כמו <code>setAttributes</code> לעבודת עיצוב. (<a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>)
+</li><li>התחביר המלא של שפת הפקודות <strong>לא פורסם</strong> בפומבי. הוא חוזר רק מ-<code>getSystemPrompt()</code>, שדורש מפתח API.
+</li></ul>
+<h2>7. ביצועים</h2>
+<ul><li><span class="tag doc">תיעוד</span> הבקשה לרכיבי קוד היא להישאר סטטיים על הקנבס, לעצור אנימציות, טיימרים ו-WebGL כשהם מחוץ למסך, ולא לעשות עבודת רקע. "כל מדידה כזו תפגע בביצועי האתר וגם הקנבס" (לגבי <code>useMeasuredSize</code>). (<a href="https://www.framer.com/help/articles/prepare-component-review/" target="_blank" rel="noopener">Prepare component for review</a>, <a href="https://www.framer.com/developers/auto-sizing" target="_blank" rel="noopener">Auto-Sizing</a>)
+</li><li><span class="tag doc">תיעוד</span> "אופטימיזציית פרויקט" לפרויקטים ישנים מסירה חישובים כבדים, למשל hash ל-SVG, כדי להאיץ עריכה. (<a href="https://www.framer.com/help/articles/optimizing-projects/" target="_blank" rel="noopener">Optimizing projects</a>)
+</li><li><span class="tag doc">תיעוד</span> מספרים של הסוכן: כ-50 טוקנים בשנייה, עמוד מלא תוך 40–100 שניות, כ-3 דולר לעמוד ו-0.5 דולר לעריכה בינונית. (<a href="https://www.framer.com/blog/building-framer-agents/" target="_blank" rel="noopener">Building Agents</a>)
+</li><li>כמות שכבות מקסימלית, culling, אסטרטגיית זום או וירטואליזציה של הקנבס: <strong>לא פורסם</strong>.
+</li></ul>
+<h2>8. אינטראקציה/הרצה</h2>
+<ul><li><span class="tag doc">תיעוד</span> יש תצוגה מקדימה (<code>RenderTarget.preview</code>) שמתנהגת כמו האתר החי. על הקנבס (<code>RenderTarget.canvas</code>) רכיבים אמורים להיות סטטיים, ו-Overrides <strong>לא פעילים</strong> בכלל. הם פועלים רק בתצוגה המקדימה ובאתר. (<a href="https://www.framer.com/developers/components-reference" target="_blank" rel="noopener">API Reference</a>, <a href="https://www.framer.com/developers/overrides-introduction" target="_blank" rel="noopener">Overrides</a>)
+</li><li><span class="tag inf">הסקה</span> כלומר, בדיוק כמו אצלנו, מצב העריכה "מוקפא" ומצב ההרצה הוא נפרד. ההבדל: אצלם ההפרדה נאכפת בעזרת כללים ודגל שהרכיב קורא, בלי sandbox. האם התצוגה המקדימה רצה ב-iframe <strong>לא פורסם</strong>.
+</li></ul>
+<h2>9. מה רלוונטי לנו</h2>
+<ol><li><strong>שפת פקודות קצרה לסוכן במקום API של צמתים.</strong> Framer מחזירים ל-Claude מלבנים ושגיאות לכל פקודה, ממשיכים גם אחרי פקודה שנכשלה, ומבקשים להעדיף אותה על פני <code>setAttributes</code>. <strong>לאמץ</strong>: אצלנו הסוכן כותב HTML, אז אפשר לתת לו פעולת patch אחת (החלפה או הוספה לפי מזהה) שמחזירה <code>getBoundingClientRect</code> של מה שנוצר, ולינטר קטן (חריגה, ניגודיות). זה זול ממסך מלא. כדאי גם להחזיר את המזהים החדשים, כמו שהם עושים.
+</li><li><strong>ענף לכל סשן של סוכן, וביטול לכל הודעה.</strong> הסוכן אף פעם לא כותב על "החי". <strong>לאמץ בגרסה פשוטה</strong>: snapshot של הפריימים לפני כל ריצה של Claude, וכפתור "בטל" או "מזג". זה בונה אמון אצל משתמש ראשון, בלי לבנות מערכת ענפים מלאה.
+</li><li><strong>רכיבי קוד בלי בידוד, רק בכללים.</strong> אצלם רכיב קוד רץ באותו DOM, והם מבקשים מהכותבים "לא לגעת ב-body". זה עובד כי הם שולטים בכל ה-CSS ומגבילים את הייבוא. <strong>לא לאמץ</strong>: Sketchpad מציג רכיבים אמיתיים מריפו זר, עם CSS גלובלי ו-<code>:root</code>. ה-shadow root שלנו הוא בדיוק מה שחסר להם, ולכן כדאי להשאיר אותו.
+</li><li><strong><code>RenderTarget</code>/<code>useIsStaticRenderer</code>.</strong> רכיב יודע שהוא על קנבס ועוצר אנימציות. <strong>לשקול</strong>: אצלנו סקריפטים כבר לא רצים בעריכה, אבל לרכיבים מהריפו של Sketchpad שצריכים JS כדי להיראות נכון אפשר לחשוף דגל גלובלי פשוט, כמו <code>window.__SKETCHPAD_CANVAS__</code>, במקום להריץ הכול או כלום.
+</li><li><strong>הקשר מראש לסוכן.</strong> <code>getContext()</code>/<code>project-inventory.md</code> כוללים פונטים, טוקנים, רכיבים ובקרים שלהם, ונוצרים פעם אחת לכל סשן. <strong>לאמץ</strong>: ב-Sketchpad לייצר בתחילת סשן קובץ אחד עם רשימת הרכיבים של הריפו, ה-props שלהם והטוקנים, כדי ש-Claude לא יסרוק את הריפו בכל פעם. זה דומה ל-<code>readComponentControls</code> שלהם.
+</li></ol>
+<h2>מקורות</h2>
+<ol><li><a href="https://dev.to/koen/code-on-canvas-develop-and-design-at-the-same-time-258l" target="_blank" rel="noopener">https://dev.to/koen/code-on-canvas-develop-and-design-at-the-same-time-258l</a>: Koen Bok, "הקנבס נבנה ב-React", ES modules, swc/wasm
+</li><li><a href="https://www.framer.com/developers/components-introduction" target="_blank" rel="noopener">https://www.framer.com/developers/components-introduction</a>: רכיבי קוד על הקנבס, בתצוגה ובאתר; שיתוף ב-URL
+</li><li><a href="https://www.framer.com/developers/components-reference" target="_blank" rel="noopener">https://www.framer.com/developers/components-reference</a>: <code>RenderTarget</code>, <code>useIsStaticRenderer</code>
+</li><li><a href="https://www.framer.com/help/articles/prepare-component-review/" target="_blank" rel="noopener">https://www.framer.com/help/articles/prepare-component-review/</a>: כללי DOM, סטטיות על הקנבס, ביצועים
+</li><li><a href="https://www.framer.com/developers/auto-sizing" target="_blank" rel="noopener">https://www.framer.com/developers/auto-sizing</a>: הערות גודל, מדידה על הקנבס
+</li><li><a href="https://www.framer.com/developers/overrides-introduction" target="_blank" rel="noopener">https://www.framer.com/developers/overrides-introduction</a>: Overrides פעילים רק בתצוגה ובאתר
+</li><li><a href="https://www.framer.com/blog/framer-rolldown/" target="_blank" rel="noopener">https://www.framer.com/blog/framer-rolldown/</a>: "Boost the performance of our canvas" כמטרה
+</li><li><a href="https://www.framer.com/blog/building-framer-agents/" target="_blank" rel="noopener">https://www.framer.com/blog/building-framer-agents/</a>: שפת פקודות, משוב, ענפים, עלויות
+</li><li><a href="https://www.framer.com/developers/mcp" target="_blank" rel="noopener">https://www.framer.com/developers/mcp</a>: MCP רשמי, OAuth, ענפים
+</li><li><a href="https://github.com/framer/agent-plugins" target="_blank" rel="noopener">https://github.com/framer/agent-plugins</a>: תוסף סוכנים, כתובת ה-MCP
+</li><li><a href="https://www.framer.com/developers/server-api-introduction" target="_blank" rel="noopener">https://www.framer.com/developers/server-api-introduction</a>: Server API, מתי משתמשים
+</li><li><a href="https://www.framer.com/developers/server-api-faq" target="_blank" rel="noopener">https://www.framer.com/developers/server-api-faq</a>: v8 sandbox, DOM מלא, socket, לא טרנזקציוני
+</li><li><a href="https://unpkg.com/framer-api@5.1.0/dist/index.d.ts" target="_blank" rel="noopener">https://unpkg.com/framer-api@5.1.0/dist/index.d.ts</a>: טיפוסי Server API, <code>FramerAgentAPI</code>, screenshot, setHTML
+</li><li><a href="https://unpkg.com/framer-api@5.1.0/dist/index.js" target="_blank" rel="noopener">https://unpkg.com/framer-api@5.1.0/dist/index.js</a>: <code>wss://api.framer.com/channel/headless-plugin</code>
+</li><li><a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts" target="_blank" rel="noopener">https://unpkg.com/framer-plugin@3.10.3/dist/index.d.ts</a>: Plugin API, סוגי צמתים ומשתנים
+</li><li><a href="https://unpkg.com/framer-plugin@3.10.3/dist/index.js" target="_blank" rel="noopener">https://unpkg.com/framer-plugin@3.10.3/dist/index.js</a>: <code>window.parent.postMessage</code> (תוסף ב-iframe)
+</li><li><a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer/SKILL.md" target="_blank" rel="noopener">https://unpkg.com/@framer/agent@0.0.47/skills/framer/SKILL.md</a>: CLI לסוכן, פקודות ותהליך עבודה
+</li><li><a href="https://unpkg.com/@framer/agent@0.0.47/skills/framer-code-components/SKILL.md" target="_blank" rel="noopener">https://unpkg.com/@framer/agent@0.0.47/skills/framer-code-components/SKILL.md</a>: מגבלות רכיבי קוד, בקרים
+</li><li><a href="https://github.com/framer/plugins/blob/main/plugins/code-link/README.md" target="_blank" rel="noopener">https://github.com/framer/plugins/blob/main/plugins/code-link/README.md</a>: Code Link, סנכרון דו-כיווני
+</li><li><a href="https://github.com/framer/plugins/blob/main/packages/code-link-shared/src/types.ts" target="_blank" rel="noopener">https://github.com/framer/plugins/blob/main/packages/code-link-shared/src/types.ts</a>: הודעות הסנכרון
+</li><li><a href="https://github.com/framer/plugins/blob/main/packages/code-link-cli/src/helpers/connection.ts" target="_blank" rel="noopener">https://github.com/framer/plugins/blob/main/packages/code-link-cli/src/helpers/connection.ts</a>: שרת WSS מקומי
+</li><li><a href="https://framer.com/academy/lessons/breakpoints" target="_blank" rel="noopener">https://framer.com/academy/lessons/breakpoints</a>: ירושה מנקודת השבירה הראשית
+</li><li><a href="https://www.framer.com/academy/lessons/component-variants-in-framer" target="_blank" rel="noopener">https://www.framer.com/academy/lessons/component-variants-in-framer</a>: ירושת וריאנטים, overrides בסגול
+</li><li><a href="https://www.framer.com/academy/lessons/component-variables-in-framer" target="_blank" rel="noopener">https://www.framer.com/academy/lessons/component-variables-in-framer</a>: Component Variables
+</li><li><a href="https://www.framer.com/help/articles/optimizing-projects/" target="_blank" rel="noopener">https://www.framer.com/help/articles/optimizing-projects/</a>: אופטימיזציית פרויקטים ישנים
+</li><li><a href="https://www.framer.com/" target="_blank" rel="noopener">https://www.framer.com/</a>: HTML גולמי של אתר מפורסם (מחלקות, data-framer, @media, ‎.mjs)
+</li></ol>
+</main>
+</body>
+</html>

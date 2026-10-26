@@ -1,7 +1,7 @@
 # Figma interaction comparison
 
 This is the initial investigation log. The maintained research library now starts at
-[docs/figma/README.md](figma/README.md), including successful browser access,
+[docs/tools/figma-interface/README.md](tools/figma-interface/README.md), including successful browser access,
 DevTools measurements and subsequent frame-selection experiments.
 
 ## Working rule

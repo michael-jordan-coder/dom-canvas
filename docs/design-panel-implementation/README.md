@@ -6,12 +6,12 @@ Implementation scope: the existing Frame, HTML, SVG, text and multiple-selection
 
 | Research | Implementation |
 | --- | --- |
-| [Panel shell](../figma/topics/panel-shell.md), [field lifecycle](../figma/topics/input-lifecycle.md) | 240px inspector; 40px section headers; 24px fields/actions; 11px text; 5px field-wrapper radius. Position, Layout, Appearance, contextual Typography, Fill, Stroke, Effects, then CSS advanced. |
-| [Parent/child layout](../figma/topics/parent-child-layout.md), [size limits](../figma/topics/size-limits.md) | Contextual Stylesheet/Fixed/Hug/Fill menu. Fill needs an in-flow flex/grid item and a definite parent axis. Existing min/max bounds survive sizing edits and reset. |
-| [Mixed types](../figma/topics/mixed-types.md), [mixed paint](../figma/topics/mixed-paint.md) | Shared authored/computed/Mixed/availability/reset state. Unsupported targets do not contribute invented values; subset edits display their scope. |
-| [Type UI](../figma/topics/type-ui.md), [text case](../figma/topics/text-case.md), [typography](../figma/topics/typography.md) | Floating Type settings with Basics/Details tabs; decoration dependencies, case, wrapping and font variations. Numeric line height writes pixels; percentage tracking writes em. |
-| [Paint/effects](../figma/topics/paint-effects.md), [inner shadow](../figma/topics/inner-shadow.md), [blur](../figma/topics/blur-effects.md) | Floating gradients, shadow editors, layer/background blur; existing CSS expressions remain editable. |
-| [Stroke/corners](../figma/topics/stroke-corners.md) | Uniform/individual HTML corners and borders; Frame appearance and border controls; SVG paint/stroke use SVG CSS properties. |
+| [Panel shell](../tools/figma-interface/topics/panel-shell.md), [field lifecycle](../tools/figma-interface/topics/input-lifecycle.md) | 240px inspector; 40px section headers; 24px fields/actions; 11px text; 5px field-wrapper radius. Position, Layout, Appearance, contextual Typography, Fill, Stroke, Effects, then CSS advanced. |
+| [Parent/child layout](../tools/figma-interface/topics/parent-child-layout.md), [size limits](../tools/figma-interface/topics/size-limits.md) | Contextual Stylesheet/Fixed/Hug/Fill menu. Fill needs an in-flow flex/grid item and a definite parent axis. Existing min/max bounds survive sizing edits and reset. |
+| [Mixed types](../tools/figma-interface/topics/mixed-types.md), [mixed paint](../tools/figma-interface/topics/mixed-paint.md) | Shared authored/computed/Mixed/availability/reset state. Unsupported targets do not contribute invented values; subset edits display their scope. |
+| [Type UI](../tools/figma-interface/topics/type-ui.md), [text case](../tools/figma-interface/topics/text-case.md), [typography](../tools/figma-interface/topics/typography.md) | Floating Type settings with Basics/Details tabs; decoration dependencies, case, wrapping and font variations. Numeric line height writes pixels; percentage tracking writes em. |
+| [Paint/effects](../tools/figma-interface/topics/paint-effects.md), [inner shadow](../tools/figma-interface/topics/inner-shadow.md), [blur](../tools/figma-interface/topics/blur-effects.md) | Floating gradients, shadow editors, layer/background blur; existing CSS expressions remain editable. |
+| [Stroke/corners](../tools/figma-interface/topics/stroke-corners.md) | Uniform/individual HTML corners and borders; Frame appearance and border controls; SVG paint/stroke use SVG CSS properties. |
 
 ## Architecture and editing
 

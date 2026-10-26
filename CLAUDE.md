@@ -44,4 +44,4 @@ There is no linter. Tests use `node:test` and import `src/**/*.ts` directly via 
 ## Docs
 
 - `README.md` is the user-facing behavior spec, kept in sync with every behavior change.
-- `docs/figma/` is the Figma behavior research (mostly Hebrew) that the Design panel is modeled on; `docs/design-panel-implementation/README.md` maps that research to the implementation and lists deliberate Figma/CSS differences.
+- `docs/tools/figma-interface/` is the Figma behavior research (mostly Hebrew) that the Design panel is modeled on; `docs/design-panel-implementation/README.md` maps that research to the implementation and lists deliberate Figma/CSS differences.

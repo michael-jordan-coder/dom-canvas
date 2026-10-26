@@ -75,9 +75,9 @@ Current evidence was gathered on 2026-10-13; UI variants and future versions may
 ## Separation from implementation
 
 This directory describes Figma, not the desired behavior of our existing code.
-[INSPECTOR_PARITY.md](../INSPECTOR_PARITY.md) is the historical product work log;
+[INSPECTOR_PARITY.md](../../INSPECTOR_PARITY.md) is the historical product work log;
 its implementation claims do not count as Figma observations.
-[Earlier comparison log](../figma-interaction-comparison.md) records the initial investigation.
+[Earlier comparison log](../../figma-interaction-comparison.md) records the initial investigation.
 Use the topic documents here as the index for new research.
 
 Do not copy private content, account details, console/network logs or entire source
